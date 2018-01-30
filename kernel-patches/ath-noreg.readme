@@ -1,0 +1,2 @@
+this patch is based on the original one found on github (see .url) but was made non-optional in order to
+simplify kernel building, specifically configuration that would otherwise require a terminal input

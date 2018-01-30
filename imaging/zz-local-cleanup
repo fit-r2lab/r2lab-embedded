@@ -1,0 +1,9 @@
+#!/bin/bash
+
+for tar in *.tar; do
+   b=$(basename $tar .tar)
+   for file in $(ls -d $tar $b $b.log); do
+       echo cleaning up $file
+       rm -rf $file
+   done 
+done	  

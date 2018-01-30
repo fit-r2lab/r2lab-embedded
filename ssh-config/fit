@@ -1,0 +1,5 @@
+Host fit*
+    LogLevel=error
+    StrictHostKeyChecking no
+    UserKnownHostsFile=/dev/null
+    CheckHostIP=no
