@@ -1,11 +1,9 @@
 # set of convenience tools to be used on the nodes
 # 
-# we start with oai-oriented utilities
 # on these images, we have a symlink
-# /root/.bash_aliases
+# /etc/profile.d/nodes.sh
 # that point at
-# /root/r2lab/infra/user-env/nodes.sh
-# 
+# /root/r2lab-embedded/shell/nodes.sh
 #
 
 # use the micro doc-help tool
@@ -18,10 +16,10 @@ augment-help-with nodes
 unalias ls 2> /dev/null
 
 ####helper to parse git-pull arguments
-# repo_branch repo /root/r2lab       -> /root/r2lab
-# repo_branch branch /root/r2lab     -> 
-# repo_branch repo /root/r2lab@foo   -> /root/r2lab
-# repo_branch branch /root/r2lab@foo -> foo
+# split_repo_branch repo /root/r2lab       -> /root/r2lab
+# split_repo_branch branch /root/r2lab     -> 
+# split_repo_branch repo /root/r2lab@foo   -> /root/r2lab
+# split_repo_branch branch /root/r2lab@foo -> foo
 function split_repo_branch () {
     python3 - "$@" << EOF
 import sys
@@ -35,8 +33,8 @@ EOF
     }
     
 ##########
-function git-pull-r2lab() { -git-pull-repos /root/r2lab@public; }
-doc-nodes git-pull-r2lab "updates /root/r2lab from git repo"
+function git-pull-r2lab() { -git-pull-repos /root/r2lab-embedded@master; }
+doc-nodes git-pull-r2lab "updates /root/r2lab-embedded from upstream (github) repo"
 
 # branches MUST be specified
 function -git-pull-repos() {
@@ -46,12 +44,13 @@ function -git-pull-repos() {
 	local repo=$(split_repo_branch repo $repo_branch)
 	local branch=$(split_repo_branch branch $repo_branch)
 	[ -d $repo ] || { echo "WARNING: cannot git pull in $repo - not found"; continue; }
+	[ -z "$branch" ] || { echo "WARNING: cannot git pull in $repo - branch not specified"; continue; }
 	echo "========== Updating $repo for branch $branch"
 	cd $repo
 	# always undo any local change
 	git reset --hard HEAD
 	# fetch everything
-	git fetch -a
+	git fetch --all
 	git checkout $branch
 	git pull origin $branch
 	cd - >& /dev/null
@@ -64,7 +63,7 @@ function bashrc() { echo "Reloading ~/.bashrc"; source ~/.bashrc; }
 
 # update and reload
 doc-nodes refresh "git-pull-r2lab + bashrc"
-function refresh() { git-pull-r2lab /root/r2lab; bashrc; }
+function refresh() { git-pull-r2lab /root/r2lab-embedded; bashrc; }
 
 doc-nodes rimage "Shows info on current image from last line in /etc/rhubarbe-image"
 function rimage() { tail -1 /etc/rhubarbe-image | sed -e 's, node , built-on ,' -e 's, image , from-image ,' ; }
@@ -315,7 +314,7 @@ doc-nodes-sep
 ##########
 # the utility to select which function the oai alias should point to
 # in most cases, we just want oai to be an alias to e.g.
-# /root/r2lab/infra/user-env/oai-gw.sh
+# /root/r2lab-embedded/shell/oai-gw.sh
 # except that while developping we use the version in /tmp
 # if present
 

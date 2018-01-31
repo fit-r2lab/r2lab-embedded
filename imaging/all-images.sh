@@ -3,11 +3,11 @@
 case $(hostname) in
     faraday*)
 	gateway=localhost
-	gitroot=/root/r2lab
+	gitroot=/root/r2lab-embedded
 	;;
     *)
 	gateway=inria_r2lab.tutorial@faraday.inria.fr
-	gitroot=$HOME/r2lab
+	gitroot=$HOME/r2lab-embedded
 	;;
 esac
 
@@ -16,7 +16,7 @@ bi=$(dirname $0)/build-image.py
 
 # we don't need all these includes everywhere but it makes it easier
 function bim () {
-    command="$bi $gateway -p $gitroot/infra/user-env -i oai-common.sh -i nodes.sh -i r2labutils.sh"
+    command="$bi $gateway -p $gitroot/shell -i oai-common.sh -i nodes.sh -i r2labutils.sh"
     echo $command "$@"
     $command --silent "$@"
 }

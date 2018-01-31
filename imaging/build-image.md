@@ -43,12 +43,12 @@ build-image.py root@faraday.inria.fr fit02 ubuntu ubuntu-prime foo.sh bar.sh "./
 
 ## Included bash
 
-In particular for the stuff in `r2lab/infra/user-env`; for example
+In particular for the stuff in `r2lab-embedded/shell/`; for example
 
 `oai-gw.sh` requires `nodes.sh` and `oai-common.sh`
 
 ```
-~/git/r2lab/infra/user-env $ ../../rhubarbe-images/build-image.py -f $(plr faraday) 1 ubuntu-16.04-v4-node-env oai1609-gw-001 "oai-gw.sh cn-git-fetch" -i oai-common.sh -i nodes.sh
+~/git/r2lab-embedded/shell $ ../imaging/build-image.py -f $(plr faraday) 1 ubuntu-16.04-v4-node-env oai1609-gw-001 "oai-gw.sh cn-git-fetch" -i oai-common.sh -i nodes.sh
 ```
 
 

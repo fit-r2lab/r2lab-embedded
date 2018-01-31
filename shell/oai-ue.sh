@@ -67,7 +67,7 @@ function base() {
     cd
 
     [ -d openairinterface5g ] || git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
-    [ -d /root/r2lab ] || git clone https://github.com/parmentelat/r2lab.git
+    [ -d /root/r2lab-embedded ] || git clone git@github.com:fit-r2lab/r2lab-embedded.git
 
 }
 

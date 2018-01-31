@@ -18,8 +18,8 @@ doc-admin log-sidecar alias
 alias jou-sidecar="journalctl -b -f --unit=sidecar"
 doc-admin jou-sidecar alias
 
-doc-admin gitup "runs git pull in /root/r2lab"
+doc-admin gitup "runs git pull in /root/r2lab-embedded"
 function gitup() {
-    cd /root/r2lab
+    cd /root/r2lab-embedded
     git pull
 }

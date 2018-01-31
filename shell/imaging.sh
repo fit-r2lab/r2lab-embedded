@@ -182,9 +182,10 @@ function ubuntu-atheros-noreg() {
     change-Kconfig-default drivers/net/wireless/ath/Kconfig ATH_REG_DYNAMIC_USER_REG_HINTS y
 
     # apply patch
-    # using the patch from our repo
-    local patch_url=https://raw.githubusercontent.com/parmentelat/r2lab/public/infra/patches/ath-noreg.patch
-    wget -O - $patch_url | patch -p1 -b
+    git-pull-r2lab
+    # using the patch from the git repo
+    local patch_path=/root/r2lab-embedded/kernel-patches/ath-noreg.patch
+    cat $patch_path | patch -p1 -b
     
     debian/rules clean
     debian/rules binary-headers
@@ -435,36 +436,33 @@ function fedora-ifcfg() {
 ########################################
 # common
 ########################################
-doc-imaging "common-setup-r2lab-repo: set up /root/r2lab"
+doc-imaging "common-setup-r2lab-repo: set up /root/r2lab-embedded"
 function common-setup-r2lab-repo () {
     type -p git 2> /dev/null || { echo "git not installed - cannot proceed"; return; }
     cd /root
-    [ -d r2lab ] || git clone https://github.com/parmentelat/r2lab.git
-    cd /root/r2lab
+    [ -d r2lab-embedded ] || git clone https://github.com/fit-r2lab/r2lab-embedded.git
+    cd /root/r2lab-embedded
     git pull
 }
 
-doc-imaging "common-setup-user-env: add infra/user-env/nodes.sh to /etc/profile.d and /root/.bash*"
+doc-imaging "common-setup-user-env: add r2lab-embedded/shell/nodes.sh to /etc/profile.d and /root/.bash*"
 function common-setup-root-bash () {
     cd /etc/profile.d
-    ln -sf /root/r2lab/infra/user-env/nodes.sh .
+    ln -sf /root/r2lab-embedded/shell/nodes.sh .
     cd /root
     ln -sf /etc/profile.d/nodes.sh .bash_profile
     ln -sf /etc/profile.d/nodes.sh .bashrc
-    # to make sure to undo previous versions that were wrong in creating this
-    rm -f /root/r2lab/infra/r2labutils.sh
-    
 }
 
 doc-imaging "common-setup-node-ssh-key: install standard R2lab key as the ssh node's key"
 function common-setup-node-ssh-key () {
-    [ -d /root/r2lab ] || { echo /root/r2lab/ not found - exiting; return; }
-    cd /root/r2lab
+    [ -d /root/r2lab-embedded ] || { echo /root/r2lab-embedded/ not found - exiting; return; }
+    cd /root/r2lab-embedded
     git pull
-    [ -d /root/r2lab/rhubarbe-images/keys ] || {
+    [ -d /root/r2lab-embedded/node-ssh-keys ] || {
 	echo "Cannot find standard R2lab node keys - cannot proceed"; return;
     }
-    rsync -av /root/r2lab/rhubarbe-images/keys/ /etc/ssh/
+    rsync -av /root/r2lab-embedded/node-ssh-keys/ /etc/ssh/
     chown -R root:root /etc/ssh/*key*
     chmod 600 /etc/ssh/*key
     chmod 644 /etc/ssh/*key.pub
