@@ -63,10 +63,10 @@ function bashrc() { echo "Reloading ~/.bashrc"; source ~/.bashrc; }
 
 # update and reload
 doc-nodes refresh "git-pull-r2lab + bashrc"
-function refresh() { git-pull-r2lab /root/r2lab-embedded; bashrc; }
+function refresh() { git-pull-r2lab; bashrc; }
 
 doc-nodes rimage "Shows info on current image from last line in /etc/rhubarbe-image"
-function rimage() { tail -1 /etc/rhubarbe-image | sed -e 's, node , built-on ,' -e 's, image , from-image ,' ; }
+function rimage() { tail -1 /etc/rhubarbe-image; }
 
 ########## 
 doc-nodes update-os-packages "runs the core OS package update (dnf or apt-get) to update to latest versions"
