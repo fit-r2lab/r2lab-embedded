@@ -44,7 +44,7 @@ function -git-pull-repos() {
 	local repo=$(split_repo_branch repo $repo_branch)
 	local branch=$(split_repo_branch branch $repo_branch)
 	[ -d $repo ] || { echo "WARNING: cannot git pull in $repo - not found"; continue; }
-	[ -z "$branch" ] || { echo "WARNING: cannot git pull in $repo - branch not specified"; continue; }
+	[ -n "$branch" ] || { echo "WARNING: cannot git pull in $repo - branch not specified"; continue; }
 	echo "========== Updating $repo for branch $branch"
 	cd $repo
 	# always undo any local change
