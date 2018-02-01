@@ -7,7 +7,7 @@ case $(hostname) in
 	;;
     *)
 	gateway=inria_r2lab.tutorial@faraday.inria.fr
-	gitroot=$HOME/r2lab-embedded
+	gitroot=$HOME/git/r2lab-embedded
 	;;
 esac
 
@@ -205,6 +205,26 @@ function  update-v11() {
           gnuradio-v11-os-update	"nodes.sh git-pull-r2lab" "nodes.sh update-os-packages" &
 }
 
+function f27-new-layout() {
+    bim 4 fedora-27 \
+        fedora-27-new-layout "imaging.sh new-common-setup" "imaging.sh update-os-packages"
+}
+
+function f27-docker() {
+    bim 5 fedora-27-new-layout \
+        fedora-27-docker "imaging.sh fedora-setup-docker"
+}
+
+function ubuntu-new-layout() {
+    bim 6 u16.04-2017-10-26 \
+        u16.04-new-layout "imaging.sh new-common-setup" "imaging.sh update-os-packages"
+}
+
+function ubuntu-docker() {
+    bim 7 u16.04-new-layout \
+        u16.04-docker "imaging.sh ubuntu-setup-docker"
+}
+
 ####################
 # xxx this clearly should be specified on the command line some day
-u16-48
+ubuntu-docker

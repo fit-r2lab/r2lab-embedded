@@ -434,19 +434,68 @@ function fedora-ifcfg() {
 }
 
 ########################################
-# common
+# common - old layout
 ########################################
-doc-imaging "common-setup-r2lab-repo: set up /root/r2lab-embedded"
+doc-imaging "common-setup-r2lab-repo: set up /root/r2lab"
 function common-setup-r2lab-repo () {
+    type -p git 2> /dev/null || { echo "git not installed - cannot proceed"; return; }
+    cd /root
+    [ -d r2lab ] || git clone https://github.com/parmentelat/r2lab.git
+    cd /root/r2lab
+    git pull
+}
+
+doc-imaging "common-setup-user-env: add infra/user-env/nodes.sh to /etc/profile.d and /root/.bash*"
+function common-setup-root-bash () {
+    cd /etc/profile.d
+    ln -sf /root/r2lab/infra/user-env/nodes.sh .
+    cd /root
+    ln -sf /etc/profile.d/nodes.sh .bash_profile
+    ln -sf /etc/profile.d/nodes.sh .bashrc
+    # to make sure to undo previous versions that were wrong in creating this
+    rm -f /root/r2lab/infra/r2labutils.sh
+    
+}
+
+doc-imaging "common-setup-node-ssh-key: install standard R2lab key as the ssh node's key"
+function common-setup-node-ssh-key () {
+    [ -d /root/r2lab ] || { echo /root/r2lab/ not found - exiting; return; }
+    cd /root/r2lab
+    git pull
+    [ -d /root/r2lab/rhubarbe-images/keys ] || {
+	echo "Cannot find standard R2lab node keys - cannot proceed"; return;
+    }
+    rsync -av /root/r2lab/rhubarbe-images/keys/ /etc/ssh/
+    chown -R root:root /etc/ssh/*key*
+    chmod 600 /etc/ssh/*key
+    chmod 644 /etc/ssh/*key.pub
+}
+
+# all-in-one
+function common-setup() {
+    common-setup-r2lab-repo
+    common-setup-root-bash
+    common-setup-node-ssh-key
+}
+
+########################################
+# common - new layout
+########################################
+doc-imaging "new-common-setup-r2lab-repo: set up /root/r2lab-embedded"
+function new-common-setup-r2lab-repo () {
     type -p git 2> /dev/null || { echo "git not installed - cannot proceed"; return; }
     cd /root
     [ -d r2lab-embedded ] || git clone https://github.com/fit-r2lab/r2lab-embedded.git
     cd /root/r2lab-embedded
     git pull
+    # clean up old layout
+    [ -d /root/r2lab ] && rm -rf /root/r2lab
+    # also clean up this remaining
+    rm -f /root/udev.log
 }
 
-doc-imaging "common-setup-user-env: add r2lab-embedded/shell/nodes.sh to /etc/profile.d and /root/.bash*"
-function common-setup-root-bash () {
+doc-imaging "new-common-setup-user-env: add r2lab-embedded/shell/nodes.sh to /etc/profile.d and /root/.bash*"
+function new-common-setup-root-bash () {
     cd /etc/profile.d
     ln -sf /root/r2lab-embedded/shell/nodes.sh .
     cd /root
@@ -454,8 +503,8 @@ function common-setup-root-bash () {
     ln -sf /etc/profile.d/nodes.sh .bashrc
 }
 
-doc-imaging "common-setup-node-ssh-key: install standard R2lab key as the ssh node's key"
-function common-setup-node-ssh-key () {
+doc-imaging "new-common-setup-node-ssh-key: install standard R2lab key as the ssh node's key"
+function new-common-setup-node-ssh-key () {
     [ -d /root/r2lab-embedded ] || { echo /root/r2lab-embedded/ not found - exiting; return; }
     cd /root/r2lab-embedded
     git pull
@@ -469,12 +518,31 @@ function common-setup-node-ssh-key () {
 }
 
 # all-in-one
-function common-setup() {
-    common-setup-r2lab-repo
-    common-setup-root-bash
-    common-setup-node-ssh-key
+function new-common-setup() {
+    new-common-setup-r2lab-repo
+    new-common-setup-root-bash
+    new-common-setup-node-ssh-key
 }
 
+########################################
+function fedora-setup-docker() {
+    dnf install -y docker
+    systemctl enable docker
+}
+
+# ubuntu does not seem to come with a docker package
+# in the vanilla ubuntu repo
+# this is for docker-CE
+# https://docs.docker.com/install/linux/docker-ce/ubuntu/
+function ubuntu-setup-docker() {
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+    apt-get update
+    apt-get install -y docker-ce
+    systemctl enable docker
+}
+
+    
 ########################################
 define-main "$0" "$BASH_SOURCE"
 main "$@"
