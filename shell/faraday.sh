@@ -473,11 +473,13 @@ function -do-first () {
     $command -l root $node
 }
 
-doc-selection ssh1n "Enter first selected node using ssh\n\t\tWARNING: arg if present is taken as a node, not a command"
+doc-selection ssh1n "(or just s1) Enter first selected node using ssh\n\t\tWARNING: arg if present is taken as a node, not a command"
 alias ssh1n="-do-first ssh"
+alias s1="-do-first ssh"
 
-doc-selection ssh1nx "Same as ssh1n but with ssh -X"
+doc-selection ssh1nx "(or just s1x) Same as ssh1n but with ssh -X"
 alias ssh1nx="-do-first 'ssh -X'"
+alias s1x="-do-first 'ssh -X'"
 
 doc-admin tln1n "Enter first selected node using telnet - ditto"
 alias tln1n="-do-first telnet"
