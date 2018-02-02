@@ -8,6 +8,10 @@
 COMMAND=$(basename $0 .sh)
 LOG=/var/log/$COMMAND.log
 
+exec >> $LOG 2>&1
+
+echo "==================== $COMMAND starting at $(date)"
+
 #### depending on which host:
 case $(hostname) in
     faraday*)
@@ -20,13 +24,11 @@ case $(hostname) in
 	echo Unknown host $(hostname); exit 1;;
 esac
 
-echo "==================== $COMMAND starting at $(date)" >> $LOG
-
 #### updates the contents of selected git repos
 for git_repo in $GIT_REPOS; do
     cd $git_repo
-    git reset --hard HEAD >> $LOG 2>&1
-    git pull >> $LOG 2>&1
+    git reset --hard HEAD
+    git pull
 done
 
 cd
@@ -34,14 +36,14 @@ cd
 #### depending on which host:
 case $(hostname) in
     faraday*)
-        pip3 install -U rhubarbe
+        pip3 install -U rhubarbe 2> /dev/null
 	systemctl restart monitor
 	systemctl restart monitorphones
 	;;
     r2lab*)
-        pip3 install -U rhubarbe
-	make -C /root/r2lab.inria.fr publish >> $LOG 2>&1
-	make -C /root/r2lab.inria.fr-raw publish >> $LOG 2>&1
+        pip3 install -U rhubarbe 2> /dev/null
+	make -C /root/r2lab.inria.fr publish
+	make -C /root/r2lab.inria.fr-raw publish
 	systemctl restart sidecar
 	systemctl restart httpd
 	;;
