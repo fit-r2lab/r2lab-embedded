@@ -39,6 +39,7 @@ case $(hostname) in
         pip3 install -U rhubarbe 2> /dev/null
 	systemctl restart monitor
 	systemctl restart monitorphones
+	systemctl restart accountsmanager
 	;;
     r2lab*)
         pip3 install -U rhubarbe 2> /dev/null
