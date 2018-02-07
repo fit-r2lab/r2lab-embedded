@@ -356,7 +356,7 @@ function refresh() {
     [ $(id -u) == 0 ] || { echo refresh must be run by root; return 1; }
     /home/faraday/diana/auto-update.sh
     /home/faraday/r2lab-embedded/auto-update.sh
-    chown -R faraday:faraday ~faraday/r2lab
+    chown -R faraday:faraday ~faraday/r2lab-embedded
     reload
 }
 doc-alt refresh "install latest version of these utilities"
@@ -559,7 +559,7 @@ function un-tgz() {
 # the private key for macphone is in inventory/macphone
 function -macphone() {
     macphoneid=$1; shift
-    ssh -o StrictHostKeyChecking=no -i /home/faraday/r2lab/inventory/macphone tester@macphone${i} "$@"
+    ssh -o StrictHostKeyChecking=no -i /home/faraday/r2lab-embedded/mac-ssh-key/macphone tester@macphone${i} "$@"
 }
 
 doc-alt macphone1 "ssh-enter phone gateway 'macphone1' as user 'tester'"
