@@ -68,7 +68,7 @@ function image() {
 
 #####
 # would make sense to add more stuff in the base image - see the NEWS file
-base_packages="git subversion cmake build-essential gdb"
+base_packages="git subversion cmake build-essential gdb sudo"
 
 doc-nodes base "the script to install base software on top of a raw u16 low-latency image"
 function base() {
