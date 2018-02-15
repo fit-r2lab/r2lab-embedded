@@ -103,7 +103,7 @@ function u16-ath-noreg() {
 }
 
 function u16-48() {
-    bim 1 ubuntu-16.04 u16.04-$DATE "imaging.sh common-setup" "nodes.sh git-pull-r2lab" "nodes.sh apt-upgrade-all" 
+    bim 1 ubuntu-16.04 u16.04-$DATE "imaging.sh new-common-setup" "imaging.sh update-os-packages" "nodes.sh git-pull-r2lab" "nodes.sh apt-upgrade-all"
     bim 2 u16.04-$DATE u16-lowlat48-$DATE "imaging.sh ubuntu-k48-lowlatency" "imaging.sh activate-lowlatency"
     bim $e3372_opts 3 u16.04-$DATE u16.04-e3372 "imaging.sh install-e3372"
     bim $cn_opts 5 u16-lowlat48-$DATE u16.48-oai-cn "oai-gw.sh  image" &
@@ -114,6 +114,16 @@ function u16-48() {
 
 #following deprecated
 function old-u16-48() {
+    bim 1 ubuntu-16.04 u16.04-$DATE "imaging.sh common-setup" "nodes.sh git-pull-r2lab" "nodes.sh apt-upgrade-all"
+    bim 2 u16.04-$DATE u16-lowlat48-$DATE "imaging.sh ubuntu-k48-lowlatency" "imaging.sh activate-lowlatency"
+    bim $e3372_opts 3 u16.04-$DATE u16.04-e3372 "imaging.sh install-e3372"
+    bim $cn_opts 5 u16-lowlat48-$DATE u16.48-oai-cn "oai-gw.sh  image" &
+    bim $enb_opts 6 u16-lowlat48-$DATE u16.48-oai-enb "oai-enb.sh image" &
+    bim $ue_opts 7 u16-lowlat48-$DATE u16.48-oai-ue "oai-ue.sh image" &
+    bim $gr_opts 8 u16-lowlat48-$DATE u16.48-gnuradio-3.7.10 "imaging.sh install-gnuradio" "nodes.sh enable-usrp-ethernet"&
+}
+
+function very-old-u16-48() {
     bim 2 ubuntu-16.04 u16.04-$DATE "nodes.sh apt-upgrade-all" 
     bim 3 u16.04-$DATE u16-lowlat48-$DATE "imaging.sh ubuntu-k48-lowlatency" 
     bim $gw_options  6 u16-lowlat48-$DATE u16.48-oai-gw-$DATE  "oai-gw.sh  image"
