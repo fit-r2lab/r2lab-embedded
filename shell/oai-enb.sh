@@ -147,15 +147,15 @@ function build-oai5g() {
 doc-nodes run-enb "run-enb 23 50: does init/configure/start with epc running on node 23 and NRB=50"
 function run-enb() {
     peer=$1; shift
-    nrb=$1; shift
+    n_rb=$1; shift
     # pass exactly 'False' to skip usb-reset
     reset_usb=$1; shift
     oai_role=enb
-    echo "run-enb args with limesdr: $limesdr and nrb: $nrb"
+    echo "run-enb args with limesdr: $limesdr and n_rb: $n_rb"
     stop
     status
     echo "run-enb: configure $peer"
-    configure $peer $nrb
+    configure $peer $n_rb
     init
     if [ "$reset_usb" == "False" ]; then
 	echo "SKIPPING USB reset"
@@ -200,9 +200,9 @@ function configure-enb() {
     # pass peer id on the command line, or define it with define-peer
     # second argument may be NRB set by default to 25
     gw_id=$1; shift
-    # if nrb not specified as 2nd argument to configure, set it to 25 by default
-    nrb={1:-25}; shift
-    [ -z "$nrb" ] && { echo "configure-enb: NRB defined - exiting"; return; }
+    # if n_rb not specified as 2nd argument to configure, set it to 25 by default
+    n_rb="${1:-25}"; shift
+    [ -z "$n_rb" ] && { echo "configure-enb: NRB defined - exiting"; return; }
     [ -z "$gw_id" ] && gw_id=$(get-peer)
     [ -z "$gw_id" ] && { echo "configure-enb: no peer defined - exiting"; return; }
     echo "ENB: Using gateway (EPC) on $gw_id"
@@ -222,30 +222,30 @@ function configure-enb() {
 	# Configure the LimeSDR device
 	echo "LimeUtil --update"
 	LimeUtil --update 
-	if [ "$nrb" -eq 25 ]; then
+	if [ "$n_rb" -eq 25 ]; then
 	    tx_gain=7
 	    rx_gain=116
 	    pdsch_referenceSignalPower=-34
-	elif [ "$nrb" -eq 50 ]; then
+	elif [ "$n_rb" -eq 50 ]; then
 	    tx_gain=20
 	    rx_gain=116
 	    pdsch_referenceSignalPower=-35
         else
-	    echo "ERROR in configure_enb: NRB=$nrb with LimeSDR"
+	    echo "ERROR in configure_enb: NRB=$n_rb with LimeSDR"
 	    return
 	fi
     else
 	# We use default USRP B210 at eNB
-	if [ "$nrb" -eq 25 ]; then
+	if [ "$n_rb" -eq 25 ]; then
             tx_gain=90
             rx_gain=125
             pdsch_referenceSignalPower=-24
-        elif [ "$nrb" -eq 50 ]; then
+        elif [ "$n_rb" -eq 50 ]; then
             tx_gain=90
             rx_gain=120
             pdsch_referenceSignalPower=-27
-	    else
-            echo "ERROR in configure_enb: NRB=$nrb with USRP B210"
+        else
+            echo "ERROR in configure_enb: NRB=$n_rb with USRP B210"
 	    return
         fi
     fi
@@ -260,7 +260,7 @@ function configure-enb() {
 s|pdsch_referenceSignalPower[ 	]*=.*|pdsch_referenceSignalPower = ${pdsch_referenceSignalPower};|
 s|mobile_network_code[ 	]*=.*|mobile_network_code = "95";|
 s|downlink_frequency[ 	]*=.*|downlink_frequency = 2660000000L;|
-s|N_RB_DL[ 	]*=.*|N_RB_DL = ${nrb};|
+s|N_RB_DL[ 	]*=.*|N_RB_DL = ${n_rb};|
 s|tx_gain[ 	]*=.*|tx_gain = ${tx_gain};|
 s|rx_gain[ 	]*=.*|rx_gain = ${rx_gain};|
 s|pusch_p0_Nominal[ 	]*=.*|pusch_p0_Nominal = -90;|
