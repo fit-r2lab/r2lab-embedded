@@ -71,7 +71,8 @@ function base() {
     git clone https://github.com/pothosware/SoapySDR.git
     cd SoapySDR
     git pull origin master
-    mkdir build && cd build
+    mkdir -p build 
+    cd build
     cmake ..
     make -j4
     make install
@@ -81,7 +82,8 @@ function base() {
     cd
     git clone https://github.com/myriadrf/LimeSuite.git
     cd LimeSuite
-    mkdir build && cd build
+    mkdir -p build 
+    cd build
     cmake ..
     make -j4
     make install
@@ -132,7 +134,7 @@ function build-oai5g() {
     # run-in-log build-oai-2.log ./build_oai -w USRP $oscillo -c --eNB
     run-in-log build-oai-external.log ./build_oai -I 
     run-in-log build-oai-usrp.log ./build_oai -c -w LMSSDR $oscillo --eNB
-    mv lte-softmodem lte-softmodem-limesdr
+    mv $run_dir/lte-softmodem $run_dir/lte-softmodem-limesdr
     run-in-log build-oai-limesdr.log ./build_oai -c -w USRP $oscillo --eNB
 
 }
@@ -142,7 +144,7 @@ function build-oai5g() {
 ########################################
 
 # entry point for global orchestration
-doc-nodes run-enb "run-enb 23: does init/configure/start with epc running on node 23"
+doc-nodes run-enb "run-enb 23 50: does init/configure/start with epc running on node 23 and NRB=50"
 function run-enb() {
     peer=$1; shift
     n_rb=$1; shift
@@ -153,7 +155,7 @@ function run-enb() {
     stop
     status
     echo "run-enb: configure $peer"
-    configure $peer
+    configure $peer $n_rb
     init
     if [ "$reset_usb" == "False" ]; then
 	echo "SKIPPING USB reset"
@@ -196,10 +198,14 @@ doc-nodes configure-enb "configure eNodeB (requires define-peer)"
 function configure-enb() {
 
     # pass peer id on the command line, or define it with define-peer
+    # second argument may be NRB set by default to 25
     gw_id=$1; shift
+    n_rb=$1; shift
     [ -z "$gw_id" ] && gw_id=$(get-peer)
     [ -z "$gw_id" ] && { echo "configure-enb: no peer defined - exiting"; return; }
+    n_rb={n_rb:=25} # if n_rb not specified, set NRB=25 by default
     echo "ENB: Using gateway (EPC) on $gw_id"
+    [ -z "$n_rb" ] && { echo "configure-enb: NRB defined - exiting"; return; }
     gw_id=$(echo $gw_id | sed  's/^0*//')
     id=$(r2lab-id)
     fitid=fit$id
@@ -207,7 +213,7 @@ function configure-enb() {
     case $id in
 	9|34) limesdr=true;;
 	16|23) limesdr=false;;
-	*) "ERROR in configure_enb: Cannot run eNB on $fitid node"; exit 1;;
+	*) "ERROR in configure_enb: Cannot run eNB on $fitid node"; return ;;
     esac
 
 
@@ -227,7 +233,7 @@ function configure-enb() {
 	    pdsch_referenceSignalPower=-35
         else
 	    echo "ERROR in configure_enb: NRB=${n_rb} with LimeSDR"
-	    exit 1
+	    return
 	fi
     else
 	# We use default USRP B210 at eNB
@@ -241,23 +247,23 @@ function configure-enb() {
             pdsch_referenceSignalPower=-27
 	    else
             echo "ERROR in configure_enb: NRB=${n_rb} with USRP B210"
-            exit 1
+	    return
         fi
     fi
     
 
 # Following setup should be used for the latest develop version
-# choosing 50 for old devlop version double the uplink but with no downlink..
+# choosing 50 for old develop version double the uplink but with no downlink..
 #
 #s|N_RB_DL[ 	]*=.*|N_RB_DL = 50;|
 
     cat <<EOF > oai-enb.sed
-s|pdsch_referenceSignalPower[ 	]*=.*|pdsch_referenceSignalPower = ${pdsch_referenceSignalPower}$;|
+s|pdsch_referenceSignalPower[ 	]*=.*|pdsch_referenceSignalPower = ${pdsch_referenceSignalPower};|
 s|mobile_network_code[ 	]*=.*|mobile_network_code = "95";|
 s|downlink_frequency[ 	]*=.*|downlink_frequency = 2660000000L;|
-s|N_RB_DL[ 	]*=.*|N_RB_DL = ${n_rb}$;|
-s|tx_gain[ 	]*=.*|tx_gain = ${tx_gain}$;|
-s|rx_gain[ 	]*=.*|rx_gain = ${rx_gain}$;|
+s|N_RB_DL[ 	]*=.*|N_RB_DL = ${n_rb};|
+s|tx_gain[ 	]*=.*|tx_gain = ${tx_gain};|
+s|rx_gain[ 	]*=.*|rx_gain = ${rx_gain};|
 s|pusch_p0_Nominal[ 	]*=.*|pusch_p0_Nominal = -90;|
 s|pucch_p0_Nominal[ 	]*=.*|pucch_p0_Nominal = -96;|
 s|mme_ip_address[ 	]*=.*|mme_ip_address = ( { ipv4 = "192.168.${oai_subnet}.$gw_id";|
