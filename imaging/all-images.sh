@@ -11,6 +11,12 @@ case $(hostname) in
 	;;
 esac
 
+# check that this directory exists
+[ -d $gitroot ] || {
+    echo "Could not locate your r2lab-embedded git repo - search for gitroot in the code"
+    exit 1
+}
+
 ###
 bi=$(dirname $0)/build-image.py
 
