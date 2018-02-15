@@ -200,12 +200,12 @@ function configure-enb() {
     # pass peer id on the command line, or define it with define-peer
     # second argument may be NRB set by default to 25
     gw_id=$1; shift
-    n_rb=$1; shift
+    # if n_rb not specified as 2nd argument to configure, set it to 25 by default
+    n_rb={1:-25}; shift
+    [ -z "$n_rb" ] && { echo "configure-enb: NRB defined - exiting"; return; }
     [ -z "$gw_id" ] && gw_id=$(get-peer)
     [ -z "$gw_id" ] && { echo "configure-enb: no peer defined - exiting"; return; }
-    n_rb={n_rb:=25} # if n_rb not specified, set NRB=25 by default
     echo "ENB: Using gateway (EPC) on $gw_id"
-    [ -z "$n_rb" ] && { echo "configure-enb: NRB defined - exiting"; return; }
     gw_id=$(echo $gw_id | sed  's/^0*//')
     id=$(r2lab-id)
     fitid=fit$id
@@ -215,7 +215,6 @@ function configure-enb() {
 	16|23) limesdr=false;;
 	*) "ERROR in configure_enb: Cannot run eNB on $fitid node"; return ;;
     esac
-
 
     cd $conf_dir
 
