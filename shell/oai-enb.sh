@@ -15,11 +15,12 @@ lte_pcap="$run_dir/softmodem.pcap"
 add-to-datas $lte_pcap
 conf_dir=$OPENAIR_HOME/targets/PROJECTS/GENERIC-LTE-EPC/CONF
 template=enb.band7.tm1.usrpb210.conf
+conf_rf_limesdr=$OPENAIR_HOME/targets/ARCH/LMSSDR/LimeSDR_above_1p8GHz.ini
 #following template name corresponds to the latest buggy develop version
 #template=enb.band7.tm1.50PRB.usrpb210.conf
 config=r2lab.conf
 add-to-configs $conf_dir/$config
-
+add-to-configs $conf_rf_limesdr
 
 doc-nodes dumpvars "list environment variables"
 function dumpvars() {
@@ -48,7 +49,7 @@ function image() {
 
 ####################
 # would make sense to add more stuff in the base image - see the NEWS file
-base_packages="git subversion libboost-all-dev libusb-1.0-0-dev python-mako doxygen python-docutils cmake build-essential libffi-dev texlive-base texlive-latex-base ghostscript gnuplot-x11 dh-apparmor graphviz gsfonts imagemagick-common  gdb ruby flex bison gfortran xterm mysql-common python-pip python-numpy qtcore4-l10n tcl tk xorg-sgml-doctools i7z
+base_packages="git subversion libboost-all-dev libusb-1.0-0-dev python-mako doxygen python-docutils cmake build-essential libffi-dev texlive-base texlive-latex-base ghostscript gnuplot-x11 dh-apparmor graphviz gsfonts imagemagick-common  gdb ruby flex bison gfortran xterm mysql-common python-pip python-numpy qtcore4-l10n tcl tk xorg-sgml-doctools i7z g++ libpython-dev swig libsqlite3-dev libi2c-dev libwxgtk3.0-dev freeglut3-dev
 "
 
 doc-nodes base "the script to install base software on top of a raw image" 
@@ -62,9 +63,36 @@ function base() {
     apt-get install -y $base_packages
 
     git-ssl-turn-off-verification
+
+    # Build the LimeSDR environment
+    # 1- Install SoapySDR
+    echo "========== Install SoapySDR for LimeSDR"
+    cd
+    git clone https://github.com/pothosware/SoapySDR.git
+    cd SoapySDR
+    git pull origin master
+    mkdir build && cd build
+    cmake ..
+    make -j4
+    make install
+    ldconfig 
+    # 2- Install LimeSuite
+    echo "========== Install LimeSuite for LimeSDR"
+    cd
+    git clone https://github.com/myriadrf/LimeSuite.git
+    cd LimeSuite
+    mkdir build && cd build
+    cmake ..
+    make -j4
+    make install
+    ldconfig
+    cd ../udev-rules/
+    chmod u+x install.sh
+    ./install.sh 
+
+    # following should be useless
     echo "========== Running git clone for r2lab and openinterface5g"
     cd
-    # following should be useless
     [ -d openairinterface5g ] || git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
     [ -d /root/r2lab-embedded ] || git clone git@github.com:fit-r2lab/r2lab-embedded.git
 }
@@ -99,8 +127,13 @@ function build-oai5g() {
     cd $build_dir
 
     echo Building in $(pwd) - see 'build*log'
-    run-in-log build-oai-1.log ./build_oai -I --eNB $oscillo --install-system-files -w USRP
-    run-in-log build-oai-2.log ./build_oai -w USRP $oscillo -c --eNB
+    # old build from OAI, new one from Open Cell
+    # run-in-log build-oai-1.log ./build_oai -I --eNB $oscillo --install-system-files -w USRP
+    # run-in-log build-oai-2.log ./build_oai -w USRP $oscillo -c --eNB
+    run-in-log build-oai-external.log ./build_oai -I 
+    run-in-log build-oai-usrp.log ./build_oai -c -w LMSSDR $oscillo --eNB
+    mv lte-softmodem lte-softmodem-limesdr
+    run-in-log build-oai-limesdr.log ./build_oai -c -w USRP $oscillo --eNB
 
 }
 
@@ -112,18 +145,20 @@ function build-oai5g() {
 doc-nodes run-enb "run-enb 23: does init/configure/start with epc running on node 23"
 function run-enb() {
     peer=$1; shift
-    # pass exactly 'False' to skip usrp-reset
-    reset_usrp=$1; shift
+    n_rb=$1; shift
+    # pass exactly 'False' to skip usb-reset
+    reset_usb=$1; shift
     oai_role=enb
+    echo "run-enb args with limesdr: $limesdr and n_rb: $n_rb"
     stop
     status
     echo "run-enb: configure $peer"
     configure $peer
     init
-    if [ "$reset_usrp" == "False" ]; then
-	echo "SKIPPING USRP reset"
+    if [ "$reset_usb" == "False" ]; then
+	echo "SKIPPING USB reset"
     else
-	usrp-reset
+	usb-reset
     fi
     start-tcpdump-data ${oai_role}
     start
@@ -160,7 +195,7 @@ function configure() {
 doc-nodes configure-enb "configure eNodeB (requires define-peer)"
 function configure-enb() {
 
-    # pass peer id on the command line, or define it it with define-peer
+    # pass peer id on the command line, or define it with define-peer
     gw_id=$1; shift
     [ -z "$gw_id" ] && gw_id=$(get-peer)
     [ -z "$gw_id" ] && { echo "configure-enb: no peer defined - exiting"; return; }
@@ -169,8 +204,47 @@ function configure-enb() {
     id=$(r2lab-id)
     fitid=fit$id
     id=$(echo $id | sed  's/^0*//')
+    case $id in
+	9|34) limesdr=true;;
+	16|23) limesdr=false;;
+	*) "ERROR in configure_enb: Cannot run eNB on $fitid node"; exit 1;;
+    esac
+
+
     cd $conf_dir
 
+    if [ "$limesdr" = true ]; then
+	# Configure the LimeSDR device
+	echo "LimeUtil --update"
+	LimeUtil --update 
+	if [ "$n_rb" -eq 25 ]; then
+	    tx_gain=7
+	    rx_gain=116
+	    pdsch_referenceSignalPower=-34
+	elif [ "$n_rb" -eq 50 ]; then
+	    tx_gain=20
+	    rx_gain=116
+	    pdsch_referenceSignalPower=-35
+        else
+	    echo "ERROR in configure_enb: NRB=${n_rb} with LimeSDR"
+	    exit 1
+	fi
+    else
+	# We use default USRP B210 at eNB
+	if [ "$n_rb" -eq 25 ]; then
+            tx_gain=90
+            rx_gain=125
+            pdsch_referenceSignalPower=-24
+        elif [ "$n_rb" -eq 50 ]; then
+            tx_gain=90
+            rx_gain=120
+            pdsch_referenceSignalPower=-27
+	    else
+            echo "ERROR in configure_enb: NRB=${n_rb} with USRP B210"
+            exit 1
+        fi
+    fi
+    
 
 # Following setup should be used for the latest develop version
 # choosing 50 for old devlop version double the uplink but with no downlink..
@@ -178,11 +252,12 @@ function configure-enb() {
 #s|N_RB_DL[ 	]*=.*|N_RB_DL = 50;|
 
     cat <<EOF > oai-enb.sed
-s|pdsch_referenceSignalPower[ 	]*=.*|pdsch_referenceSignalPower = -24;|
+s|pdsch_referenceSignalPower[ 	]*=.*|pdsch_referenceSignalPower = ${pdsch_referenceSignalPower}$;|
 s|mobile_network_code[ 	]*=.*|mobile_network_code = "95";|
 s|downlink_frequency[ 	]*=.*|downlink_frequency = 2660000000L;|
-s|N_RB_DL[ 	]*=.*|N_RB_DL = 25;|
-s|rx_gain[ 	]*=.*|rx_gain = 125;|
+s|N_RB_DL[ 	]*=.*|N_RB_DL = ${n_rb}$;|
+s|tx_gain[ 	]*=.*|tx_gain = ${tx_gain}$;|
+s|rx_gain[ 	]*=.*|rx_gain = ${rx_gain}$;|
 s|pusch_p0_Nominal[ 	]*=.*|pusch_p0_Nominal = -90;|
 s|pucch_p0_Nominal[ 	]*=.*|pucch_p0_Nominal = -96;|
 s|mme_ip_address[ 	]*=.*|mme_ip_address = ( { ipv4 = "192.168.${oai_subnet}.$gw_id";|
@@ -199,8 +274,17 @@ EOF
 }
 
 ####################
-doc-nodes start "starts lte-softmodem - run with -d to turn on soft oscilloscope" 
+doc-nodes start "starts lte-softmodem with usrp or limesdr depending on fit node - run with -d to turn on soft oscilloscope" 
 function start() {
+
+    id=$(r2lab-id)
+    fitid=fit$id
+    id=$(echo $id | sed  's/^0*//')
+    case $id in
+	9|34) limesdr=true;;
+	16|23) limesdr=false;;
+	*) "ERROR in start: Cannot run eNB on $fitid node"; exit 1;;
+    esac
 
     oscillo=""
     if [ -n "$1" ]; then
@@ -213,7 +297,13 @@ function start() {
     cd $run_dir
     echo "In $(pwd)"
     echo "Running lte-softmodem in background"
-    ./lte-softmodem -P softmodem.pcap --ulsch-max-errors 100 -O $conf_dir/$config $oscillo >& $lte_log &
+    if [ $limesdr = true ] ; then
+	echo "./lte-softmodem-limesdr -P softmodem.pcap -O $conf_dir/$config $oscillo --rf-config-file $conf_rf_limesdr >& $lte_log &"
+	./lte-softmodem-limesdr -P softmodem.pcap -O $conf_dir/$config $oscillo --rf-config-file $conf_rf_limesdr >& $lte_log &
+    else
+	echo "./lte-softmodem -P softmodem.pcap --ulsch-max-errors 100 -O $conf_dir/$config $oscillo >& $lte_log &"
+	./lte-softmodem -P softmodem.pcap --ulsch-max-errors 100 -O $conf_dir/$config $oscillo >& $lte_log &
+    fi
     cd - >& /dev/null
 }
 
