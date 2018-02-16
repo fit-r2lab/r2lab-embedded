@@ -9,6 +9,7 @@ source $(dirname $(readlink -f $BASH_SOURCE))/oai-common.sh
 OPENAIR_HOME=/root/openairinterface5g
 build_dir=$OPENAIR_HOME/cmake_targets
 run_dir=$build_dir/lte_build_oai/build
+run_dir_limsdr=$build_dir/lte_build_oai/build
 lte_log="$run_dir/softmodem.log"
 add-to-logs $lte_log
 lte_pcap="$run_dir/softmodem.pcap"
@@ -138,6 +139,23 @@ function build-oai5g() {
     run-in-log build-oai-usrp.log ./build_oai -c -w USRP $oscillo --eNB
 
 }
+
+# the run_dir directory can only contain one lte-softmodem binary either compiled for USRP or LIMESDR
+
+doc-nodes build-oai5g-limesdr "builds oai5g for LimeSDR" 
+function build-oai5g-limesdr() {
+
+    cd $OPENAIR_HOME
+    source oaienv
+    source $HOME/.bashrc
+
+    cd $build_dir
+    echo Building lte-softmodem for LimeSDR in $(pwd) - see 'build*log'
+    run-in-log build-oai-external.log ./build_oai -I --eNB -x --install-system-files -w LMSSDR
+    run-in-log build-oai-limesdr.log ./build_oai -c -w LMSSDR -x --eNB
+
+}
+
 
 ########################################
 # end of image
@@ -303,8 +321,8 @@ function start() {
     echo "In $(pwd)"
     echo "Running lte-softmodem in background"
     if [ $limesdr = true ] ; then
-	echo "./lte-softmodem-limesdr -P softmodem.pcap -O $conf_dir/$config $oscillo --rf-config-file $conf_rf_limesdr >& $lte_log &"
-	./lte-softmodem-limesdr -P softmodem.pcap -O $conf_dir/$config $oscillo --rf-config-file $conf_rf_limesdr >& $lte_log &
+	echo "./lte-softmodem -P softmodem.pcap -O $conf_dir/$config $oscillo --rf-config-file $conf_rf_limesdr >& $lte_log &"
+	./lte-softmodem -P softmodem.pcap -O $conf_dir/$config $oscillo --rf-config-file $conf_rf_limesdr >& $lte_log &
     else
 	echo "./lte-softmodem -P softmodem.pcap --ulsch-max-errors 100 -O $conf_dir/$config $oscillo >& $lte_log &"
 	./lte-softmodem -P softmodem.pcap --ulsch-max-errors 100 -O $conf_dir/$config $oscillo >& $lte_log &
