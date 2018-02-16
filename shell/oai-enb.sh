@@ -132,10 +132,10 @@ function build-oai5g() {
     # old build from OAI, new one from Open Cell
     # run-in-log build-oai-1.log ./build_oai -I --eNB $oscillo --install-system-files -w USRP
     # run-in-log build-oai-2.log ./build_oai -w USRP $oscillo -c --eNB
-    run-in-log build-oai-external.log ./build_oai -I 
-    run-in-log build-oai-usrp.log ./build_oai -c -w LMSSDR $oscillo --eNB
+    run-in-log build-oai-external.log ./build_oai -I --eNB $oscillo --install-system-files -w USRP
+    run-in-log build-oai-limesdr.log ./build_oai -c -w LMSSDR $oscillo --eNB
     mv $run_dir/lte-softmodem $run_dir/lte-softmodem-limesdr
-    run-in-log build-oai-limesdr.log ./build_oai -c -w USRP $oscillo --eNB
+    run-in-log build-oai-usrp.log ./build_oai -c -w USRP $oscillo --eNB
 
 }
 
