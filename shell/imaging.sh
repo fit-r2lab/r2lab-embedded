@@ -73,13 +73,21 @@ function ubuntu-k48-lowlatency() {
     local k48_lon="${k48_ver}.${k48_sub}"
 
     urls="
-http://fr.archive.ubuntu.com/ubuntu/pool/main/l/linux/linux-headers-${k48_ver}_${k48_lon}_all.deb
-http://fr.archive.ubuntu.com/ubuntu/pool/main/l/linux/linux-headers-${k48_ver}-lowlatency_${k48_lon}_amd64.deb
-http://fr.archive.ubuntu.com/ubuntu/pool/main/l/linux/linux-headers-${k48_ver}-generic_${k48_lon}_amd64.deb
-http://fr.archive.ubuntu.com/ubuntu/pool/main/l/linux/linux-image-${k48_ver}-lowlatency_${k48_lon}_amd64.deb
+https://launchpad.net/~canonical-kernel-team/+archive/ubuntu/ppa/+files/linux-headers-${k48_ver}_${k48_lon}_all.deb
+https://launchpad.net/~canonical-kernel-team/+archive/ubuntu/ppa/+files/linux-headers-${k48_ver}-lowlatency_${k48_lon}_amd64.deb
+https://launchpad.net/~canonical-kernel-team/+archive/ubuntu/ppa/+files/linux-headers-${k48_ver}-generic_${k48_lon}_amd64.deb
+https://launchpad.net/~canonical-kernel-team/+archive/ubuntu/ppa/+files/linux-image-${k48_ver}-lowlatency_${k48_lon}_amd64.deb
 "
+#    urls="
+#http://fr.archive.ubuntu.com/ubuntu/pool/main/l/linux/linux-headers-${k48_ver}_${k48_lon}_all.deb
+#http://fr.archive.ubuntu.com/ubuntu/pool/main/l/linux/linux-headers-${k48_ver}-lowlatency_${k48_lon}_amd64.deb
+#http://fr.archive.ubuntu.com/ubuntu/pool/main/l/linux/linux-headers-${k48_ver}-generic_${k48_lon}_amd64.deb
+#http://fr.archive.ubuntu.com/ubuntu/pool/main/l/linux/linux-image-${k48_ver}-lowlatency_${k48_lon}_amd64.deb
+#"
 
     -dpkg-from-urls $urls
+    # following may be necessary to fix possible apt-get issues
+    apt-get -y -f install
 
 }
 
