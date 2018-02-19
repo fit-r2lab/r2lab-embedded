@@ -9,7 +9,6 @@ source $(dirname $(readlink -f $BASH_SOURCE))/oai-common.sh
 OPENAIR_HOME=/root/openairinterface5g
 build_dir=$OPENAIR_HOME/cmake_targets
 run_dir=$build_dir/lte_build_oai/build
-run_dir_limsdr=$build_dir/lte_build_oai/build
 lte_log="$run_dir/softmodem.log"
 add-to-logs $lte_log
 lte_pcap="$run_dir/softmodem.pcap"
@@ -39,13 +38,17 @@ function dumpvars() {
 }
 
 ####################
-doc-nodes image "the entry point for nightly image builds"
+doc-nodes image "the entry point for nightly eNB image builds, by default for USRP"
 function image() {
-#    deps_arg="$1"; shift
+    sdr="${1:-usrp}"; shift
     dumpvars
     base
-#    deps "$deps_arg"
-    build
+    case $sdr in
+	"usrp") build usrp ;; 
+	"limesdr") build limesdr ;;
+	*) echo "image: Wrong sdr device name $sdr"; return 1 ;;
+    esac
+
 }
 
 ####################
@@ -65,7 +68,38 @@ function base() {
 
     git-ssl-turn-off-verification
 
-    # Build the LimeSDR environment
+    # following should be useless
+    echo "========== Running git clone for r2lab and openinterface5g"
+    cd
+    [ -d openairinterface5g ] || git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
+    [ -d /root/r2lab-embedded ] || git clone git@github.com:fit-r2lab/r2lab-embedded.git
+}
+
+
+doc-nodes build "builds lte-softmodem for an oai image for USRP or for LimeSDR with option limesdr"
+function build() {
+
+    sdr="${1:-usrp}"; shift
+    case $sdr in
+	"usrp") SDR_DEV="USRP"; build ;; 
+	"limesdr") SDR_DEV="LMSSDR"; build-limesdr-env ;;
+	*) echo "image: Error unknown sdr device $sdr"; return 1 ;;
+    esac
+
+    # following updates may be useful in case build is run in standalone
+    git-pull-r2lab
+    git-pull-oai
+
+    cd $build_dir
+    echo Building OAI5G - see $build_dir/build-oai5g.log
+    build-oai5g $SDR_DEV >& build-oai5g.log
+
+}
+
+
+doc-nodes build-limesdr-env "builds the LimeSDR environment"
+function build-limesdr-env() {
+
     # 1- Install SoapySDR
     echo "========== Install SoapySDR for LimeSDR"
     cd
@@ -78,6 +112,7 @@ function base() {
     make -j4
     make install
     ldconfig 
+
     # 2- Install LimeSuite
     echo "========== Install LimeSuite for LimeSDR"
     cd
@@ -93,35 +128,13 @@ function base() {
     chmod u+x install.sh
     ./install.sh 
 
-    # following should be useless
-    echo "========== Running git clone for r2lab and openinterface5g"
-    cd
-    [ -d openairinterface5g ] || git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
-    [ -d /root/r2lab-embedded ] || git clone git@github.com:fit-r2lab/r2lab-embedded.git
 }
 
-doc-nodes build "builds oai5g for an oai image"
-function build() {
 
-    git-pull-r2lab
-    git-pull-oai
-
-    cd $build_dir
-    echo Building OAI5G - see $build_dir/build-oai5g.log
-    build-oai5g -x >& build-oai5g.log
-
-}
-
-doc-nodes build-oai5g "builds oai5g - run with -x for building with software oscilloscope" 
+doc-nodes build-oai5g "builds lte-softmodem by default for USRP or for LimeSDR with option LMSSDR " 
 function build-oai5g() {
 
-    oscillo=""
-    if [ -n "$1" ]; then
-	case $1 in
-	    -x) oscillo="-x" ;;
-	    *) echo "usage: build-oai5g [-x]"; return 1 ;;
-	esac
-    fi
+    SDR_DEV="${1:-USRP}"; shift
 
     cd $OPENAIR_HOME
     source oaienv
@@ -129,33 +142,12 @@ function build-oai5g() {
 
     cd $build_dir
 
-    echo Building in $(pwd) - see 'build*log'
-    # old build from OAI, new one from Open Cell
-    # run-in-log build-oai-1.log ./build_oai -I --eNB $oscillo --install-system-files -w USRP
-    # run-in-log build-oai-2.log ./build_oai -w USRP $oscillo -c --eNB
-    run-in-log build-oai-external.log ./build_oai -I --eNB $oscillo --install-system-files -w USRP
-    run-in-log build-oai-limesdr.log ./build_oai -c -w LMSSDR $oscillo --eNB
-    mv $run_dir/lte-softmodem $run_dir/lte-softmodem-limesdr
-    run-in-log build-oai-usrp.log ./build_oai -c -w USRP $oscillo --eNB
+    #Run the build by default with oscillo function enabled (option -x). Use -d option to enable it when running.
+    echo Building lte-softmodem for $SDR_DEV in $(pwd) - see 'build*log'
+    run-in-log build-oai-external.log ./build_oai -I --eNB -x --install-system-files -w $SDR_DEV
+    run-in-log build-oai-usrp.log ./build_oai -c -w $SDR_DEV -x --eNB
 
 }
-
-# the run_dir directory can only contain one lte-softmodem binary either compiled for USRP or LIMESDR
-
-doc-nodes build-oai5g-limesdr "builds oai5g for LimeSDR" 
-function build-oai5g-limesdr() {
-
-    cd $OPENAIR_HOME
-    source oaienv
-    source $HOME/.bashrc
-
-    cd $build_dir
-    echo Building lte-softmodem for LimeSDR in $(pwd) - see 'build*log'
-    run-in-log build-oai-external.log ./build_oai -I --eNB -x --install-system-files -w LMSSDR
-    run-in-log build-oai-limesdr.log ./build_oai -c -w LMSSDR -x --eNB
-
-}
-
 
 ########################################
 # end of image
@@ -269,11 +261,6 @@ function configure-enb() {
     fi
     
 
-# Following setup should be used for the latest develop version
-# choosing 50 for old develop version double the uplink but with no downlink..
-#
-#s|N_RB_DL[ 	]*=.*|N_RB_DL = 50;|
-
     cat <<EOF > oai-enb.sed
 s|pdsch_referenceSignalPower[ 	]*=.*|pdsch_referenceSignalPower = ${pdsch_referenceSignalPower};|
 s|mobile_network_code[ 	]*=.*|mobile_network_code = "95";|
@@ -306,7 +293,7 @@ function start() {
     case $id in
 	9|34) limesdr=true;;
 	16|23) limesdr=false;;
-	*) "ERROR in start: Cannot run eNB on $fitid node"; exit 1;;
+	*) "ERROR in start: Cannot run eNB on $fitid node"; return 1;;
     esac
 
     oscillo=""
