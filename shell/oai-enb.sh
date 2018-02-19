@@ -81,7 +81,7 @@ function build() {
 
     sdr="${1:-usrp}"; shift
     case $sdr in
-	"usrp") SDR_DEV="USRP"; build ;; 
+	"usrp") SDR_DEV="USRP" ;; 
 	"limesdr") SDR_DEV="LMSSDR"; build-limesdr-env ;;
 	*) echo "image: Error unknown sdr device $sdr"; return 1 ;;
     esac
