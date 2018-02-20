@@ -263,15 +263,18 @@ doc-selection rw alias
 
 alias rusrpon="rhubarbe usrpon"
 alias uon=rusrpon
-doc-selection "rusrpon|uon" "turn selected nodes usrpon (rhubarbe usrpon)"
+alias rusbon=rusrpon
+doc-selection "rusrpon|rusbon|uon" "turn on USB port on selected nodes (rhubarbe usrpon)"
 
 alias rusrpoff="rhubarbe usrpoff"
 alias uoff=rusrpoff
-doc-selection "rusrpoff|uoff" "turn selected nodes usrpoff (rhubarbe usrpoff)"
+alias rusboff=rusrpoff
+doc-selection "rusrpoff|rusboff|uoff" "turn off USB port on selected nodes (rhubarbe usrpoff)"
 
 alias rusrpstatus="rhubarbe usrpstatus"
 alias ust=rusrpstatus
-doc-selection "rusrpstatus|ust" "show status (usrpon or usrpoff) of selected nodes USRP (rhubarbe usrpstatus)"
+alias rusbstatus=rusrpstatus
+doc-selection "rusrpstatus|rusbstatus|ust" "show USB status (on or off) of selected nodes (rhubarbe usrpstatus)"
 
 alias rload="rhubarbe load"
 doc-selection rload "load image (specify with -i) on selected nodes (rhubarbe load)"
