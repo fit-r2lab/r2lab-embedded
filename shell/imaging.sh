@@ -368,7 +368,7 @@ function install-e3372() {
 
     apt-get update
     apt-get install -y usb-modeswitch
-    apt-get install -y firefox  # can be useful to handle Huawei web interface config
+    apt-get install -y xterm firefox  # can be useful to handle Huawei web interface config
     
     echo "========== add /etc/usb_modeswitch.conf file"
     cat > /etc/usb_modeswitch.conf <<EOF
@@ -400,7 +400,7 @@ EOF
 doc-imaging install-gnuradio "install gnuradio package with uhd"
 function install-gnuradio() {
     apt-get update 
-    apt-get -y install libuhd-dev libuhd003 uhd-host gnuradio 
+    apt-get -y install libuhd-dev libuhd003 uhd-host gnuradio xterm
 }
 
 
