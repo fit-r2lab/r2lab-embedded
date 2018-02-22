@@ -1,4 +1,5 @@
-unalias ls 2> /dev/null
+# allow interactive shells to use aliases
+shopt -s expand_aliases
 
 ########## pseudo docstrings
 source $(dirname $(readlink -f $BASH_SOURCE))/r2labutils.sh
@@ -7,6 +8,9 @@ create-doc-category selection "commands that work on a selection of nodes"
 augment-help-with selection
 create-doc-category alt "other convenient user-oriented commands"
 create-doc-category admin "admin-oriented commands"
+
+# remove colors
+unalias ls 2> /dev/null
 
 #################### contextual data
 function preplab () { hostname | grep -q bemol; }

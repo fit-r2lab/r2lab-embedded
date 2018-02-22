@@ -2,9 +2,12 @@
 # 
 # on these images, we have a symlink
 # /etc/profile.d/nodes.sh
-# that point at
+# that points at
 # /root/r2lab-embedded/shell/nodes.sh
 #
+
+# remove colors
+unalias ls 2> /dev/null
 
 # use the micro doc-help tool
 source $(dirname $(readlink -f $BASH_SOURCE))/r2labutils.sh
