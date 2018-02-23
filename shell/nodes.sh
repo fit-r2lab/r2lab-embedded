@@ -582,8 +582,8 @@ function e3372-reset() {
 # xxx could use a -interactive wrapper to display command
 # and then ask for user's confirmation
 
-downlink_freq="--freq=2.56G"
-uplink_freq="--freq=2.68G"
+downlink_freq="--freq=2.66G"
+uplink_freq="--freq=2.54G"
 
 function -scramble() {
     local link="$1"; shift
@@ -608,10 +608,10 @@ function -scramble() {
 doc-nodes 'scramble-*' "shortcuts for scrambling the skype demo; use -blast to use max. gain"
 function scramble-downlink() { -scramble downlink "-g 70"; }
 function scramble-downlink-mid() { -scramble downlink "-g 80"; }
-function scramble-downlink-blast() { -scramble downlink "-g 90"; }
+function scramble-downlink-blast() { -scramble downlink "-g 110"; }
 function scramble-uplink() { -scramble uplink "-g 70"; }
 function scramble-uplink-mid() { -scramble uplink "-g 80"; }
-function scramble-uplink-blast() { -scramble uplink "-g 90"; }
+function scramble-uplink-blast() { -scramble uplink "-g 110"; }
 
 doc-nodes watch-uplink "Run uhd_fft on band7 uplink"
 function watch-uplink() {
