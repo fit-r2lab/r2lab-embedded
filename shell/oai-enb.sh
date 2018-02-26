@@ -8,7 +8,8 @@ source $(dirname $(readlink -f $BASH_SOURCE))/oai-common.sh
 
 OPENAIR_HOME=/root/openairinterface5g
 build_dir=$OPENAIR_HOME/cmake_targets
-run_dir=$build_dir/lte_build_oai/build
+up_run_dir=$build_dir/lte_build_oai
+run_dir=$up_run_dir/build
 lte_log="$run_dir/softmodem.log"
 add-to-logs $lte_log
 lte_pcap="$run_dir/softmodem.pcap"
@@ -38,17 +39,16 @@ function dumpvars() {
 }
 
 ####################
-doc-nodes image "the entry point for nightly eNB image builds, by default for USRP"
+doc-nodes image "the entry point for nightly eNB image builds"
 function image() {
-    sdr="${1:-usrp}"; shift
     dumpvars
     base
-    case $sdr in
-	"usrp") build usrp ;; 
-	"limesdr") build limesdr ;;
-	*) echo "image: Wrong sdr device name $sdr"; return 1 ;;
-    esac
-
+    build usrp
+    echo "image: build lte-softmodem for USRP"
+    mv $run_dir $up_run_dir/build_usrp
+    echo "image: build lte-softmodem for LimeSDR"
+    build limesdr
+    mv $run_dir$up_run_dir/build_limesdr
 }
 
 ####################
@@ -229,6 +229,8 @@ function configure-enb() {
     cd $conf_dir
 
     if [ "$limesdr" = true ]; then
+	# set the $run_dir directory to $up_run-dir/build_limesdr
+	rm -f $up_run_dir/build; ln -s $up_run_dir/build_limesdr $up_run_dir/build
 	# Configure the LimeSDR device
 	echo "LimeUtil --update"
 	LimeUtil --update 
@@ -245,7 +247,9 @@ function configure-enb() {
 	    return
 	fi
     else
-	# We use default USRP B210 at eNB
+	# eNB with usrp B210 scenario
+	# set the $run_dir directory to $up_run-dir/build_usrp
+	rm -f $up_run_dir/build; ln -s $up_run_dir/build_usrp $up_run_dir/build
 	if [ "$n_rb" -eq 25 ]; then
             tx_gain=90
             rx_gain=125
@@ -305,8 +309,7 @@ function start() {
     fi
 
     cd $run_dir
-    echo "In $(pwd)"
-    echo "Running lte-softmodem in background"
+    echo "In $(pwd); running lte-softmodem in background"
     if [ $limesdr = true ] ; then
 	echo "./lte-softmodem -P softmodem.pcap -O $conf_dir/$config $oscillo --rf-config-file $conf_rf_limesdr >& $lte_log &"
 	./lte-softmodem -P softmodem.pcap -O $conf_dir/$config $oscillo --rf-config-file $conf_rf_limesdr >& $lte_log &
