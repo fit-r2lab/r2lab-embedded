@@ -48,7 +48,7 @@ function image() {
     mv $run_dir $up_run_dir/build_usrp
     echo "image: build lte-softmodem for LimeSDR"
     build limesdr
-    mv $run_dir$up_run_dir/build_limesdr
+    mv $run_dir $up_run_dir/build_limesdr
 }
 
 ####################

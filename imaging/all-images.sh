@@ -6,7 +6,7 @@ case $(hostname) in
 	gitroot=/root/r2lab-embedded
 	;;
     *)
-	gateway=inria_oai@faraday.inria.fr
+	gateway=inria_r2lab.tutorial@faraday.inria.fr
 	gitroot=$HOME/fit-r2lab/r2lab-embedded
 	;;
 esac
@@ -59,13 +59,14 @@ enb_opts="
     -l /root/openairinterface5g/cmake_targets/log/asn1c_install_log.txt
     -l /root/openairinterface5g/cmake_targets/build-oai-1.log
     -l /root/openairinterface5g/cmake_targets/build-oai-2.log
-    -b /root/openairinterface5g/cmake_targets/lte_build_oai/build/lte-softmodem
+    -b /root/openairinterface5g/cmake_targets/lte_build_oai/build_usrp/lte-softmodem
+    -b /root/openairinterface5g/cmake_targets/lte_build_oai/build_limesdr/lte-softmodem
 "
 ue_opts="
     -l /root/build-oai5g-ue.log
     -l /root/openairinterface5g/cmake_targets/log/asn1c_install_log.txt
     -l /root/openairinterface5g/cmake_targets/build-oai-ue-1.log
-    -b /root/openairinterface5g/targets/bin/lte-softmodem.Rel14
+    -b /root/openairinterface5g/cmake_targets/lte_build_oai/build/lte-softmodem
 "
 
 gr_opts="
@@ -104,12 +105,17 @@ function u16-ath-noreg() {
 
 function u16-48() {
     bim 1 ubuntu-16.04 u16.04 "imaging.sh new-common-setup" "imaging.sh update-os-packages" "nodes.sh git-pull-r2lab" "nodes.sh apt-upgrade-all"
-    bim 2 u16.04-$DATE u16-lowlat48 "imaging.sh ubuntu-k48-lowlatency" "imaging.sh activate-lowlatency"
+    bim 2 u16.04 u16-lowlat48 "imaging.sh ubuntu-k48-lowlatency" "imaging.sh activate-lowlatency"
     bim $e3372_opts 3 u16.04 u16.04-e3372 "imaging.sh install-e3372"
     bim $cn_opts 5 u16-lowlat48 u16.48-oai-cn "oai-gw.sh  image" &
     bim $enb_opts 6 u16-lowlat48 u16.48-oai-enb "oai-enb.sh image" &
     bim $ue_opts 7 u16-lowlat48 u16.48-oai-ue "oai-ue.sh image" &
-    bim $gr_opts 8 u16-lowlat48 u16.48-gnuradio-3.7.10 "imaging.sh install-gnuradio" "nodes.sh enable-usrp-ethernet"&
+    bim $gr_opts 8 u16-lowlat48 u16.48-gnuradio "imaging.sh install-gnuradio" "nodes.sh enable-usrp-ethernet"&
+}
+
+# latest gnuradio built from source 
+function gnuradio() {
+    bim $gr_opts 8 u16-lowlat48 u16.48-gnuradio "imaging.sh install-gnuradio" "nodes.sh enable-usrp-ethernet"
 }
 
 #following deprecated
@@ -154,7 +160,7 @@ function u14-319(){
     #bim $enb_options 36 u14-lowlat319 u14.319-oai-enb-uhdettus "oai-enb.sh image uhd-ettus"
 }
 
-function gnuradio(){
+function old-gnuradio(){
     bim 1 ubuntu-16.04-gnuradio-3.7.10.1-update3 ubuntu-16.04-gnuradio-3.7.10.1-update4 "nodes.sh git-pull-r2lab"
 }
 
@@ -244,4 +250,4 @@ function ubuntu-docker() {
 ####################
 # xxx this clearly should be specified on the command line some day
 #ubuntu-docker
-u16-48
+gnuradio
