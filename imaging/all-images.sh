@@ -106,16 +106,25 @@ function u16-ath-noreg() {
 function u16-48() {
     bim 1 ubuntu-16.04 u16.04 "imaging.sh new-common-setup" "imaging.sh update-os-packages" "nodes.sh git-pull-r2lab" "nodes.sh apt-upgrade-all"
     bim 2 u16.04 u16-lowlat48 "imaging.sh ubuntu-k48-lowlatency" "imaging.sh activate-lowlatency"
-    bim $e3372_opts 3 u16.04 u16.04-e3372 "imaging.sh install-e3372"
+}
+
+# all images used in openair demo
+function oai() {
+    bim $e3372_opts 3 u16.04 u16.04-e3372 "imaging.sh install-e3372"&
     bim $cn_opts 5 u16-lowlat48 u16.48-oai-cn "oai-gw.sh  image" &
     bim $enb_opts 6 u16-lowlat48 u16.48-oai-enb "oai-enb.sh image" &
     bim $ue_opts 7 u16-lowlat48 u16.48-oai-ue "oai-ue.sh image" &
-    bim $gr_opts 8 u16-lowlat48 u16.48-gnuradio "imaging.sh install-gnuradio" "nodes.sh enable-usrp-ethernet"&
 }
 
-# latest gnuradio built from source 
+# latest gnuradio built from source -- better to use lowlatency for uhd
 function gnuradio() {
     bim $gr_opts 8 u16-lowlat48 u16.48-gnuradio "imaging.sh install-gnuradio" "nodes.sh enable-usrp-ethernet"
+}
+
+function all-oai() {
+    u16-48
+    oai
+    gnuradio
 }
 
 #following deprecated

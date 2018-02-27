@@ -408,6 +408,7 @@ function install-gnuradio() {
     pip install pybombs
     pybombs recipes add gr-recipes git+https://github.com/gnuradio/gr-recipes.git
     mkdir prefix/
+    # Be patient, more than one hour to compile!
     pybombs prefix init -a default prefix/default/ -R gnuradio-default
 }
 
