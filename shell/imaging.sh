@@ -400,8 +400,8 @@ EOF
 doc-imaging install-gnuradio "install gnuradio package with uhd"
 function install-gnuradio() {
     apt-get update
-    # install x11 utilities
-    apt-get -y install xterm xinit openbox
+    # install x11 & pip utilities
+    apt-get -y install xterm xinit openbox python-pip
     # apt-get -y install libuhd-dev libuhd003 uhd-host gnuradio xterm openbox xinit
     # build latest gnuradio using pybombs
     # see https://www.gnuradio.org/blog/pybombs-the-what-the-how-and-the-why/
