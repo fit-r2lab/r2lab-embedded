@@ -155,14 +155,14 @@ function build-oai5g() {
 ########################################
 
 # entry point for global orchestration
-doc-nodes run-enb "run-enb 23 50: does init/configure/start with epc running on node 23 and NRB=50"
+doc-nodes run-enb "run-enb 23 50 False : does init/configure/start with epc running on node 23, with NRB=50 and without USB reset"
 function run-enb() {
     peer=$1; shift
     n_rb=$1; shift
     # pass exactly 'False' to skip usb-reset
     reset_usb=$1; shift
     oai_role=enb
-    echo "run-enb args with limesdr: $limesdr and n_rb: $n_rb"
+    echo "run-enb running with n_rb set to $n_rb"
     stop
     status
     echo "run-enb: configure $peer"

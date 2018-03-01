@@ -249,8 +249,7 @@ function configure-epc() {
     # pass peer id on the command line, or define it it with define-peer
     hss_id=$1; shift
     [ -z "$hss_id" ] && hss_id=$(get-peer)
-    [ -z "$h
-ss_id" ] && { echo "configure-enb: no peer defined - exiting"; return; }
+    [ -z "$hss_id" ] && { echo "configure-enb: no peer defined - exiting"; return; }
     # ensure nodes functions are known
     hss_id=$(echo -n "0"${hss_id}|tail -c 2)
     echo "EPC: Using  HSS on $hss_id"
@@ -260,12 +259,10 @@ ss_id" ] && { echo "configure-enb: no peer defined - exiting"; return; }
     hss_id=$(echo $hss_id | sed  's/^0*//')
     mkdir -p /usr/local/etc/oai/freeDiameter
     local id=$(r2lab-id)
-    echo "**debug** before id = $id"
     local fitid=fit$id
     id=$(echo $id | sed  's/^0*//')
     local localip="192.168.${oai_subnet}.${id}/24"
     local hssip="192.168.${oai_subnet}.${hss_id}"
-    echo "**debug** after id = $id and hssip = $hssip"
 
     cd $template_dir
 
