@@ -554,10 +554,10 @@ function usb-reset() {
     # is not in its nominal location,
     # like if node 42 sits in slot 4
     local cmc="192.168.1.$id"
-    echo "Turning off USRP # $id"
+    echo "Turning off USB device on node # $id"
     curl http://$cmc/usrpoff
     sleep 1
-    echo "Turning on USRP # $id"
+    echo "Turning on USB device on node # $id"
     curl http://$cmc/usrpon
 }
 
