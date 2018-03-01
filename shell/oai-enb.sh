@@ -171,6 +171,7 @@ function run-enb() {
     if [ "$reset_usb" == "False" ]; then
 	echo "SKIPPING USB reset"
     else
+	echo "Resetting USB port of eNB node $peer"
 	usb-reset
     fi
     start-tcpdump-data ${oai_role}
@@ -233,8 +234,8 @@ function configure-enb() {
 	# set the $run_dir directory to $up_run-dir/build_limesdr
 	rm -f $up_run_dir/build; ln -s $up_run_dir/build_limesdr $up_run_dir/build
 	# Configure the LimeSDR device
-	echo "LimeUtil --update"
-	LimeUtil --update 
+	echo "Wait for 10s and run LimeUtil --update"
+	sleep 10; LimeUtil --update 
 	if [ "$n_rb" -eq 25 ]; then
 	    tx_gain=7
 	    rx_gain=116
