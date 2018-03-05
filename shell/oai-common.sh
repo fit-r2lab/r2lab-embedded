@@ -13,8 +13,8 @@ oai_subnet=2
 
 ####################
 doc-nodes git-pull-oai "updates OAI repos /root/openair-cn /root/openairinterface5g from git"
-function git-pull-oai() { -git-pull-repos /root/openair-cn@develop /root/openairinterface5g@develop; }
-#function git-pull-oai() { -git-pull-repos /root/openair-cn@develop /root/openairinterface5g@2017.w34; }
+#function git-pull-oai() { -git-pull-repos /root/openair-cn@develop /root/openairinterface5g@develop; }
+function git-pull-oai() { -git-pull-repos /root/openair-cn@develop /root/openairinterface5g@2017.w34; }
 
 ####################
 function run-in-log() {
