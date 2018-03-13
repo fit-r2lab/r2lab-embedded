@@ -566,7 +566,7 @@ function un-tgz() {
 # the private key for macphone is in inventory/macphone
 function -macphone() {
     macphoneid=$1; shift
-    ssh -o StrictHostKeyChecking=no -i /home/faraday/r2lab-embedded/mac-ssh-keys/macphone tester@macphone${i} "$@"
+    ssh -o StrictHostKeyChecking=no -i /home/faraday/r2lab-embedded/mac-ssh-keys/macphone tester@macphone${macphoneid} "$@"
 }
 
 doc-alt macphone1 "ssh-enter phone gateway 'macphone1' as user 'tester'"
