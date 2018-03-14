@@ -250,6 +250,9 @@ class Nightly:
             return False
 
     def all_off(self):
+        if self.verbose:
+            print("verbose mode: skip all-off")
+            return
         command = "rhubarbe bye"
         for host in self.all_names:
             command += " {}".format(host)
@@ -311,7 +314,10 @@ class Nightly:
         else:
             subject = "R2lab nightly - everything is fine"
 
-        send_email(email_from, email_to, subject, html)
+        if self.verbose:
+            print("verbose mode: skip sending mail")
+        else:
+            send_email(email_from, email_to, subject, html)
 
         self.all_off()
 
