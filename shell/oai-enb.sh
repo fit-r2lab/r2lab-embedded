@@ -15,9 +15,9 @@ add-to-logs $lte_log
 lte_pcap="$run_dir/softmodem.pcap"
 add-to-datas $lte_pcap
 conf_dir=$OPENAIR_HOME/targets/PROJECTS/GENERIC-LTE-EPC/CONF
-template=enb.band7.tm1.usrpb210.conf
+#template=enb.band7.tm1.usrpb210.conf
 #following template name corresponds to the latest buggy develop version
-#template=enb.band7.tm1.50PRB.usrpb210.conf
+template=enb.band7.tm1.50PRB.usrpb210.conf
 #conf_rf_limesdr=$OPENAIR_HOME/targets/ARCH/LMSSDR/LimeSDR_above_1p8GHz.ini
 conf_rf_limesdr=$OPENAIR_HOME/targets/ARCH/LMSSDR/LimeSDR_above_1p8GHz_1v4.ini
 config=r2lab.conf
