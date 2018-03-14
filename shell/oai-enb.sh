@@ -6,6 +6,11 @@ doc-nodes-sep "#################### For managing an OAI enodeb"
 
 source $(dirname $(readlink -f $BASH_SOURCE))/oai-common.sh
 
+# WARNING WITH LATEST DEVELOP VERSION, -P OPTION CRASHES SYSTEMATICALLY
+# set this to non-void to enable pcap saving with lte-softmodem -P
+# warning, this seems to crash with recent versions
+SAVE_PCAP=
+
 OPENAIR_HOME=/root/openairinterface5g
 build_dir=$OPENAIR_HOME/cmake_targets
 up_run_dir=$build_dir/lte_build_oai
@@ -13,7 +18,7 @@ run_dir=$up_run_dir/build
 lte_log="$run_dir/softmodem.log"
 add-to-logs $lte_log
 lte_pcap="$run_dir/softmodem.pcap"
-add-to-datas $lte_pcap
+[ -n "$SAVE_PCAP" ] && add-to-datas $lte_pcap
 conf_dir=$OPENAIR_HOME/targets/PROJECTS/GENERIC-LTE-EPC/CONF
 #template=enb.band7.tm1.usrpb210.conf
 #following template name corresponds to the latest buggy develop version
@@ -319,15 +324,30 @@ function start() {
 
     cd $run_dir
     echo "In $(pwd); running lte-softmodem in background"
-# WARNING WITH LATEST DEVELOP VERSION, -P OPTION CRASHES SYSTEMATICALLY
+    command="./lte-softmodem -O $conf_dir/$config"
+    if [ -n $SAVE_PCAP ]; then
+            command="$command -P softmodem.pcap"
+    fi
     if [ $limesdr = true ] ; then
-	echo "./lte-softmodem -P softmodem.pcap -O $conf_dir/$config $oscillo --rf-config-file $conf_rf_limesdr >& $lte_log &"
-#	./lte-softmodem -P softmodem.pcap -O $conf_dir/$config $oscillo --rf-config-file $conf_rf_limesdr >& $lte_log &
-	./lte-softmodem -O $conf_dir/$config $oscillo --rf-config-file $conf_rf_limesdr >& $lte_log &
+        command="$command --rf-config-file $conf_rf_limesdr"
     else
-	echo "./lte-softmodem -P softmodem.pcap --ulsch-max-errors 100 -O $conf_dir/$config $oscillo >& $lte_log &"
-#	./lte-softmodem -P softmodem.pcap --ulsch-max-errors 100 -O $conf_dir/$config $oscillo >& $lte_log &
-	./lte-softmodem --ulsch-max-errors 100 -O $conf_dir/$config $oscillo >& $lte_log &
+        command="$command --ulsch-max-errors 100"
+    fi
+    if [ -z "$oscillo" ]; then
+        # without graphical mode: run in background
+        DETACH=true
+    else
+        # with graphical mode, run in foreground otherwise
+        # the ssh session closes and we cannot forward the X11 traffic
+        DETACH=
+        command="$command $oscillo"
+    fi
+    echo "Starting base station with command (DETACH=$DETACH)"
+    echo "$command"
+    if [ -n "$DETACH" ]; then
+        $command >& $lte_log &
+    else
+        $command >& $lte_log
     fi
     cd - >& /dev/null
 }
