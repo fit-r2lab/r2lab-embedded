@@ -57,7 +57,7 @@ function image() {
 base_packages="git subversion libboost-all-dev libusb-1.0-0-dev python-mako doxygen python-docutils cmake build-essential libffi-dev texlive-base texlive-latex-base ghostscript gnuplot-x11 dh-apparmor graphviz gsfonts imagemagick-common  gdb ruby flex bison gfortran xterm mysql-common python-pip python-numpy qtcore4-l10n tcl tk xorg-sgml-doctools i7z g++ libpython-dev swig libsqlite3-dev libi2c-dev libwxgtk3.0-dev freeglut3-dev
 "
 
-doc-nodes base "the script to install base software on top of a raw image" 
+doc-nodes base "the script to install base software on top of a raw image"
 function base() {
 
     git-pull-r2lab
@@ -82,7 +82,7 @@ function build() {
 
     sdr="${1:-usrp}"; shift
     case $sdr in
-	"usrp") SDR_DEV="USRP" ;; 
+	"usrp") SDR_DEV="USRP" ;;
 	"limesdr") SDR_DEV="LMSSDR"; build-limesdr-env ;;
 	*) echo "image: Error unknown sdr device $sdr"; return 1 ;;
     esac
@@ -107,19 +107,19 @@ function build-limesdr-env() {
     git clone https://github.com/pothosware/SoapySDR.git
     cd SoapySDR
     git pull origin master
-    mkdir -p build 
+    mkdir -p build
     cd build
     cmake ..
     make -j4
     make install
-    ldconfig 
+    ldconfig
 
     # 2- Install LimeSuite
     echo "========== Install LimeSuite for LimeSDR"
     cd
     git clone https://github.com/myriadrf/LimeSuite.git
     cd LimeSuite
-    mkdir -p build 
+    mkdir -p build
     cd build
     cmake ..
     make -j4
@@ -127,12 +127,12 @@ function build-limesdr-env() {
     ldconfig
     cd ../udev-rules/
     chmod u+x install.sh
-    ./install.sh 
+    ./install.sh
 
 }
 
 
-doc-nodes build-oai5g "builds lte-softmodem by default for USRP or for LimeSDR with option LMSSDR " 
+doc-nodes build-oai5g "builds lte-softmodem by default for USRP or for LimeSDR with option LMSSDR "
 function build-oai5g() {
 
     SDR_DEV="${1:-USRP}"; shift
@@ -242,7 +242,7 @@ function configure-enb() {
 	rm -f $up_run_dir/build; ln -s $up_run_dir/build_limesdr $up_run_dir/build
 	# Configure the LimeSDR device
 	echo "Wait for 10s and run LimeUtil --update"
-	sleep 10; LimeUtil --update 
+	sleep 10; LimeUtil --update
 	if [ "$n_rb" -eq 25 ]; then
 	    tx_gain=7
 	    rx_gain=116
@@ -272,7 +272,7 @@ function configure-enb() {
 	    return
         fi
     fi
-    
+
 
     cat <<EOF > oai-enb.sed
 s|pdsch_referenceSignalPower[ 	]*=.*|pdsch_referenceSignalPower = ${pdsch_referenceSignalPower};|
@@ -297,7 +297,7 @@ EOF
 }
 
 ####################
-doc-nodes start "starts lte-softmodem with usrp or limesdr depending on fit node - run with -d to turn on soft oscilloscope" 
+doc-nodes start "starts lte-softmodem with usrp or limesdr depending on fit node - run with -d to turn on soft oscilloscope"
 function start() {
 
     id=$(r2lab-id)
