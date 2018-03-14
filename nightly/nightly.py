@@ -130,7 +130,7 @@ class Nightly:
         self.failures[node.id] = reason
         # xxx ok this may be a be a bit fragile, but given that sidecar_client
         # is not properly installed...
-        unavailable_script = Path.home() / "r2lab/sidecar/unavailable.py"
+        unavailable_script = Path.home() / "r2lab-python/examples/unavailable.py"
         if not unavailable_script.exists():
             print("Cannot locate unavailable script {} - skipping"
                   .format(unavailable_script))
