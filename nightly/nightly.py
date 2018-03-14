@@ -8,16 +8,16 @@ Features:
 (*) designed to be run on an hourly basis, at typically nn:01
     will check for a lease being currently held by nightly slice; returns if not
 (*) defaults to all nodes but can exclude some hand-picked ones on the command-line
-(*) updates sidecar status (available) 
-(*) sends status mail 
+(*) updates sidecar status (available)
+(*) sends status mail
 
 Performed checks on all nodes:
 
 (*) turn node on - check it answers ping
 (*) turn node off - check it does not answer ping
 (*) uses 2 reference images (typically fedora and ubuntu)
-(*) uploads first one, check for running image 
-(*) uploads second one, check for running image 
+(*) uploads first one, check for running image
+(*) uploads second one, check for running image
 
 """
 
@@ -120,7 +120,7 @@ class Nightly:
             print("verbose:", *args)
 
     def mark_and_exclude(self, node, reason):
-        """ 
+        """
         what to do when a node is found as being non-nominal
         (*) remove it from further actions
         (*) mark it as unavailable
@@ -130,7 +130,7 @@ class Nightly:
         self.failures[node.id] = reason
         # xxx ok this may be a be a bit fragile, but given that sidecar_client
         # is not properly installed...
-        unavailable_script = Path.home() / "r2lab/sidecar/unavailable.py"
+        unavailable_script = Path.home() / "r2lab-python/examples/unavailable.py"
         if not unavailable_script.exists():
             print("Cannot locate unavailable script {} - skipping"
                   .format(unavailable_script))
@@ -250,6 +250,9 @@ class Nightly:
             return False
 
     def all_off(self):
+        if self.verbose:
+            print("verbose mode: skip all-off")
+            return
         command = "rhubarbe bye"
         for host in self.all_names:
             command += " {}".format(host)
@@ -267,7 +270,7 @@ class Nightly:
         print("Nightly check - starting at {}"
               .format(time.strftime("%Y-%m-%d@%H:%M:%S",
                                     time.localtime(time.time()))))
-              
+
         print(40*'=')
 
         self.verbose_msg("focus is {}" .format(
@@ -311,7 +314,10 @@ class Nightly:
         else:
             subject = "R2lab nightly - everything is fine"
 
-        send_email(email_from, email_to, subject, html)
+        if self.verbose:
+            print("verbose mode: skip sending mail")
+        else:
+            send_email(email_from, email_to, subject, html)
 
         self.all_off()
 
