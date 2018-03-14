@@ -8,16 +8,16 @@ Features:
 (*) designed to be run on an hourly basis, at typically nn:01
     will check for a lease being currently held by nightly slice; returns if not
 (*) defaults to all nodes but can exclude some hand-picked ones on the command-line
-(*) updates sidecar status (available) 
-(*) sends status mail 
+(*) updates sidecar status (available)
+(*) sends status mail
 
 Performed checks on all nodes:
 
 (*) turn node on - check it answers ping
 (*) turn node off - check it does not answer ping
 (*) uses 2 reference images (typically fedora and ubuntu)
-(*) uploads first one, check for running image 
-(*) uploads second one, check for running image 
+(*) uploads first one, check for running image
+(*) uploads second one, check for running image
 
 """
 
@@ -120,7 +120,7 @@ class Nightly:
             print("verbose:", *args)
 
     def mark_and_exclude(self, node, reason):
-        """ 
+        """
         what to do when a node is found as being non-nominal
         (*) remove it from further actions
         (*) mark it as unavailable
@@ -270,7 +270,7 @@ class Nightly:
         print("Nightly check - starting at {}"
               .format(time.strftime("%Y-%m-%d@%H:%M:%S",
                                     time.localtime(time.time()))))
-              
+
         print(40*'=')
 
         self.verbose_msg("focus is {}" .format(
