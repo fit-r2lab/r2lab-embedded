@@ -322,10 +322,12 @@ function start() {
 # WARNING WITH LATEST DEVELOP VERSION, -P OPTION CRASHES SYSTEMATICALLY
     if [ $limesdr = true ] ; then
 	echo "./lte-softmodem -P softmodem.pcap -O $conf_dir/$config $oscillo --rf-config-file $conf_rf_limesdr >& $lte_log &"
-	./lte-softmodem -P softmodem.pcap -O $conf_dir/$config $oscillo --rf-config-file $conf_rf_limesdr >& $lte_log &
+#	./lte-softmodem -P softmodem.pcap -O $conf_dir/$config $oscillo --rf-config-file $conf_rf_limesdr >& $lte_log &
+	./lte-softmodem -O $conf_dir/$config $oscillo --rf-config-file $conf_rf_limesdr >& $lte_log &
     else
 	echo "./lte-softmodem -P softmodem.pcap --ulsch-max-errors 100 -O $conf_dir/$config $oscillo >& $lte_log &"
-	./lte-softmodem -P softmodem.pcap --ulsch-max-errors 100 -O $conf_dir/$config $oscillo >& $lte_log &
+#	./lte-softmodem -P softmodem.pcap --ulsch-max-errors 100 -O $conf_dir/$config $oscillo >& $lte_log &
+	./lte-softmodem --ulsch-max-errors 100 -O $conf_dir/$config $oscillo >& $lte_log &
     fi
     cd - >& /dev/null
 }
