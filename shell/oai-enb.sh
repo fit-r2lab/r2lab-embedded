@@ -162,33 +162,48 @@ function build-oai5g() {
 # end of image
 ########################################
 
-# entry point for global orchestration
-doc-nodes run-enb "run-enb 23 50 False True: does init/configure/start with epc running on node 23, with NRB=50, without USB reset, and with the oscillo option set"
-function run-enb() {
+# entry points for global orchestration
+doc-nodes warm-enb "warm-enb 23 50 False: does init/configure with epc running on node 23, with NRB=50, without USB reset"
+function warm-enb() {
     peer=$1; shift
     n_rb=$1; shift
     # pass exactly 'False' to skip usb-reset
     reset_usb=$1; shift
-    oscillo=$1; shift
     oai_role=enb
-    echo "run-enb running with n_rb set to $n_rb"
+    echo "warm-enb running with n_rb set to $n_rb"
+    init
     stop
     status
-    echo "run-enb: configure $peer"
+    echo "warm-enb: configure eNB with EPC running on $peer"
+    configure $peer $n_rb
+    # reset USB if required
+    # note that the USB reset MUST be done at least once
+    # after an image load
     if [ "$reset_usb" == "False" ]; then
 	echo "SKIPPING USB reset"
     else
 	echo "Resetting USB port of eNB node $peer"
 	usb-reset
     fi
-    configure $peer $n_rb
-    init
+    # probe so as to load firmware
+    # this seems specific to the USB-based devices
+    uhd_usrp_probe --init || {
+        echo "WARNING: SDR board could not be loaded - probably need a RESET"
+        return 1
+    }
+}
+
+doc-nodes run-enb "run-enb True: does start with the oscillo option set"
+function run-enb() {
+    oscillo=$1; shift
+
+    echo running tcpdump on the data interface
     start-tcpdump-data ${oai_role}
     if [ "$oscillo" == "True" ]; then
-        echo "start eNB with oscillo function"
+        echo "start eNB in foreground with oscillo function through X11"
 	start -d
     else
-        echo "start eNB"
+        echo "start eNB in background"
 	start
     fi
     status
