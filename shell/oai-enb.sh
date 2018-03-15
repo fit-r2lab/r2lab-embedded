@@ -19,6 +19,9 @@ lte_log="$run_dir/softmodem.log"
 add-to-logs $lte_log
 lte_pcap="$run_dir/softmodem.pcap"
 [ -n "$SAVE_PCAP" ] && add-to-datas $lte_pcap
+# the output of start-tcpdump-data
+add-to-datas "/root/data-${oai_role}.pcap"
+
 conf_dir=$OPENAIR_HOME/targets/PROJECTS/GENERIC-LTE-EPC/CONF
 #template=enb.band7.tm1.usrpb210.conf
 #following template name corresponds to the latest buggy develop version
@@ -192,8 +195,6 @@ function run-enb() {
     return 0
 }
 
-# the output of start-tcpdump-data
-add-to-datas "/root/data-${oai_role}.pcap"
 
 ####################
 doc-nodes init "initializes clock after NTP, and tweaks MTU's"
