@@ -341,7 +341,7 @@ function start() {
     cd $run_dir
     echo "In $(pwd); running lte-softmodem in background"
     command="./lte-softmodem -O $conf_dir/$config"
-    if [ -n $SAVE_PCAP ]; then
+    if [ -n "$SAVE_PCAP" ]; then
             command="$command -P softmodem.pcap"
     fi
     if [ $limesdr = true ] ; then
