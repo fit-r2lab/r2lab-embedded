@@ -465,8 +465,13 @@ function populate-hss-db() {
 ###    echo issuing SQL "$insert_command $update_command"
 ###    mysql --user=root --password=linux -e "$insert_command $update_command" oai_db
 
-## Following for Nexus 5 phone with SIM # 02
+## Following for phone1 (Nexus 5) with SIM # 02
     hack_command="update users set mmeidentity_idmmeidentity=100 where imsi=208950000000002;"
+    echo issuing HACK SQL "$hack_command"
+    mysql --user=root --password=linux -e "$hack_command" oai_db
+
+## Following for phone2 (Moto E)  with SIM # 04
+    hack_command="update users set mmeidentity_idmmeidentity=100 where imsi=208950000000004;"
     echo issuing HACK SQL "$hack_command"
     mysql --user=root --password=linux -e "$hack_command" oai_db
 
@@ -480,13 +485,13 @@ function populate-hss-db() {
     echo issuing HACK SQL "$hack_command"
     mysql --user=root --password=linux -e "$hack_command" oai_db
 
-## Following for Iphone 6s phone with SIM # 04
-    hack_command="update users set mmeidentity_idmmeidentity=100 where imsi=208950000000004;"
+## Following for OAI UE with fake SIM # 03 on node fit06 (with UE duplexer)
+    hack_command="update users set mmeidentity_idmmeidentity=100 where imsi=208950000000003;"
     echo issuing HACK SQL "$hack_command"
     mysql --user=root --password=linux -e "$hack_command" oai_db
 
-## Following for OAI UE with fake SIM # 03 on node fit06 (with UE duplexer)
-    hack_command="update users set mmeidentity_idmmeidentity=100 where imsi=208950000000003;"
+## Following for OAI UE with fake SIM # 08 on node fit19 (with UE duplexer)
+    hack_command="update users set mmeidentity_idmmeidentity=100 where imsi=208950000000008;"
     echo issuing HACK SQL "$hack_command"
     mysql --user=root --password=linux -e "$hack_command" oai_db
 

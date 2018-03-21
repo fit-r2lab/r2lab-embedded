@@ -182,9 +182,21 @@ function configure-ue() {
     git-pull-r2lab   # calls to git-pull-oai should be explicit from the caller if desired
     cd $conf_dir
 
+### MSIN represents the Mobile Subscription Identity Number. 
+### "0000000003" corresponds to a fake SIM for node fit06
+### "0000000008" corresponds to a fake SIM for node fit19
+    id=$(r2lab-id)
+    fitid=fit$id
+    id=$(echo $id | sed  's/^0*//')
+    case $id in
+        6) msin="0000000003";;
+        19) msin="0000000008";;
+        *) "ERROR in configure_ue: Cannot run OAI UE on $fitid node, no B210+UE duplexer attached"; return ;;
+    esac
+
     cat <<EOF > oai-ue.sed
 s|MNC="93";|MNC="95";|
-s|MSIN=.*|MSIN="0000000003";|
+s|MSIN=.*|MSIN=${msin};|
 s|OPC=.*|OPC="8E27B6AF0E692E750F32667A3B14605D";|
 s|HPLMN=.*|HPLMN= "20893";|
 s|"20893"|"20895"|
