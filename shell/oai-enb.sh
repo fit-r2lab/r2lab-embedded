@@ -263,9 +263,10 @@ function configure-enb() {
 	rm -f $up_run_dir/build; ln -s $up_run_dir/build_limesdr $up_run_dir/build
 	# Configure the LimeSDR device
 	echo "Run LimeUtil --update and reset the LimeSDR device to reconnect to"
-#	sleep 10; 
 	LimeUtil --update
 	usb-reset
+# wait 10 seconds to let the LimeSDR device starting
+	sleep 10
 	if [ "$n_rb" -eq 25 ]; then
 	    tx_gain=7
 	    rx_gain=116
