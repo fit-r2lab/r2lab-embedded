@@ -132,6 +132,24 @@ function wait-usrp() {
     done
 }
 
+doc-nodes node-has-b210 "Check if a USRP B210 is attached to the node"
+function node-has-b210() {
+    if [ -n "$(uhd_find_devices 2>&1 | grep B210)" ]; then
+	true
+    else
+	false
+    fi
+}
+
+doc-nodes node-has-limesdr "Check if a LimeSDR is attached to the node"
+function node-has-limesdr() {
+    if [ -n "$(/usr/local/bin/LimeUtil --find)" ]; then
+	true
+    else
+	false
+    fi
+}
+
 ##########
 doc-nodes-sep
 

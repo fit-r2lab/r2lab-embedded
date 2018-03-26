@@ -176,21 +176,31 @@ function warm-enb() {
     status
     echo "warm-enb: configure eNB with EPC running on $peer"
     configure $peer $n_rb
-    # reset USB if required
-    # note that the USB reset MUST be done at least once
-    # after an image load
-    if [ "$reset_usb" == "False" ]; then
-	echo "SKIPPING USB reset"
+    if node-has-b210; then
+        # reset USB if required
+        # note that the USB reset MUST be done at least once
+        # after an image load
+	if [ "$reset_usb" == "False" ]; then
+	    echo "SKIPPING USB reset"
+	else
+	    echo "Resetting USB port of eNB node $peer"
+	    usb-reset
+	fi
+        # Load firmware on the B210 device
+	uhd_usrp_probe --init || {
+            echo "WARNING: USRP B210 board could not be loaded - probably need a RESET"
+            return 1
+	}
+    elif node-has-limesdr; then
+	# Load firmware on the LimeSDR device
+	echo "Run LimeUtil --update and reset the LimeSDR device to reconnect to"
+	LimeUtil --update
+	usb-reset # reset mandatory after a load
+	sleep 10 # LimeSDR is slow to restart
     else
-	echo "Resetting USB port of eNB node $peer"
-	usb-reset
+	echo "WARNING: Neither B210 nor LimeSDR device attached to the eNB node!"
+	return 1
     fi
-    # probe so as to load firmware
-    # this seems specific to the USB-based devices
-    uhd_usrp_probe --init || {
-        echo "WARNING: SDR board could not be loaded - probably need a RESET"
-        return 1
-    }
 }
 
 doc-nodes run-enb "run-enb True: does start with the oscillo option set"
@@ -248,24 +258,15 @@ function configure-enb() {
     echo "ENB: Using gateway (EPC) on $gw_id"
     gw_id=$(echo $gw_id | sed  's/^0*//')
     id=$(r2lab-id)
-    fitid=fit$id
     id=$(echo $id | sed  's/^0*//')
-    case $id in
-	9|34) limesdr=true;;
-	16|23) limesdr=false;;
-	*) "ERROR in configure_enb: Cannot run eNB on $fitid node"; return ;;
-    esac
 
     cd $conf_dir
 
-    if [ "$limesdr" = true ]; then
+    if node-has-limesdr; then
+	# eNB with LimeSDR scenario
 	# set the $run_dir directory to $up_run-dir/build_limesdr
 	rm -f $up_run_dir/build; ln -s $up_run_dir/build_limesdr $up_run_dir/build
-	# Configure the LimeSDR device
-	echo "Run LimeUtil --update and reset the LimeSDR device to reconnect to"
-#	sleep 10; 
-	LimeUtil --update
-	usb-reset
+
 	if [ "$n_rb" -eq 25 ]; then
 	    tx_gain=7
 	    rx_gain=116
@@ -278,7 +279,7 @@ function configure-enb() {
 	    echo "ERROR in configure_enb: NRB=$n_rb with LimeSDR"
 	    return
 	fi
-    else
+    elif node-has-b210; then
 	# eNB with usrp B210 scenario
 	# set the $run_dir directory to $up_run-dir/build_usrp
 	rm -f $up_run_dir/build; ln -s $up_run_dir/build_usrp $up_run_dir/build
@@ -294,8 +295,10 @@ function configure-enb() {
             echo "ERROR in configure_enb: NRB=$n_rb with USRP B210"
 	    return
         fi
+    else
+	echo "WARNING: Neither B210 nor LimeSDR device attached to the eNB node!"
+	return 1
     fi
-
 
     cat <<EOF > oai-enb.sed
 s|pdsch_referenceSignalPower[ 	]*=.*|pdsch_referenceSignalPower = ${pdsch_referenceSignalPower};|
@@ -324,14 +327,7 @@ doc-nodes start "starts lte-softmodem with usrp or limesdr depending on fit node
 function start() {
 
     id=$(r2lab-id)
-    fitid=fit$id
     id=$(echo $id | sed  's/^0*//')
-    case $id in
-	9|34) limesdr=true;;
-	16|23) limesdr=false;;
-	*) "ERROR in start: Cannot run eNB on $fitid node"; return 1;;
-    esac
-
     oscillo=""
     if [ -n "$1" ]; then
 	case $1 in
@@ -346,7 +342,7 @@ function start() {
     if [ -n "$SAVE_PCAP" ]; then
             command="$command -P softmodem.pcap"
     fi
-    if [ $limesdr = true ] ; then
+    if node-has-limesdr ; then
         command="$command --rf-config-file $conf_rf_limesdr"
     else
         command="$command --ulsch-max-errors 100"
