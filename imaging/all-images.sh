@@ -2,13 +2,13 @@
 
 case $(hostname) in
     faraday*)
-	gateway=localhost
-	gitroot=/root/r2lab-embedded
-	;;
+        gateway=localhost
+        gitroot=/root/r2lab-embedded
+    ;;
     *)
-	gateway=inria_r2lab.tutorial@faraday.inria.fr
-	gitroot=$HOME/fit-r2lab/r2lab-embedded
-	;;
+        gateway=inria_oai@faraday.inria.fr
+        gitroot=$HOME/git/r2lab-embedded
+    ;;
 esac
 
 # check that this directory exists
@@ -139,8 +139,8 @@ function old-u16-48() {
 }
 
 function very-old-u16-48() {
-    bim 2 ubuntu-16.04 u16.04-$DATE "nodes.sh apt-upgrade-all" 
-    bim 3 u16.04-$DATE u16-lowlat48-$DATE "imaging.sh ubuntu-k48-lowlatency" 
+    bim 2 ubuntu-16.04 u16.04-$DATE "nodes.sh apt-upgrade-all"
+    bim 3 u16.04-$DATE u16-lowlat48-$DATE "imaging.sh ubuntu-k48-lowlatency"
     bim $gw_options  6 u16-lowlat48-$DATE u16.48-oai-gw-$DATE  "oai-gw.sh  image"
     bim $enb_options 7 u16-lowlat48-$DATE u16.48-oai-enb-$DATE "oai-enb.sh image uhd-oai"
 }
@@ -256,7 +256,12 @@ function ubuntu-docker() {
         u16.04-docker "imaging.sh ubuntu-setup-docker"
 }
 
+function mosaic-cn() {
+    bim 1 u16.04 mosaic5g-cn "oai-cn.sh image"
+}
+
 ####################
 # xxx this clearly should be specified on the command line some day
 #ubuntu-docker
-gnuradio
+#gnuradio
+mosaic-cn
