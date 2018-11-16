@@ -56,6 +56,7 @@ function git-ssl-fetch-eurecom-certificates() {
 # this looks more robust even if a bit less secure
 # but we don't care that much anyways 
 function git-ssl-turn-off-verification() {
+    git config --global --unset-all http.sslVerify
     git config --global --add http.sslVerify false
 }
 
