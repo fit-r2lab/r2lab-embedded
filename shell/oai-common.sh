@@ -2,7 +2,7 @@ source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
 
 # this is included (i.e. source'd) from places that all have
 # included nodes.sh
-# so in this context we have done 
+# so in this context we have done
 # create-doc-category nodes
 # and so doc-nodes and doc-nodes-sep are available
 
@@ -46,15 +46,15 @@ function capture-scr() { oai-as-enb; capture-all "$1"-scr; }
 # some package installed later on (which one?) is overwriting the global certs
 function git-ssl-fetch-eurecom-certificates() {
     echo -n | \
-	openssl s_client -showcerts -connect gitlab.eurecom.fr:443 2>/dev/null | \
-	sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' \ 
-	    >> /etc/ssl/certs/ca-certificates.crt
+        openssl s_client -showcerts -connect gitlab.eurecom.fr:443 2>/dev/null | \
+        sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' \
+            >> /etc/ssl/certs/ca-certificates.crt
     echo "Added Eurecom gitlab certificates here:"
     ls -l  /etc/ssl/certs/ca-certificates.crt
 }
 
 # this looks more robust even if a bit less secure
-# but we don't care that much anyways 
+# but we don't care that much anyways
 function git-ssl-turn-off-verification() {
     git config --global --unset-all http.sslVerify
     git config --global --add http.sslVerify false
@@ -63,14 +63,14 @@ function git-ssl-turn-off-verification() {
 ####################
 # designed for interactive usage; tcpdump stops upon Control-C
 doc-nodes tcpdump-sctp "interactive tcpdump of the SCTP traffic on interface ${oai_ifname}
-		with one arg, stores into a .pcap"
+                with one arg, stores into a .pcap"
 function tcpdump-sctp() {
     local output="$1"; shift
     command="tcpdump -i ${oai_ifname} ip proto 132"
     [ -n "$output" ] && {
-	local file="${output}-${oai_role}.pcap"
-	echo "Capturing (unbuffered) into $file"
-	command="$command -w $file -U"
+        local file="${output}-${oai_role}.pcap"
+        echo "Capturing (unbuffered) into $file"
+        command="$command -w $file -U"
     }
     echo Running $command
     $command
@@ -80,23 +80,22 @@ function tcpdump-sctp() {
 function -manage-processes() {
     # use with list or stop
     mode=$1; shift
-    pids="$@" 
+    pids="$@"
     if [ -z "$pids" ]; then
-	echo "========== No running process"
-	return 1
+        echo "========== No running process"
+        return 1
     fi
     echo "========== Found processes"
     ps $pids
     if [ "$mode" == 'stop' ]; then
-	echo "========== Killing $pids"
-	kill $pids
-	echo "========== Their status now"
-	ps $pids
-	if [ -n "$locks" ]; then
-	    echo "========== Clearing locks $locks"
-	    rm -f $locks
-	fi
-	
+        echo "========== Killing $pids"
+        kill $pids
+        echo "========== Their status now"
+        ps $pids
+        if [ -n "$locks" ]; then
+            echo "========== Clearing locks $locks"
+            rm -f $locks
+        fi
     fi
 }
 
@@ -121,33 +120,33 @@ function wait-usrp() {
     [ -z "$timeout" ] && timeout=
     counter=1
     while true; do
-	if uhd_find_devices >& /dev/null; then
-	    uhd_usrp_probe >& /dev/null && return 0
-	fi
-	counter=$(($counter + 1))
-	[ -z "$timeout" ] && continue
-	if [ "$counter" -ge $timeout ] ; then
-	    echo "Could not find a UHD device after $timeout seconds"
-	    return 1
-	fi
+        if uhd_find_devices >& /dev/null; then
+            uhd_usrp_probe >& /dev/null && return 0
+        fi
+        counter=$(($counter + 1))
+        [ -z "$timeout" ] && continue
+        if [ "$counter" -ge $timeout ] ; then
+            echo "Could not find a UHD device after $timeout seconds"
+            return 1
+        fi
     done
 }
 
 doc-nodes node-has-b210 "Check if a USRP B210 is attached to the node"
 function node-has-b210() {
     if [ -n "$(uhd_find_devices 2>&1 | grep B210)" ]; then
-	true
+        true
     else
-	false
+        false
     fi
 }
 
 doc-nodes node-has-limesdr "Check if a LimeSDR is attached to the node"
 function node-has-limesdr() {
     if [ -n "$(/usr/local/bin/LimeUtil --find)" ]; then
-	true
+        true
     else
-	false
+        false
     fi
 }
 
@@ -155,5 +154,5 @@ function node-has-limesdr() {
 doc-nodes-sep
 
 ########################################
-define-main "$0" "$BASH_SOURCE" 
+define-main "$0" "$BASH_SOURCE"
 main "$@"
