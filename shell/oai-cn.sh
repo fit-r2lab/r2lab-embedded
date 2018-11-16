@@ -93,7 +93,7 @@ function configure() {
 }
 
 doc-nodes configure-core-network "configure hss, mme, spgw, and /etc/hosts"
-function configure-hss-mme() {
+function configure-core-network() {
 
     -enable-snap-bins
     local r2lab_id=$(r2lab-id)
@@ -186,7 +186,7 @@ function stop() {
 }
 
 function journal() {
-    units="oai-cn.hss oai-cn.mme oai-cn.spgw"
+    units="snap.oai-cn.hssd.service snap.oai-cn.mmed.service snap.oai-cn.spgwd.service"
     jopts=""
     for unit in $units; do jopts="$jopts --unit $unit"; done
     journalctl $jopts "$@"
