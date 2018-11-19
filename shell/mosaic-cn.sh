@@ -2,7 +2,7 @@
 
 source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
 
-source $(dirname $(readlink -f $BASH_SOURCE))/oai-common.sh
+source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
 
 COMMAND=$(basename "$BASH_SOURCE")
 
@@ -16,7 +16,7 @@ doc-nodes-sep "#################### commands for managing an OAI core-network"
 # journal: wrapper around journalctl for the 3 bundled services
 
 ### to test locally (adjust slicename if needed)
-# apssh -g inria_oai@faraday.inria.fr -t root@fit01 -i nodes.sh -i r2labutils.sh -i oai-common.sh -s oai-cn.sh image
+# apssh -g inria_oai@faraday.inria.fr -t root@fit01 -i nodes.sh -i r2labutils.sh -i mosaic-common.sh -s mosaic-cn.sh image
 
 
 
@@ -210,46 +210,6 @@ function journal() {
 }
 
 
-
-###### helpers
-# basic tool to ease patches; expects
-# (*) on the command line the file to patch
-# (*) on stdin a sed file to apply on that file
-function -sed-configurator() {
-    local target=$1; shift
-    local original=$target.orig
-    local stem=$(basename $target)
-    local sedname=/tmp/$stem.$$.sed
-    local tmptarget=/tmp/$stem.$$
-
-    # store stdin in a file
-    cat > $sedname
-
-    # be explicit about backups
-    [ -f $original ] || { echo "Backing up $target"; cp $target $original; }
-
-    # compute new version; preserve modes
-    cp $target $tmptarget
-    # give an extension to -i so that it also works on mac for devel
-    sed -f $sedname -i.4mac $tmptarget
-    # change target only if needed
-    cmp --silent $target $tmptarget || {
-        echo "(Over)writing $target (through $sedname)"
-        mv -f $tmptarget $target
-    }
-}
-
-# the options to use with snap for these packages
-function -snap-install() {
-    local package=$1; shift
-    local command="snap install --channel=edge --devmode $package"
-    echo "Installing: $command"
-    $command
-}
-
-function -enable-snap-bins() {
-    echo $PATH | grep -q /snap/bin || export PATH=$PATH:/snap/bin
-}
 
 ########################################
 define-main "$0" "$BASH_SOURCE"

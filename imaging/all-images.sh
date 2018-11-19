@@ -263,11 +263,14 @@ function mosaic-cn() {
     local today=2018-11-19
     bim 1 u16.04 u16.04-hwe-$today "nodes.sh u16-optin-hwe-kernel"
     bim 2 u16.04-hwe-$today u16.04-hwe-updated-$today "nodes.sh apt-upgrade-all"
-    bim 3 u16.04-hwe-updated-$today mosaic5g-cn "oai-cn.sh image"
+    bim 3 u16.04-hwe-updated-$today mosaic-cn "mosaic-cn.sh image"
+}
+
+function mosaic-ran() {
+    local today=2018-11-19
+    bim 1 u16.04-hwe-updated-$today mosaic-ran "mosaic-ran.sh image"
 }
 
 ####################
 # xxx this clearly should be specified on the command line some day
-#ubuntu-docker
-#gnuradio
-mosaic-cn
+mosaic-ran
