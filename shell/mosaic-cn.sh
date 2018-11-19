@@ -64,7 +64,7 @@ EOF
     # in the following, we need to backslash $ because otherwise it is
     # interpreted by bash as ${a}
     -sed-configurator /etc/modprobe.d/blacklist.conf << EOF
-/blacklist intel_powerclamp/{q}
+/^blacklist intel_powerclamp/{q}
 \$ablacklist intel_powerclamp
 EOF
 }
