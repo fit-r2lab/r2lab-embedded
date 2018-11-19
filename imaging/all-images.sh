@@ -256,8 +256,14 @@ function ubuntu-docker() {
         u16.04-docker "imaging.sh ubuntu-setup-docker"
 }
 
+# mosaic-cn requires the gtp module that comes only with kernels >= 4.8
+# one way to go there is with Ubuntu's HWE kernel rollout scheme
+# https://wiki.ubuntu.com/Kernel/RollingLTSEnablementStack
 function mosaic-cn() {
-    bim 1 u16.04 mosaic5g-cn "oai-cn.sh image"
+    local today=2018-11-19
+    bim 1 u16.04 u16.04-hwe-$today "nodes.sh u16-optin-hwe-kernel"
+    bim 2 u16.04-hwe-$today u16.04-hwe-updated-$today "nodes.sh apt-upgrade-all"
+    bim 3 u16.04-hwe-updated-$today mosaic5g-cn "oai-cn.sh image"
 }
 
 ####################

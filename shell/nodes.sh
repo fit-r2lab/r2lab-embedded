@@ -1,5 +1,5 @@
 # set of convenience tools to be used on the nodes
-# 
+#
 # on these images, we have a symlink
 # /etc/profile.d/nodes.sh
 # that points at
@@ -20,7 +20,7 @@ unalias ls 2> /dev/null
 
 ####helper to parse git-pull arguments
 # split_repo_branch repo /root/r2lab       -> /root/r2lab
-# split_repo_branch branch /root/r2lab     -> 
+# split_repo_branch branch /root/r2lab     ->
 # split_repo_branch repo /root/r2lab@foo   -> /root/r2lab
 # split_repo_branch branch /root/r2lab@foo -> foo
 function split_repo_branch () {
@@ -34,7 +34,7 @@ except:
     print("")
 EOF
     }
-    
+
 ##########
 function git-pull-r2lab() { -git-pull-repos /root/r2lab-embedded@master; }
 doc-nodes git-pull-r2lab "updates /root/r2lab-embedded from upstream (github) repo"
@@ -71,7 +71,7 @@ function refresh() { git-pull-r2lab; bashrc; }
 doc-nodes rimage "Shows info on current image from last line in /etc/rhubarbe-image"
 function rimage() { tail -1 /etc/rhubarbe-image; }
 
-########## 
+##########
 doc-nodes update-os-packages "runs the core OS package update (dnf or apt-get) to update to latest versions"
 function update-os-packages () {
     if type -p dnf >& /dev/null; then
@@ -117,6 +117,12 @@ function init-ntp-clock() {
 	echo "ERROR: cannot init clock - ntpdate not found"
 	return 1
     fi
+}
+
+doc-nodes u16-optin-hwe-kernel "opt in for 16.04's HWE kernel 4.15"
+function u16-optin-hwe-kernel() {
+    apt-get -y update
+    apt-get -y install --install-recommends linux-generic-hwe-16.04
 }
 
 doc-nodes apt-upgrade-all "refresh all packages with apt-get"
@@ -251,7 +257,7 @@ function details-on-interface () {
     iwconfig $dev
     echo ==================== iw dev $dev info
     iw dev $dev info
-}    
+}
 
 doc-nodes find-interface-by-driver "returns first interface bound to given driver"
 function find-interface-by-driver () {
@@ -280,7 +286,7 @@ function wait-for-interface-on-driver() {
     # where we catch a name before udev has had the time to trigger and rename the interface
     # should not be a big deal hopefully
     sleep 1
-    
+
     while true; do
 	# use the first device that runs on iwlwifi
 	local _found=$(find-interface-by-driver $driver)
@@ -299,7 +305,7 @@ function wait-for-device () {
     set +x
     local dev=$1; shift
     local wait_state="$1"; shift
-    
+
     while true; do
 	local f=/sys/class/net/$dev
 	local operstate=$(cat $f/operstate 2> /dev/null)
@@ -384,7 +390,7 @@ function capture-all() {
     echo "Captured in $outpath the following files:"
     ls -l $allfiles
     echo "++++++++++++++++++++++++++++++++++++++++"
-}    
+}
 
 doc-nodes-sep
 
@@ -418,12 +424,12 @@ function dump-dmesg() {
 	dmesg > /root/dmesg/dmesg-$(date +"%H-%M-%S")
 	echo -n "."
 	sleep 1
-    done	 
-}    
+    done
+}
 
 doc-nodes unbuf-var-log-syslog "reconfigures rsyslog to write in /var/sys/syslog unbuffered on ubuntu"
 function unbuf-var-log-syslog() {
-    # 
+    #
     local conf=/etc/rsyslog.d/50-default.conf
     sed --in-place -e s,-/var/log/syslog,/var/log/syslog, $conf
     service rsyslog restart
@@ -442,7 +448,7 @@ function -start-tcpdump() {
     local interface="$1"; shift
     local name="$1"; shift
     [ -z "$name" ] && name=$(r2lab-id)
-    cd 
+    cd
     local pcap="${interface}-${name}.pcap"
     local pidfile="tcpdump-${interface}.pid"
     local command="tcpdump -n -U -w $pcap -i ${interface}" "$@"
@@ -453,7 +459,7 @@ function -start-tcpdump() {
     ps $pid
     echo $pid > $pidfile
 }
-    
+
 # Usage -stop-tcpdump data|control some-distinctive-name
 function -stop-tcpdump() {
     local interface="$1"; shift
@@ -516,7 +522,7 @@ function demo() {
 # long names are tcp-segmentation-offload udp-fragmentation-offload
 # generic-segmentation-offload generic-receive-offload
 # plus, udp-fragmentation-offload is fixed on our nodes
-doc-nodes "offload-(on|off)" "turn on or off various offload features on specified wired interface" 
+doc-nodes "offload-(on|off)" "turn on or off various offload features on specified wired interface"
 function offload-off () { -offload off "$@"; }
 function offload-on () { -offload on "$@"; }
 
@@ -562,8 +568,8 @@ function usb-reset() {
 }
 
 
-doc-nodes usrp-reset "Reset the USRP attached to this node" 
-function usrp-reset () { usb-reset; } 
+doc-nodes usrp-reset "Reset the USRP attached to this node"
+function usrp-reset () { usb-reset; }
 
 
 doc-nodes e3372-reset "Reset the LTE Huawei E3372 attached to this node"
@@ -588,7 +594,7 @@ uplink_freq="--freq=2.54G"
 function -scramble() {
     local link="$1"; shift
     local force="$1"; shift
-    
+
     local command="uhd_siggen --gaussian"
     case "$link" in
 	up*)

@@ -47,7 +47,7 @@ class ImageBuilder:
         self.paths = path.split(":") + [ '.' ]
         self.extra_logs = extra_logs
         self.expected_binaries = expected_binaries
-        
+
     def user_host(self, input):
         # callers can mention localhost as the gateway to avoid
         # the extra ssh leg
@@ -79,16 +79,16 @@ class ImageBuilder:
         * create a subdir named dirname
         * create 3 subdirs scripts/ args/ logs/
         * create symlinks named scripts/nnn-script -> script[0] starting at 001
-        * create symlinks in scripts/ for all the includes 
+        * create symlinks in scripts/ for all the includes
         * create files named args/nnn-script -> the arguments to be passed to <script>
-        * create a tarfile <dirname>.tar of subdir/ that can be transferred remotely 
+        * create a tarfile <dirname>.tar of subdir/ that can be transferred remotely
         """
         try:
             os.mkdir(dirname)
         except:
             shutil.rmtree(dirname)
             os.mkdir(dirname)
-            
+
         for subdir in "scripts", "args", "logs":
             os.mkdir(os.path.join(dirname, subdir))
         for i, script in enumerate(self.scripts, 1):
@@ -128,7 +128,7 @@ class ImageBuilder:
         print("The following scripts will be run:")
         for i, script in enumerate(self.scripts, 1):
             print("{:03d}:{}".format(i, " ".join(script)))
-            
+
         items = []
         if no_load: items.append("skip load")
         if no_save: items.append("skip save")
@@ -171,7 +171,7 @@ class ImageBuilder:
         )
 
         banner = 20*'='
-        
+
         #################### the little pieces
         sequence = Sequence(
             PrintJob("Checking for a valid lease"),
@@ -275,7 +275,7 @@ class ImageBuilder:
             if verbose:
                 print(20*'+', "after run")
                 sched.list()
-                print(20*'x')                
+                print(20*'x')
             print("image {} OK".format(self.to_image))
             return True
         else:
@@ -291,36 +291,50 @@ def main():
     usage = """
 Create an R2lab image by loading 'from_image', running some scripts, and save into 'to_image'
 
-All scripts are searched in 
+All scripts are searched in
 * the path provided with -p
 * the location of this command (esp. useful for spotting 'build-image.sh')
 * .
 
 Included scripts are useful if one of your own scripts sources another one.
-Bear in mind that all scripts are first copied over on the target node in 
+Bear in mind that all scripts are first copied over on the target node in
 /etc/rhubarbe-history/to_image/scripts
 together with their arguments and stuff
 """
     parser = ArgumentParser()
-    parser.add_argument("-n", "--no-load-save", action='store_true', default=False,
-                        help="skip load and save, for when developping scripts")
-    parser.add_argument("-c", "--chain", action='store_true', default=False,
-                        help="avoid loading given image, useful when chaining builds")
-    parser.add_argument("-v", "--verbose", action='store_true', default=False)
-    parser.add_argument("-i", "--includes", action='append', default=[])
-    parser.add_argument("-l", "--logs", dest='extra_logs', action='append', default=[],
-                        help="additional logs to be collected")
-    parser.add_argument("-b", "--expected-binaries", dest='expected_binaries', action='append', default=[],
-                        help="files to check for once build is done")
-    parser.add_argument("-p", "--path", action='append', dest='paths', default=[],
-                        help="colon-separated list of dirs to search")
-    parser.add_argument("-s", "--silent", action='store_true', default=False,
-                        help="redirect stdout and stder to <to_image>.log")
-    parser.add_argument("gateway", help="no gateway if this contains 'localhost'")
-    parser.add_argument("node", help="fit node to use - name or number")
-    parser.add_argument("from_image", help="the image to start from")
-    parser.add_argument("to_image", help="the image to create; use '==' to keep the same")
-    parser.add_argument("scripts", nargs='+', help="each scripts is a space separated command")
+    parser.add_argument(
+        "-n", "--no-load-save", action='store_true', default=False,
+        help="skip load and save, for when developping scripts")
+    parser.add_argument(
+        "-c", "--chain", action='store_true', default=False,
+        help="avoid loading given image, useful when chaining builds")
+    parser.add_argument(
+        "-v", "--verbose", action='store_true', default=False)
+    parser.add_argument(
+        "-i", "--includes", action='append', default=[])
+    parser.add_argument(
+        "-l", "--logs", dest='extra_logs', action='append', default=[],
+        help="additional logs to be collected")
+    parser.add_argument(
+        "-b", "--expected-binaries", dest='expected_binaries',
+        action='append', default=[],
+        help="files to check for once build is done")
+    parser.add_argument(
+        "-p", "--path", action='append', dest='paths', default=[],
+        help="colon-separated list of dirs to search")
+    parser.add_argument(
+        "-s", "--silent", action='store_true', default=False,
+        help="redirect stdout and stder to <to_image>.log")
+    parser.add_argument(
+        "gateway", help="no gateway if this contains 'localhost'")
+    parser.add_argument(
+        "node", help="fit node to use - name or number")
+    parser.add_argument(
+        "from_image", help="the image to start from")
+    parser.add_argument(
+        "to_image", help="the image to create; use '==' to keep the same")
+    parser.add_argument(
+        "scripts", nargs='+', help="each scripts is a space separated command")
     args = parser.parse_args()
 
     # find out where the command is stored so we can locate build-image.sh
@@ -329,7 +343,7 @@ together with their arguments and stuff
 
     # keep the same image name over daily updates : use == in to_image
     to_image = args.from_image if '==' in args.to_image else args.to_image
-    
+
     try:
         node_id = int(args.node.replace('fit', ''))
         node = "fit{:02d}".format(node_id)
@@ -341,7 +355,7 @@ together with their arguments and stuff
 
     # add the location of this command to the path
     path = ":".join(args.paths + [ command_dir ] )
-        
+
     # default is of course to load and save
     no_load, no_save = False, False
     # -n means realy no load and no save
@@ -359,7 +373,7 @@ together with their arguments and stuff
                            includes = args.includes, path = path,
                            extra_logs = args.extra_logs,
                            expected_binaries = args.expected_binaries)
-    run_code = builder.run(verbose = args.verbose, 
+    run_code = builder.run(verbose = args.verbose,
                            no_load = no_load, no_save = no_save)
     return 0 if run_code else 1
 

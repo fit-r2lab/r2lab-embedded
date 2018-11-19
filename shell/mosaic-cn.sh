@@ -34,7 +34,7 @@ function dependencies-for-core-network() {
     git-pull-r2lab
     # apt-get requirements
     apt-get update
-    apt-get install -y emacs
+    apt-get install -y emacs i7z
 
     echo "========== Installing mysql-server"
     debconf-set-selections <<< 'mysql-server mysql-server/root_password password linux'
@@ -61,9 +61,11 @@ function configure-grub-cstate() {
 s|^GRUB_CMDLINE_LINUX_DEFAULT.*=.*|GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_pstate=disable processor.max_cstate=1 intel_idle.max_cstate=0 idle=poll"|
 EOF
 
+    # in the following, we need to backslash $ because otherwise it is
+    # interpreted by bash as ${a}
     -sed-configurator /etc/modprobe.d/blacklist.conf << EOF
 /blacklist intel_powerclamp/{q}
-\$a"blacklist intel_powerclamp"
+\$ablacklist intel_powerclamp
 EOF
 }
 
@@ -120,6 +122,8 @@ EOF
     -sed-configurator mme_fd.conf << EOF
 s|^Identity.*=.*|Identity = "fit${r2lab_id}.r2lab.fr";|
 s|^Realm.*=.*|Realm = "r2lab.fr";|
+s|^ConnectPeer.*|ConnectPeer= "fit${r2lab_id}.r2lab.fr" { ConnectTo = "192.168.2.${r2lab_id}"; No_SCTP ; No_IPv6; Prefer_TCP; No_TLS; port = 3868;  realm = "r2lab.fr";};|
+
 EOF
 
     -sed-configurator hss.conf << EOF
@@ -152,14 +156,20 @@ s|fit.*hss|fit${r2lab_id}.r2lab.fr fit${r2lab_id} hss|
 s|fit.*mme|fit${r2lab_id}.r2lab.fr fit${r2lab_id} mme|
 EOF
 
+# this one is for convenience, avoiding journald to broadcast stuff on wall
+    -sed-configurator /etc/systemd/journald.conf << EOF
+s|.*ForwardToWall=.*|ForwardToWall=no|
+EOF
+    systemctl restart systemd-journald
+
 }
 
 doc-nodes configure-r2lab-devices "Enter R2lab local SIM's into HSS database"
 function configure-r2lab-devices() {
     -enable-snap-bins
-    oai-cn.hss-add-user 208950000000002 8BAF473F2F8FD09487CCCBD7097C6862 20 7 # SIM 02, Nexus 5
+    oai-cn.hss-add-user 208950000000002 8BAF473F2F8FD09487CCCBD7097C6862 20 7 # SIM 02, Nexus 5 - phone 1
     oai-cn.hss-add-user 208950000000003 8BAF473F2F8FD09487CCCBD7097C6862 20 7 # SIM 03, OAI UE on fit06
-    oai-cn.hss-add-user 208950000000004 8BAF473F2F8FD09487CCCBD7097C6862 20 7 # SIM 04, Moto E2 4G
+    oai-cn.hss-add-user 208950000000004 8BAF473F2F8FD09487CCCBD7097C6862 20 7 # SIM 04, Moto E2 4G - phone 2
     oai-cn.hss-add-user 208950000000005 8BAF473F2F8FD09487CCCBD7097C6862 20 7 # SIM 05, Huawei 3372 LTE on fit26
     oai-cn.hss-add-user 208950000000007 8BAF473F2F8FD09487CCCBD7097C6862 20 7 # SIM 07, Huawei 3372 LTE on fit02
 }
@@ -176,6 +186,7 @@ function reinit-core-network() {
 
 ###### running
 function start() {
+    turn-on-data
     -enable-snap-bins
     oai-cn.start-all
 }
@@ -185,12 +196,20 @@ function stop() {
     oai-cn.stop-all
 }
 
+function status() {
+    -enable-snap-bins
+    oai-cn.status-all
+}
+
+# this form allows to run with the -f option
 function journal() {
     units="snap.oai-cn.hssd.service snap.oai-cn.mmed.service snap.oai-cn.spgwd.service"
     jopts=""
     for unit in $units; do jopts="$jopts --unit $unit"; done
     journalctl $jopts "$@"
 }
+
+
 
 ###### helpers
 # basic tool to ease patches; expects
