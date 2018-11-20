@@ -43,15 +43,11 @@ function install-radio-access-network() {
 
 
 ###### configuring
-doc-nodes configure "configure ran - expects CN id"
+doc-nodes configure "configure RAN, i.e. tweaks e-nodeB config file - expects 1 arg: CN-id"
 function configure() {
     local cn_id=$1; shift
-    configure-radio-access-network $cn_id
-}
+    [ -n "$cn_id" ] || { echo Usage: $FUNCNAME CN-id; return 1; }
 
-doc-nodes configure-radio-access-network "tweaks e-nodeB config file"
-function configure-radio-access-network() {
-    local cn_id=$1; shift
     local r2lab_id=$(r2lab-id)
 
     -enable-snap-bins
