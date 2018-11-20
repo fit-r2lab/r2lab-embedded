@@ -22,7 +22,7 @@ bi=$(dirname $0)/build-image.py
 
 # we don't need all these includes everywhere but it makes it easier
 function bim () {
-    command="$bi $gateway -p $gitroot/shell -i oai-common.sh -i nodes.sh -i r2labutils.sh"
+    command="$bi $gateway -p $gitroot/shell -i mosaic-common.sh -i nodes.sh -i r2labutils.sh"
     echo $command "$@"
     $command --silent "$@"
 }
@@ -259,16 +259,26 @@ function ubuntu-docker() {
 # mosaic-cn requires the gtp module that comes only with kernels >= 4.8
 # one way to go there is with Ubuntu's HWE kernel rollout scheme
 # https://wiki.ubuntu.com/Kernel/RollingLTSEnablementStack
+today=2018-11-20
+mosaic_base1=u16.04-hwe
+mosaic_base2=u16.04-hwe-$today
+
+# we need to do this in 2 steps so that the node reboots
+# on the right kernel after we move to hwe
+function mosaic-prepare() {
+    bim 1 u16.04 $mosaic_base1 \
+        "nodes.sh u16-optin-hwe-kernel" \
+        "imaging.sh new-common-setup-root-bash"
+    bim 2 $mosaic_base1 $mosaic_base2 \
+        "nodes.sh apt-upgrade-all"
+}
+
 function mosaic-cn() {
-    local today=2018-11-19
-    bim 1 u16.04 u16.04-hwe-$today "nodes.sh u16-optin-hwe-kernel"
-    bim 2 u16.04-hwe-$today u16.04-hwe-updated-$today "nodes.sh apt-upgrade-all"
-    bim 3 u16.04-hwe-updated-$today mosaic-cn "mosaic-cn.sh image"
+    bim 3 $mosaic_base2 mosaic-cn "mosaic-cn.sh image"
 }
 
 function mosaic-ran() {
-    local today=2018-11-19
-    bim 1 u16.04-hwe-updated-$today mosaic-ran "mosaic-ran.sh image"
+    bim 4 $mosaic_base2 mosaic-ran "mosaic-ran.sh image"
 }
 
 ####################

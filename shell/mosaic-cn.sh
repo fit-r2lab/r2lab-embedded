@@ -27,6 +27,7 @@ function image() {
     dependencies-for-core-network
     configure-grub-cstate
     install-core-network
+    mosaic-as-cn
 }
 
 doc-nodes dependencies-for-core-network "prepare ubuntu for core network"

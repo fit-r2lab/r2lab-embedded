@@ -20,7 +20,7 @@ function -dpkg-from-urls() {
 	curl -O $url
 	debs="$debs $(basename $url)"
     done
-    
+
     if dpkg -i $debs; then
 	rm $debs
 	return 0
@@ -48,9 +48,9 @@ function -dpkg-is-installed() {
 # won't work with ubuntu-14 though
 doc-imaging ubuntu-k47-lowlatency "install 4.7 lowlatency kernel"
 function ubuntu-k47-lowlatency() {
-    
+
     -dpkg-is-installed linux-image-4.7.0-040700-lowlatency && return
-    
+
     urls="
 http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.7/linux-headers-4.7.0-040700_4.7.0-040700.201608021801_all.deb
 http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.7/linux-headers-4.7.0-040700-lowlatency_4.7.0-040700.201608021801_amd64.deb
@@ -67,9 +67,9 @@ function ubuntu-k48-lowlatency() {
 
     local k48_ver="4.8.0-59"
     local k48_sub="64"
-    
+
     -dpkg-is-installed linux-image-${k48_ver}-lowlatency && return
-    
+
     local k48_lon="${k48_ver}.${k48_sub}"
 
     urls="
@@ -111,7 +111,7 @@ https://launchpadlibrarian.net/326154512/linux-image-${k48_ver}-lowlatency_${k48
 ### 	menuentry 'Ubuntu, with Linux 3.19.0-031900-lowlatency (recovery mode)' --class ubuntu --class gnu-linux --class gnu --class os <blabla>
 ### menuentry 'Memory test (memtest86+)' {
 ### menuentry 'Memory test (memtest86+, serial console 115200)' {
-### 
+###
 function ubuntu-grub-update() {
     menu_specification="$1"; shift
     [ -z "$menu_specification" ] && menu_specification="1>2"
@@ -125,11 +125,11 @@ function ubuntu-k319-lowlatency() {
 
     # this recipe proposed by Rohit won't work for us
     # apt-get -y install linux-image-3.19.0-61-lowlatency linux-headers-3.19.0-61-lowlatency
-    
+
     # let's go back to ours
     # XXX this however is not enough as it won't change the default kernel for grub
     -dpkg-is-installed linux-image-3.19.0-031900-lowlatency && return
-    
+
     urls="
 http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.19-vivid/linux-headers-3.19.0-031900_3.19.0-031900.201504091832_all.deb
 http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.19-vivid/linux-headers-3.19.0-031900-generic_3.19.0-031900.201504091832_amd64.deb
@@ -194,7 +194,7 @@ function ubuntu-atheros-noreg() {
     # using the patch from the git repo
     local patch_path=/root/r2lab-embedded/kernel-patches/ath-noreg.patch
     cat $patch_path | patch -p1 -b
-    
+
     debian/rules clean
     debian/rules binary-headers
     debian/rules binary-generic
@@ -203,20 +203,20 @@ function ubuntu-atheros-noreg() {
     # at that point we need to install the .deb packages
     cd $kbuildroot
     dpkg -i  linux-{headers,image}*${SHORT_VERSION}*.deb
-    
+
     # the .deb are interesting in themselves, so we can shove this kernel in other
     # images; so, let's finish this step here so that
     # we can first save the full image even if it's huge
-    cd 
+    cd
     return
 }
 
 doc-imaging clean-kernel-build "clean up $kbuildroot after kernel building"
 function clean-kernel-build () {
-    
+
     # cleanup - it can be huge
     # typically this area is 14Gb large after ubuntu-atheros-noreg, and makes for a 6Gb+ image
-    # which can be reduced down to 
+    # which can be reduced down to
     cd
     rm -rf $kbuildroot
 }
@@ -256,7 +256,7 @@ function ubuntu-setup-ssh () {
 
     # remove root password
     passwd --delete root
-    
+
     # restart ssh
     echo "Restarting sshd"
     type systemctl >& /dev/null \
@@ -311,7 +311,7 @@ function network-names-udev () {
 # udev
 #
 # see insightful doc in
-# http://reactivated.net/writing_udev_rules.html 
+# http://reactivated.net/writing_udev_rules.html
 #
 # on ubuntu, to see data about a given device (udevinfo not available)
 # udevadm info -q all -n /sys/class/net/p2p1
@@ -319,9 +319,9 @@ function network-names-udev () {
 # udevadm info /sys/class/net/p2p1
 #  -- or --
 # udevadm info --attribute-walk /sys/class/net/wlp1s0
-# 
+#
 # create new udev rules for device names - hopefully fine on both distros ?
-# 
+#
 # p2p1 = control = igb = enp3s0
 # eth0 = data = e1000e = enp0s25
 
@@ -369,7 +369,7 @@ function install-e3372() {
     apt-get update
     apt-get install -y usb-modeswitch
     apt-get install -y xterm firefox  # can be useful to handle Huawei web interface config
-    
+
     echo "========== add /etc/usb_modeswitch.conf file"
     cat > /etc/usb_modeswitch.conf <<EOF
 #######################################################
@@ -471,7 +471,7 @@ function common-setup-root-bash () {
     ln -sf /etc/profile.d/nodes.sh .bashrc
     # to make sure to undo previous versions that were wrong in creating this
     rm -f /root/r2lab/infra/r2labutils.sh
-    
+
 }
 
 doc-imaging "common-setup-node-ssh-key: install standard R2lab key as the ssh node's key"
@@ -514,6 +514,7 @@ function new-common-setup-r2lab-repo () {
 doc-imaging "new-common-setup-user-env: add r2lab-embedded/shell/nodes.sh to /etc/profile.d and /root/.bash*"
 function new-common-setup-root-bash () {
     cd /etc/profile.d
+    rm -f r2labutils.sh
     ln -sf /root/r2lab-embedded/shell/nodes.sh .
     cd /root
     ln -sf /etc/profile.d/nodes.sh .bash_profile
@@ -559,7 +560,7 @@ function ubuntu-setup-docker() {
     systemctl enable docker
 }
 
-    
+
 ########################################
 define-main "$0" "$BASH_SOURCE"
 main "$@"

@@ -23,12 +23,15 @@ doc-nodes image "frontend for rebuilding this image"
 function image() {
     dependencies-for-radio-access-network
     install-radio-access-network
+    mosaic-as-ran
 }
 
 function dependencies-for-radio-access-network() {
     git-pull-r2lab
     apt-get update
     apt-get install -y emacs
+    apt-get install -y uhd-host
+    /usr/lib/uhd/utils/uhd_images_downloader.py
 }
 
 function install-radio-access-network() {
@@ -67,7 +70,24 @@ EOF
 
 }
 
+
 ###### running
+doc-nodes start-graphical "Start e-nodeB with an X11 UI - requires ssh session with X11 forwarding"
+function start-graphical() {
+    local oscillo=$1; shift
+    [ -z "$oscillo" ] && oscillo=false
+
+    turn-on-data
+    -enable-snap-bins
+    case "$oscillo" in
+        *alse)
+            oai-ran.enb-start ;;
+        *)
+            echo "e-nodeB qith X11 graphical output not yet implemented"
+            oai-ran.enb-start ;;
+    esac
+}
+
 function start() {
     turn-on-data
     -enable-snap-bins
@@ -91,8 +111,6 @@ function journal() {
     for unit in $units; do jopts="$jopts --unit $unit"; done
     journalctl $jopts "$@"
 }
-
-
 
 ########################################
 define-main "$0" "$BASH_SOURCE"

@@ -11,6 +11,16 @@ oai_realm="r2lab.fr"
 oai_ifname=data
 oai_subnet=2
 
+function mosaic-as-cn() {
+    git-pull-r2lab
+    ln -sf /root/r2lab-embedded/shell/mosaic-cn.sh /etc/profile.d
+}
+
+function mosaic-as-ran() {
+    git-pull-r2lab
+    ln -sf /root/r2lab-embedded/shell/mosaic-ran.sh /etc/profile.d
+}
+
 
 # the options to use with snap for these packages
 function -snap-install() {
