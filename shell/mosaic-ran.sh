@@ -59,8 +59,8 @@ function configure-radio-access-network() {
 
     -sed-configurator $enbconf << EOF
 s|mnc = [0-9]+;|mnc = 95;|
-s|downlink_frequency\s*=.*;|downlink_frequency = 2660000000L|
-s|\(mme_ip_address.*ipv4.*=\).*|\1 "192.168.2.${cn}";"|
+s|downlink_frequency\s*=.*;|downlink_frequency = 2660000000L;|
+s|\(mme_ip_address.*ipv4.*=\).*|\1 "192.168.2.${cn_id}";"|
 s|ENB_INTERFACE_NAME_FOR_S1_MME.*=.*"[^"]*";|ENB_INTERFACE_NAME_FOR_S1_MME = "data";|
 s|ENB_IPV4_ADDRESS_FOR_S1_MME.*=.*"[^"]*";|ENB_IPV4_ADDRESS_FOR_S1_MME = "192.168.2.${r2lab_id}/24";|
 s|ENB_INTERFACE_NAME_FOR_S1U.*=.*"[^"]*";|ENB_INTERFACE_NAME_FOR_S1U = "data";|
