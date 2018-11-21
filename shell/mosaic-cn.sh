@@ -6,7 +6,7 @@ source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
 
 COMMAND=$(basename "$BASH_SOURCE")
 
-doc-nodes-sep "#################### commands for managing an OAI core-network"
+doc-nodes-sep "#################### commands for managing a MOSAIC core-network"
 
 ### frontend:
 # image: install stuff on top of a basic ubuntu image
@@ -18,6 +18,9 @@ doc-nodes-sep "#################### commands for managing an OAI core-network"
 ### to test locally (adjust slicename if needed)
 # apssh -g inria_oai@faraday.inria.fr -t root@fit01 -i nodes.sh -i r2labutils.sh -i mosaic-common.sh -s mosaic-cn.sh image
 
+
+mosaic_role="cn"
+mosaic_long="core network"
 
 
 ###### imaging
@@ -112,18 +115,18 @@ function configure-core-network() {
 # modified by the snap install, and needs to be ironed out
 
     -sed-configurator acl.conf << EOF
-s|^ALLOW_OLD_TLS.*|ALLOW_OLD_TLS *.r2lab.fr|g
+s|^ALLOW_OLD_TLS.*|ALLOW_OLD_TLS *.${mosaic_realm}|g
 EOF
 
     -sed-configurator hss_fd.conf << EOF
-s|^Identity.*=.*|Identity = "fit${r2lab_id}.r2lab.fr";|
-s|^Realm.*=.*|Realm = "r2lab.fr";|
+s|^Identity.*=.*|Identity = "fit${r2lab_id}.${mosaic_realm}";|
+s|^Realm.*=.*|Realm = "${mosaic_realm}";|
 EOF
 
     -sed-configurator mme_fd.conf << EOF
-s|^Identity.*=.*|Identity = "fit${r2lab_id}.r2lab.fr";|
-s|^Realm.*=.*|Realm = "r2lab.fr";|
-s|^ConnectPeer.*|ConnectPeer= "fit${r2lab_id}.r2lab.fr" { ConnectTo = "192.168.2.${r2lab_id}"; No_SCTP ; No_IPv6; Prefer_TCP; No_TLS; port = 3868;  realm = "r2lab.fr";};|
+s|^Identity.*=.*|Identity = "fit${r2lab_id}.${mosaic_realm}";|
+s|^Realm.*=.*|Realm = "${mosaic_realm}";|
+s|^ConnectPeer.*|ConnectPeer= "fit${r2lab_id}.${mosaic_realm}" { ConnectTo = "192.168.${mosaic_subnet}.${r2lab_id}"; No_SCTP ; No_IPv6; Prefer_TCP; No_TLS; port = 3868;  realm = "${mosaic_realm}";};|
 
 EOF
 
@@ -133,19 +136,19 @@ EOF
 
 # s|VAR.*=.*"[^"]*";|VAR = "value";|
     -sed-configurator mme.conf << EOF
-s|REALM.*=.*|REALM = "r2lab.fr";|
+s|REALM.*=.*|REALM = "${mosaic_realm}";|
 s|HSS_HOSTNAME.*=.*|HSS_HOSTNAME = "fit${r2lab_id}";|
 s|MNC="[0-9]+"|MNC="95"|
-s|MME_INTERFACE_NAME_FOR_S1_MME.*=.*"[^"]*";|MME_INTERFACE_NAME_FOR_S1_MME = "data";|
-s|MME_IPV4_ADDRESS_FOR_S1_MME.*=.*"[^"]*";|MME_IPV4_ADDRESS_FOR_S1_MME = "192.168.2.${r2lab_id}/24";|
+s|MME_INTERFACE_NAME_FOR_S1_MME.*=.*"[^"]*";|MME_INTERFACE_NAME_FOR_S1_MME = "${mosaic_ifname}";|
+s|MME_IPV4_ADDRESS_FOR_S1_MME.*=.*"[^"]*";|MME_IPV4_ADDRESS_FOR_S1_MME = "192.168.${mosaic_subnet}.${r2lab_id}/24";|
 s|MME_IPV4_ADDRESS_FOR_S11_MME.*=.*"[^"]*";|MME_IPV4_ADDRESS_FOR_S11_MME = "127.0.2.1/8";|
 s|SGW_IPV4_ADDRESS_FOR_S11.*=.*"[^"]*";|SGW_IPV4_ADDRESS_FOR_S11 = "127.0.3.1/8";|
 EOF
 
     -sed-configurator spgw.conf << EOF
 s|SGW_IPV4_ADDRESS_FOR_S11.*=.*"[^"]*";|SGW_IPV4_ADDRESS_FOR_S11 = "127.0.3.1/8";|
-s|SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP.*=.*"[^"]*";|SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP = "data";|
-s|SGW_IPV4_ADDRESS_FOR_S1U_S12_S4_UP.*=.*"[^"]*";|SGW_IPV4_ADDRESS_FOR_S1U_S12_S4_UP = "192.168.2.${r2lab_id}/24";|
+s|SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP.*=.*"[^"]*";|SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP = "${mosaic_ifname}";|
+s|SGW_IPV4_ADDRESS_FOR_S1U_S12_S4_UP.*=.*"[^"]*";|SGW_IPV4_ADDRESS_FOR_S1U_S12_S4_UP = "192.168.${mosaic_subnet}.${r2lab_id}/24";|
 s|PGW_INTERFACE_NAME_FOR_SGI.*=.*"[^"]*";|PGW_INTERFACE_NAME_FOR_SGI = "control";|
 s|PGW_MASQUERADE_SGI.*=.*"[^"]*";|PGW_MASQUERADE_SGI = "yes";|
 s|DEFAULT_DNS_IPV4_ADDRESS.*=.*"[^"]*";|DEFAULT_DNS_IPV4_ADDRESS = "138.96.0.10";|
@@ -153,8 +156,8 @@ s|DEFAULT_DNS_SEC_IPV4_ADDRESS.*=.*"[^"]*";|DEFAULT_DNS_SEC_IPV4_ADDRESS = "138.
 EOF
 
     -sed-configurator /etc/hosts << EOF
-s|fit.*hss|fit${r2lab_id}.r2lab.fr fit${r2lab_id} hss|
-s|fit.*mme|fit${r2lab_id}.r2lab.fr fit${r2lab_id} mme|
+s|fit.*hss|fit${r2lab_id}.${mosaic_realm} fit${r2lab_id} hss|
+s|fit.*mme|fit${r2lab_id}.${mosaic_realm} fit${r2lab_id} mme|
 EOF
 
 # this one is for convenience, avoiding journald to broadcast stuff on wall
@@ -186,23 +189,26 @@ function reinit-core-network() {
 
 
 ###### running
+doc-nodes start "Start all CN services"
 function start() {
     turn-on-data
     -enable-snap-bins
     oai-cn.start-all
 }
 
+doc-nodes stop "Stop all CN services"
 function stop() {
     -enable-snap-bins
     oai-cn.stop-all
 }
 
+doc-nodes status "Displays status of all CN services"
 function status() {
     -enable-snap-bins
     oai-cn.status-all
 }
 
-# this form allows to run with the -f option
+doc-nodes journal "Wrapper around journalctl about all CN services - use with -f to follow up"
 function journal() {
     units="snap.oai-cn.hssd.service snap.oai-cn.mmed.service snap.oai-cn.spgwd.service"
     jopts=""
@@ -210,6 +216,11 @@ function journal() {
     journalctl $jopts "$@"
 }
 
+doc-nodes "cd into configuration directory for CN service"
+function configure-directory() {
+    local conf_dir=$(dirname $(oai-cn.hss-conf-get))
+    cd $conf_dir
+}
 
 
 ########################################

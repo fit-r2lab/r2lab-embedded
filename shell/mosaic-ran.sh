@@ -17,6 +17,9 @@ source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
 # apssh -g inria_oai@faraday.inria.fr -t root@fit01 -i nodes.sh -i r2labutils.sh -i mosaic-common.sh -s mosaic-ran.sh image
 
 
+mosaic_role="ran"
+mosaic_long="radio access network"
+
 
 ###### imaging
 doc-nodes image "frontend for rebuilding this image"
@@ -56,56 +59,75 @@ function configure() {
     -sed-configurator $enbconf << EOF
 s|mnc = [0-9]+;|mnc = 95;|
 s|downlink_frequency\s*=.*;|downlink_frequency = 2660000000L;|
-s|\(mme_ip_address.*ipv4.*=\).*|\1 "192.168.2.${cn_id}";|
-s|ENB_INTERFACE_NAME_FOR_S1_MME.*=.*"[^"]*";|ENB_INTERFACE_NAME_FOR_S1_MME = "data";|
-s|ENB_IPV4_ADDRESS_FOR_S1_MME.*=.*"[^"]*";|ENB_IPV4_ADDRESS_FOR_S1_MME = "192.168.2.${r2lab_id}/24";|
-s|ENB_INTERFACE_NAME_FOR_S1U.*=.*"[^"]*";|ENB_INTERFACE_NAME_FOR_S1U = "data";|
-s|ENB_IPV4_ADDRESS_FOR_S1U.*=.*"[^"]*";|ENB_IPV4_ADDRESS_FOR_S1U = "192.168.2.${r2lab_id}/24";|
-s|ENB_IPV4_ADDRESS_FOR_X2C.*=.*"[^"]*";|ENB_IPV4_ADDRESS_FOR_X2C = "192.168.2.${r2lab_id}/24";|
+s|\(mme_ip_address.*ipv4.*=\).*|\1 "192.168.${mosaic_subnet}.${cn_id}";|
+s|ENB_INTERFACE_NAME_FOR_S1_MME.*=.*"[^"]*";|ENB_INTERFACE_NAME_FOR_S1_MME = "${mosaic_ifname}";|
+s|ENB_IPV4_ADDRESS_FOR_S1_MME.*=.*"[^"]*";|ENB_IPV4_ADDRESS_FOR_S1_MME = "192.168.${mosaic_subnet}.${r2lab_id}/24";|
+s|ENB_INTERFACE_NAME_FOR_S1U.*=.*"[^"]*";|ENB_INTERFACE_NAME_FOR_S1U = "${mosaic_ifname}";|
+s|ENB_IPV4_ADDRESS_FOR_S1U.*=.*"[^"]*";|ENB_IPV4_ADDRESS_FOR_S1U = "192.168.${mosaic_subnet}.${r2lab_id}/24";|
+s|ENB_IPV4_ADDRESS_FOR_X2C.*=.*"[^"]*";|ENB_IPV4_ADDRESS_FOR_X2C = "192.168.${mosaic_subnet}.${r2lab_id}/24";|
 EOF
 
 }
 
 
 ###### running
-doc-nodes start-graphical "Start e-nodeB with an X11 UI - requires ssh session with X11 forwarding"
-function start-graphical() {
-    local oscillo=$1; shift
-    [ -z "$oscillo" ] && oscillo=false
-
-    turn-on-data
-    -enable-snap-bins
-    case "$oscillo" in
-        *alse)
-            oai-ran.enb-start ;;
-        *)
-            echo "e-nodeB qith X11 graphical output not yet implemented"
-            oai-ran.enb-start ;;
-    esac
-}
-
+doc-nodes start "Start RAN a.k.a. e-nodeB; option -x means graphical (requires X11-enabled ssh session); option -n means avoid resetting USB"
 function start() {
-    turn-on-data
+    local USAGE="$Usage: FUNCNAME [options]
+  options:
+    -x: start in graphical mode (or -o for compat)
+    -n: don't reset USB"
+
+    local graphical=""
+    local reset="true"
+
+    while getopts ":rxo" opt; do
+        case $opt in
+            x|o)
+                graphical=true;;
+            n)
+                reset="";;
+            *)
+                echo "USAGE"; return 1;;
+        esac
+    done
+
     -enable-snap-bins
-    oai-ran.enb-start
+
+    turn-on-data
+    [ -n "$reset" ] && { echo "Resetting USB"; usb-reset; }
+    if [ -n "$graphical" ]; then
+        echo "e-nodeB with X11 graphical output not yet implemented - running in background instead for now"
+        oai-ran.enb-start
+    else
+        oai-ran.enb-start
+    fi
 }
 
+doc-nodes status "Stop RAN service(s)"
 function stop() {
     -enable-snap-bins
     oai-ran.enb-stop
 }
 
+doc-nodes status "Displays status of RAN service(s)"
 function status() {
     -enable-snap-bins
     oai-ran.enb-status
 }
 
-# this form allows to run with the -f option
+doc-nodes journal "Wrapper around journalctl about RAN service(s) - use with -f to follow up"
 function journal() {
     units="snap.oai-ran.enbd.service"
     jopts=""
     for unit in $units; do jopts="$jopts --unit $unit"; done
     journalctl $jopts "$@"
+}
+
+doc-nodes "cd into configuration directory for RAN service(s)"
+function configure-directory() {
+    local conf_dir=$(dirname $(oai-ran.enb-conf-get))
+    cd $conf_dir
 }
 
 ########################################
