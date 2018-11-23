@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source $(dirname $(readlink -f $BASH_SOURCE))/r2labutils.sh
+source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
 
 create-doc-category imaging "tools for creating images"
 augment-help-with imaging
@@ -304,6 +304,13 @@ EOF
 
 }
 
+doc-imaging u16-optin-lts-kernel "opt in for 16.04's HWE kernel 4.15"
+function u16-optin-lts-kernel() {
+    apt-get -y update
+    apt-get -y install --install-recommends linux-generic-hwe-16.04
+}
+
+
 
 doc-imaging "ubuntu-dev: add udev rules for canonical interface names"
 function network-names-udev () {
@@ -519,6 +526,16 @@ function new-common-setup-root-bash () {
     cd /root
     ln -sf /etc/profile.d/nodes.sh .bash_profile
     ln -sf /etc/profile.d/nodes.sh .bashrc
+}
+
+# yet another new layout: .bashrc needs to be extensible
+function new-common-setup-root-bash2 () {
+    cd /etc/profile.d
+    rm -f r2labutils.sh
+    ln -sf /root/r2lab-embedded/shell/nodes.sh .
+    cd /root
+    ln -sf .bashrc .bash_profile
+    [ -h .bashrc ] && { rm .bashrc; -have-bashrc-source /root/r2lab-embedded/shell/nodes.sh; }
 }
 
 doc-imaging "new-common-setup-node-ssh-key: install standard R2lab key as the ssh node's key"

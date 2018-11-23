@@ -119,12 +119,6 @@ function init-ntp-clock() {
     fi
 }
 
-doc-nodes u16-optin-hwe-kernel "opt in for 16.04's HWE kernel 4.15"
-function u16-optin-hwe-kernel() {
-    apt-get -y update
-    apt-get -y install --install-recommends linux-generic-hwe-16.04
-}
-
 doc-nodes apt-upgrade-all "refresh all packages with apt-get"
 function apt-upgrade-all() {
     apt-get -y update
@@ -136,6 +130,54 @@ function apt-upgrade-all() {
     apt-get -y purge unattended-upgrades
 
 }
+
+###
+function -have-bashrc-source() {
+    local file_to_source="$1"; shift
+    local target=/root/.bashrc
+    [ -f $local_target ] || touch $local_target
+    grep -q "source $file_to_source" $target >& /dev/null && return 0
+    # do not silent it down if such a file is missing
+    #echo "[ -f $file_to_source ] && source $file_to_source" >> $target
+    echo "source $file_to_source" >> $target
+    # also load it in current shell
+    source $file_to_source
+}
+
+function -add-in-path() {
+    local new_path="$1"; shift
+    echo $PATH | grep -q $new_path || export PATH=$PATH:$new_path
+}
+
+
+###### helpers
+# basic tool to ease patches; expects
+# (*) on the command line the file to patch
+# (*) on stdin a sed file to apply on that file
+function -sed-configurator() {
+    local target=$1; shift
+    local original=$target.orig
+    local stem=$(basename $target)
+    local sedname=/tmp/$stem.$$.sed
+    local tmptarget=/tmp/$stem.$$
+
+    # store stdin in a file
+    cat > $sedname
+
+    # be explicit about backups
+    [ -f $original ] || { echo "Backing up $target"; cp $target $original; }
+
+    # compute new version; preserve modes
+    cp $target $tmptarget
+    # give an extension to -i so that it also works on mac for devel
+    sed -f $sedname -i.4mac $tmptarget
+    # change target only if needed
+    cmp --silent $target $tmptarget || {
+        echo "(Over)writing $target (through $sedname)"
+        mv -f $tmptarget $target
+    }
+}
+
 ##########
 doc-nodes-sep
 

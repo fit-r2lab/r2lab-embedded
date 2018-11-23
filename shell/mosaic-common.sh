@@ -32,43 +32,11 @@ function -snap-install() {
     local command="snap install --channel=edge --devmode $package"
     echo "Installing: $command"
     $command
+    -have-bashrc-source /etc/profile.d/apps-bin-path.sh
 }
 
-function -enable-snap-bins() {
-    echo $PATH | grep -q /snap/bin || export PATH=$PATH:/snap/bin
-}
-
-
-###### helpers
-# basic tool to ease patches; expects
-# (*) on the command line the file to patch
-# (*) on stdin a sed file to apply on that file
-function -sed-configurator() {
-    local target=$1; shift
-    local original=$target.orig
-    local stem=$(basename $target)
-    local sedname=/tmp/$stem.$$.sed
-    local tmptarget=/tmp/$stem.$$
-
-    # store stdin in a file
-    cat > $sedname
-
-    # be explicit about backups
-    [ -f $original ] || { echo "Backing up $target"; cp $target $original; }
-
-    # compute new version; preserve modes
-    cp $target $tmptarget
-    # give an extension to -i so that it also works on mac for devel
-    sed -f $sedname -i.4mac $tmptarget
-    # change target only if needed
-    cmp --silent $target $tmptarget || {
-        echo "(Over)writing $target (through $sedname)"
-        mv -f $tmptarget $target
-    }
-}
 
 # convenient for debugging
-doc-admin inspect-config-diffs "Show differences about modified config files"
 function inspect-config-diffs() {
     for orig in *.orig; do
         local current=$(basename $orig .orig)

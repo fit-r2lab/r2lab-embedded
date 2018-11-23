@@ -25,6 +25,7 @@ mosaic_long="radio access network"
 doc-nodes image "frontend for rebuilding this image"
 function image() {
     dependencies-for-radio-access-network
+#    install-uhd-images
     install-radio-access-network
     mosaic-as-ran
 }
@@ -33,14 +34,17 @@ function dependencies-for-radio-access-network() {
     git-pull-r2lab
     apt-get update
     apt-get install -y emacs
+}
+
+function install-uhd-images() {
     apt-get install -y uhd-host
-    /usr/lib/uhd/utils/uhd_images_downloader.py
+    /usr/lib/uhd/utils/uhd_images_downloader.py >& /root/uhd_images_downloaded.log
 }
 
 function install-radio-access-network() {
     -snap-install oai-ran
     # just in case
-    -enable-snap-bins
+    #-enable-snap-bins
     oai-ran.stop-all
 }
 
@@ -53,7 +57,7 @@ function configure() {
 
     local r2lab_id=$(r2lab-id)
 
-    -enable-snap-bins
+    #-enable-snap-bins
     local enbconf=$(oai-ran.enb-conf-get)
 
     -sed-configurator $enbconf << EOF
@@ -92,7 +96,7 @@ function start() {
         esac
     done
 
-    -enable-snap-bins
+    #-enable-snap-bins
 
     turn-on-data
     [ -n "$reset" ] && { echo "Resetting USB"; usb-reset; }
@@ -106,13 +110,13 @@ function start() {
 
 doc-nodes status "Stop RAN service(s)"
 function stop() {
-    -enable-snap-bins
+    #-enable-snap-bins
     oai-ran.enb-stop
 }
 
 doc-nodes status "Displays status of RAN service(s)"
 function status() {
-    -enable-snap-bins
+    #-enable-snap-bins
     oai-ran.enb-status
 }
 

@@ -6,7 +6,7 @@ case $(hostname) in
         gitroot=/root/r2lab-embedded
     ;;
     *)
-        gateway=inria_oai@faraday.inria.fr
+        gateway=inria_mosaic@faraday.inria.fr
         gitroot=$HOME/git/r2lab-embedded
     ;;
 esac
@@ -257,18 +257,17 @@ function ubuntu-docker() {
 }
 
 # mosaic-cn requires the gtp module that comes only with kernels >= 4.8
-# one way to go there is with Ubuntu's HWE kernel rollout scheme
+# one way to go there is with Ubuntu's lts kernel rollout scheme
 # https://wiki.ubuntu.com/Kernel/RollingLTSEnablementStack
-today=2018-11-20
-mosaic_base1=u16.04-hwe
-mosaic_base2=u16.04-hwe-$today
+mosaic_base1=u16.04-lts
+mosaic_base2=u16.04-lts-update
 
 # we need to do this in 2 steps so that the node reboots
-# on the right kernel after we move to hwe
-function mosaic-prepare() {
+# on the right kernel after we move to lts
+function mosaic-base() {
     bim 1 u16.04 $mosaic_base1 \
-        "nodes.sh u16-optin-hwe-kernel" \
-        "imaging.sh new-common-setup-root-bash"
+        "imaging.sh u16-optin-lts-kernel" \
+        "imaging.sh new-common-setup-root-bash2"
     bim 2 $mosaic_base1 $mosaic_base2 \
         "nodes.sh apt-upgrade-all"
 }
@@ -278,9 +277,12 @@ function mosaic-cn() {
 }
 
 function mosaic-ran() {
-    bim 4 $mosaic_base2 mosaic-ran "mosaic-ran.sh image"
+    bim 19 $mosaic_base2 mosaic-ran "mosaic-ran.sh image"
 }
 
 ####################
 # xxx this clearly should be specified on the command line some day
-mosaic-ran
+mosaic-base
+mosaic-cn &
+mosaic-ran &
+wait %1 %2

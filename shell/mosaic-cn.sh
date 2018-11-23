@@ -81,7 +81,7 @@ function install-core-network() {
     # need to stop stuff, not sure why it starts in the first place
     # problem here is, right after snap-installing it looks like
     # oai-cn.stop-all can't be found..
-    -enable-snap-bins
+    #-enable-snap-bins
     # just in case
     oai-cn.stop-all
 }
@@ -101,7 +101,7 @@ function configure() {
 doc-nodes configure-core-network "configure hss, mme, spgw, and /etc/hosts"
 function configure-core-network() {
 
-    -enable-snap-bins
+    #-enable-snap-bins
     local r2lab_id=$(r2lab-id)
     # not quite sure how this sohuld work
     # the conf-get commands return file paths
@@ -170,7 +170,7 @@ EOF
 
 doc-nodes configure-r2lab-devices "Enter R2lab local SIM's into HSS database"
 function configure-r2lab-devices() {
-    -enable-snap-bins
+    #-enable-snap-bins
     oai-cn.hss-add-user 208950000000002 8BAF473F2F8FD09487CCCBD7097C6862 20 7 # SIM 02, Nexus 5 - phone 1
     oai-cn.hss-add-user 208950000000003 8BAF473F2F8FD09487CCCBD7097C6862 20 7 # SIM 03, OAI UE on fit06
     oai-cn.hss-add-user 208950000000004 8BAF473F2F8FD09487CCCBD7097C6862 20 7 # SIM 04, Moto E2 4G - phone 2
@@ -180,7 +180,7 @@ function configure-r2lab-devices() {
 
 doc-nodes reinit-core-network "Required to have configuration changes taken into account"
 function reinit-core-network() {
-    -enable-snap-bins
+    #-enable-snap-bins
     oai-cn.hss-init
     oai-cn.mme-init
     oai-cn.spgw-init
@@ -192,19 +192,19 @@ function reinit-core-network() {
 doc-nodes start "Start all CN services"
 function start() {
     turn-on-data
-    -enable-snap-bins
+    #-enable-snap-bins
     oai-cn.start-all
 }
 
 doc-nodes stop "Stop all CN services"
 function stop() {
-    -enable-snap-bins
+    #-enable-snap-bins
     oai-cn.stop-all
 }
 
 doc-nodes status "Displays status of all CN services"
 function status() {
-    -enable-snap-bins
+    #-enable-snap-bins
     oai-cn.status-all
 }
 
