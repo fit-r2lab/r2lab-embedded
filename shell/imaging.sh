@@ -232,7 +232,7 @@ function ubuntu-setup-ntp () {
     systemctl enable ntp || echo "systemctl-less ubuntus : not supported"
 }
 
-doc-imaging "ubuntu-setup-ssh: tweaks sshd_config, remove dummy r2lab user, remove root password, restart ssh"
+doc-imaging ubuntu-setup-ssh "tweaks sshd_config, remove dummy r2lab user, remove root password, restart ssh"
 function ubuntu-setup-ssh () {
 
 ####################
@@ -269,7 +269,7 @@ EOF
 }
 
 
-doc-imaging "ubuntu-base: remove /etc/hostname, install base packages"
+doc-imaging ubuntu-base "remove /etc/hostname, install base packages"
 function ubuntu-base () {
     ###
     rm /etc/hostname
@@ -284,7 +284,7 @@ iw ethtool tcpdump wireshark bridge-utils
 }
 
 
-doc-imaging "ubuntu-interfaces: overwrite /etc/network/interfaces"
+doc-imaging ubuntu-interfaces "overwrite /etc/network/interfaces"
 function ubuntu-interfaces () {
     cat > /etc/network/interfaces <<EOF
 source /etc/network/interfaces.d/*
@@ -312,7 +312,7 @@ function u16-optin-lts-kernel() {
 
 
 
-doc-imaging "ubuntu-dev: add udev rules for canonical interface names"
+doc-imaging ubuntu-dev "add udev rules for canonical interface names"
 function network-names-udev () {
 ####################
 # udev
@@ -460,7 +460,7 @@ function fedora-ifcfg() {
 ########################################
 # common - old layout
 ########################################
-doc-imaging "common-setup-r2lab-repo: set up /root/r2lab"
+doc-imaging common-setup-r2lab-repo "set up /root/r2lab"
 function common-setup-r2lab-repo () {
     type -p git 2> /dev/null || { echo "git not installed - cannot proceed"; return; }
     cd /root
@@ -469,7 +469,7 @@ function common-setup-r2lab-repo () {
     git pull
 }
 
-doc-imaging "common-setup-user-env: add infra/user-env/nodes.sh to /etc/profile.d and /root/.bash*"
+doc-imaging common-setup-user-env "add infra/user-env/nodes.sh to /etc/profile.d and /root/.bash*"
 function common-setup-root-bash () {
     cd /etc/profile.d
     ln -sf /root/r2lab/infra/user-env/nodes.sh .
@@ -481,7 +481,7 @@ function common-setup-root-bash () {
 
 }
 
-doc-imaging "common-setup-node-ssh-key: install standard R2lab key as the ssh node's key"
+doc-imaging common-setup-node-ssh-key "install standard R2lab key as the ssh node's key"
 function common-setup-node-ssh-key () {
     [ -d /root/r2lab ] || { echo /root/r2lab/ not found - exiting; return; }
     cd /root/r2lab
@@ -505,7 +505,7 @@ function common-setup() {
 ########################################
 # common - new layout
 ########################################
-doc-imaging "new-common-setup-r2lab-repo: set up /root/r2lab-embedded"
+doc-imaging new-common-setup-r2lab-repo "set up /root/r2lab-embedded"
 function new-common-setup-r2lab-repo () {
     type -p git 2> /dev/null || { echo "git not installed - cannot proceed"; return; }
     cd /root
@@ -518,7 +518,6 @@ function new-common-setup-r2lab-repo () {
     rm -f /root/udev.log
 }
 
-doc-imaging "new-common-setup-user-env: add r2lab-embedded/shell/nodes.sh to /etc/profile.d and /root/.bash*"
 function new-common-setup-root-bash () {
     cd /etc/profile.d
     rm -f r2labutils.sh
@@ -529,6 +528,7 @@ function new-common-setup-root-bash () {
 }
 
 # yet another new layout: .bashrc needs to be extensible
+doc-imaging new-common-setup-user-env2 "add r2lab-embedded/shell/nodes.sh to /etc/profile.d and source from bashrc"
 function new-common-setup-root-bash2 () {
     cd /etc/profile.d
     rm -f r2labutils.sh
@@ -538,7 +538,7 @@ function new-common-setup-root-bash2 () {
     [ -h .bashrc ] && { rm .bashrc; -have-bashrc-source /root/r2lab-embedded/shell/nodes.sh; }
 }
 
-doc-imaging "new-common-setup-node-ssh-key: install standard R2lab key as the ssh node's key"
+doc-imaging new-common-setup-node-ssh-key "install standard R2lab key as the ssh node's key"
 function new-common-setup-node-ssh-key () {
     [ -d /root/r2lab-embedded ] || { echo /root/r2lab-embedded/ not found - exiting; return; }
     cd /root/r2lab-embedded

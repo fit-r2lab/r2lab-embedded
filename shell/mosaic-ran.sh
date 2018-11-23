@@ -8,6 +8,7 @@ source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
 
 ### frontend:
 # image: install stuff on top of a basic ubuntu image
+# warm-up: make sure the USB is there, and similar
 # configure: do at least once after restoring an image
 # start: start services
 # stop:
@@ -25,7 +26,7 @@ mosaic_long="radio access network"
 doc-nodes image "frontend for rebuilding this image"
 function image() {
     dependencies-for-radio-access-network
-#    install-uhd-images
+    install-uhd-images
     install-radio-access-network
     mosaic-as-ran
 }
@@ -43,22 +44,33 @@ function install-uhd-images() {
 
 function install-radio-access-network() {
     -snap-install oai-ran
-    # just in case
-    #-enable-snap-bins
     oai-ran.stop-all
 }
 
 
 ###### configuring
-doc-nodes configure "configure RAN, i.e. tweaks e-nodeB config file - expects 1 arg: CN-id"
+# nrb business : see oai-enb.sh for details
+doc-nodes configure "configure RAN, i.e. tweaks e-nodeB config file - see --help"
 function configure() {
+    local nrb=50
+    local USAGE="Usage: $FUNCNAME [options] cn-id
+  options:
+    -b nrb: sets NRB - default is $nrb (not yet implemented)"
+    while getopts ":b" opt; do
+        case $opt in
+            b) nrb=$OPTARG;;
+            *) echo -e "$USAGE"; return 1;;
+        esac
+    done
+
+    [[ -z "$@" ]] && { echo -e "$USAGE"; return 1; }
     local cn_id=$1; shift
-    [ -n "$cn_id" ] || { echo Usage: $FUNCNAME CN-id; return 1; }
+    [[ -n "$@" ]] && { echo -e "$USAGE"; return 1; }
 
     local r2lab_id=$(r2lab-id)
-
-    #-enable-snap-bins
     local enbconf=$(oai-ran.enb-conf-get)
+
+    echo "Configuring RAN on node $r2lab_id for CN on node $cn_id and nrb=$nrb"
 
     -sed-configurator $enbconf << EOF
 s|mnc = [0-9]+;|mnc = 95;|
@@ -75,31 +87,66 @@ EOF
 
 
 ###### running
-doc-nodes start "Start RAN a.k.a. e-nodeB; option -x means graphical (requires X11-enabled ssh session); option -n means avoid resetting USB"
-function start() {
-    local USAGE="$Usage: FUNCNAME [options]
+
+doc-nodes warm-up "warm-ran: prepares enb - see --help"
+function warm-up() {
+    local USAGE="Usage: $FUNCNAME [-r]
   options:
-    -x: start in graphical mode (or -o for compat)
-    -n: don't reset USB"
+    -r: causes the USB to be reset"
 
-    local graphical=""
-    local reset="true"
-
-    while getopts ":rxo" opt; do
-        case $opt in
-            x|o)
-                graphical=true;;
-            n)
-                reset="";;
-            *)
-                echo "USAGE"; return 1;;
+    local reset=true
+    while getopts ":n" opt; do
+        case "$opt" in
+            r) reset="" ;;
+            *) echo -e "$USAGE"; return 1;;
         esac
     done
 
-    #-enable-snap-bins
+    [[ -n "$@" ]] && { echo -e "$USAGE"; return 1; }
 
+    echo "Warming up RAN, doing USB=$reset"
+    stop
+    status
+    if node-has-b210; then
+        # reset USB if required
+        # note that the USB reset MUST be done at least once
+        # after an image load
+        [ -n "$reset" ] && { echo Resetting USB; usb-reset; sleep 5; } || echo "SKIPPING USB reset"
+        # Load firmware on the B210 device
+	    uhd_usrp_probe --init || {
+            echo "WARNING: USRP B210 board could not be loaded - probably need a RESET"
+            return 1
+	    }
+    elif node-has-limesdr; then
+	    # Load firmware on the LimeSDR device
+	    echo "Running LimeUtil --update"
+	    LimeUtil --update
+        [ -n "$reset" ] && { echo Resetting USB; usb-reset; } || echo "SKIPPING USB reset"
+    else
+	    echo "WARNING: Neither B210 nor LimeSDR device attached to the eNB node!"
+	    return 1
+    fi
+}
+
+doc-nodes start "Start RAN a.k.a. e-nodeB; option -x means graphical - requires X11-enabled ssh session"
+function start() {
+    local USAGE="Usage: $FUNCNAME [options]
+  options:
+    -x: start in graphical mode (or -o for compat)"
+
+    local graphical=""
+
+    while getopts ":xo" opt; do
+        case $opt in
+            x|o)
+                graphical=true;;
+            *)
+                echo -e "$USAGE"; return 1;;
+        esac
+    done
+
+    [[ -n "$@" ]] && { echo -e "$USAGE"; return 1; }
     turn-on-data
-    [ -n "$reset" ] && { echo "Resetting USB"; usb-reset; }
     if [ -n "$graphical" ]; then
         echo "e-nodeB with X11 graphical output not yet implemented - running in background instead for now"
         oai-ran.enb-start
@@ -110,13 +157,11 @@ function start() {
 
 doc-nodes status "Stop RAN service(s)"
 function stop() {
-    #-enable-snap-bins
     oai-ran.enb-stop
 }
 
 doc-nodes status "Displays status of RAN service(s)"
 function status() {
-    #-enable-snap-bins
     oai-ran.enb-status
 }
 
