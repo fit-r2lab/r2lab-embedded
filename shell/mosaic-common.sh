@@ -18,11 +18,13 @@ mosaic_long="redefine-me"
 function mosaic-as-cn() {
     git-pull-r2lab
     ln -sf /root/r2lab-embedded/shell/mosaic-cn.sh /etc/profile.d
+    -have-bashrc-source /etc/profile.d/mosaic-cn.sh
 }
 
 function mosaic-as-ran() {
     git-pull-r2lab
     ln -sf /root/r2lab-embedded/shell/mosaic-ran.sh /etc/profile.d
+    -have-bashrc-source /etc/profile.d/mosaic-ran.sh
 }
 
 

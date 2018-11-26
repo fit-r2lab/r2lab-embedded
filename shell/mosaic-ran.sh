@@ -62,6 +62,7 @@ function configure() {
             *) echo -e "$USAGE"; return 1;;
         esac
     done
+    shift $((OPTIND-1))
 
     [[ -z "$@" ]] && { echo -e "$USAGE"; return 1; }
     local cn_id=$1; shift
