@@ -105,6 +105,9 @@ function warm-up() {
 
     [[ -n "$@" ]] && { echo -e "$USAGE"; return 1; }
 
+    # that's the best moment to do that
+    turn-on-data
+
     echo "Warming up RAN, doing USB=$reset"
     stop
     status
