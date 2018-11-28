@@ -89,6 +89,38 @@ EOF
 
 ###### running
 
+doc-nodes wait-usrp "Wait until a USRP is ready - optional timeout in seconds"
+function wait-usrp() {
+    timeout="$1"; shift
+    [ -z "$timeout" ] && timeout=
+    counter=1
+    while true; do
+        if uhd_find_devices >& /dev/null; then
+            uhd_usrp_probe >& /dev/null && return 0
+        fi
+        counter=$(($counter + 1))
+        [ -z "$timeout" ] && continue
+        if [ "$counter" -ge $timeout ] ; then
+            echo "Could not find a UHD device after $timeout seconds"
+            return 1
+        fi
+    done
+}
+
+doc-nodes node-has-b210 "Check if a USRP B210 is attached to the node"
+function node-has-b210() {
+    type uhd_find_devices >& /dev/null || {
+        echo "you need to install uhd_find_devices"; return 1;}
+    uhd_find_devices 2>&1 | grep -q B210
+}
+
+doc-nodes node-has-limesdr "Check if a LimeSDR is attached to the node"
+function node-has-limesdr() {
+    ls /usr/local/bin/LimeUtil >& /dev/null || {
+        echo "you need to install LimeUtil"; return 1;}
+    [ -n "$(/usr/local/bin/LimeUtil --find)" ]
+}
+
 doc-nodes warm-up "warm-ran: prepares enb - see --help"
 function warm-up() {
     local USAGE="Usage: $FUNCNAME [-r]
@@ -117,7 +149,10 @@ function warm-up() {
         # after an image load
         [ -n "$reset" ] && { echo Resetting USB; usb-reset; sleep 5; } || echo "SKIPPING USB reset"
         # Load firmware on the B210 device
-	    uhd_usrp_probe --init || {
+	    # uhd_usrp_probe --init
+        uhd_image_loader --args="type=b200" \
+         --fw-path /snap/oai-ran/current/uhd_images/usrp_b200_fw.hex \
+         --fpga-path /snap/oai-ran/current/uhd_images/usrp_b200_fpga.bin || {
             echo "WARNING: USRP B210 board could not be loaded - probably need a RESET"
             return 1
 	    }

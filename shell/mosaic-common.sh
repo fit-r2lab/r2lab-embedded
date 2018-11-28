@@ -75,39 +75,6 @@ function tcpdump-sctp() {
 }
 
 ##########
-doc-nodes wait-usrp "Wait until a USRP is ready - optional timeout in seconds"
-function wait-usrp() {
-    timeout="$1"; shift
-    [ -z "$timeout" ] && timeout=
-    counter=1
-    while true; do
-        if uhd_find_devices >& /dev/null; then
-            uhd_usrp_probe >& /dev/null && return 0
-        fi
-        counter=$(($counter + 1))
-        [ -z "$timeout" ] && continue
-        if [ "$counter" -ge $timeout ] ; then
-            echo "Could not find a UHD device after $timeout seconds"
-            return 1
-        fi
-    done
-}
-
-doc-nodes node-has-b210 "Check if a USRP B210 is attached to the node"
-function node-has-b210() {
-    type uhd_find_devices >& /dev/null || {
-        echo "you need to install uhd_find_devices"; return 1;}
-    uhd_find_devices 2>&1 | grep -q B210
-}
-
-doc-nodes node-has-limesdr "Check if a LimeSDR is attached to the node"
-function node-has-limesdr() {
-    ls /usr/local/bin/LimeUtil >& /dev/null || {
-        echo "you need to install LimeUtil"; return 1;}
-    [ -n "$(/usr/local/bin/LimeUtil --find)" ]
-}
-
-##########
 doc-nodes-sep
 
 ########################################

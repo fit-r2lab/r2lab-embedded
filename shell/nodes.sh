@@ -595,22 +595,36 @@ function enable-usrp-ethernet() {
     ifconfig usrp up
 }
 
-doc-nodes usb-reset "Reset the USB port where the external device (USRP2/N210/e3372) is attached"
-function usb-reset() {
-    local id=$(r2lab-id)
-    # WARNING this might not work on a node that
-    # is not in its nominal location,
+### messing with the USB port through the CMC and usrpon/usrpoff commands
+function -usb-verb() {
+    local verb=$1; shift
+    local msg=$1; shift
+    # use hostname reboot<n> that is the safe way to
+    # take into account cases where a node does not
+    # sit in its nominal location
     # like if node 42 sits in slot 4
-    local cmc="192.168.1.$id"
-    echo "Turning off USB device on node # $id"
-    curl http://$cmc/usrpoff
-    sleep 1
-    echo "Turning on USB device on node # $id"
+    local id=$(r2lab-id)
+    local cmc="reboot${id}"
+    echo "$msg USB device on node $id"
     curl http://$cmc/usrpon
 }
 
+doc-nodes usb-on "Turn on the USB port where the external device (USRP2/N210/e3372) is attached"
+function  usb-on() { -usb-verb usrpon "Turning on"; }
+doc-nodes usb-off "Turn off the USB port where the external device (USRP2/N210/e3372) is attached"
+function  usb-off() { -usb-verb usrpoff "Turning off"; }
+doc-nodes usb-status "Getting status of the USB port where the external device (USRP2/N210/e3372) is attached"
+function  usb-status() { -usb-verb usrpstatus "Fecthing status for"; }
 
-doc-nodes usrp-reset "Reset the USRP attached to this node"
+doc-nodes usb-reset "Reset the USB port where the external device (USRP2/N210/e3372) is attached"
+function usb-reset() {
+    usb-off
+    sleep 1
+    usboff
+}
+
+
+doc-nodes usrp-reset "alias for usb-reset"
 function usrp-reset () { usb-reset; }
 
 
