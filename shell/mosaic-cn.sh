@@ -102,7 +102,7 @@ doc-nodes configure-core-network "configure hss, mme, spgw, and /etc/hosts"
 function configure-core-network() {
 
     #-enable-snap-bins
-    local r2lab_id=$(r2lab-id)
+    local r2lab_id=$(r2lab-id -s)
     # not quite sure how this sohuld work
     # the conf-get commands return file paths
     # but that works only for the 3 main conf files
@@ -191,7 +191,7 @@ function reinit-core-network() {
 ###### running
 doc-nodes start "Start all CN services"
 function start() {
-    turn-on-data
+    echo "Checking interface is up : $(turn-on-data)"
     #-enable-snap-bins
     oai-cn.start-all
 }

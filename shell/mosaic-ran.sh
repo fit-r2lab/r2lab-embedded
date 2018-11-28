@@ -56,6 +56,7 @@ function configure() {
     local USAGE="Usage: $FUNCNAME [options] cn-id
   options:
     -b nrb: sets NRB - default is $nrb (not yet implemented)"
+    OPTIND=1
     while getopts ":b" opt; do
         case $opt in
             b) nrb=$OPTARG;;
@@ -68,7 +69,7 @@ function configure() {
     local cn_id=$1; shift
     [[ -n "$@" ]] && { echo -e "$USAGE"; return 1; }
 
-    local r2lab_id=$(r2lab-id)
+    local r2lab_id=$(r2lab-id -s)
     local enbconf=$(oai-ran.enb-conf-get)
 
     echo "Configuring RAN on node $r2lab_id for CN on node $cn_id and nrb=$nrb"
@@ -121,41 +122,60 @@ function node-has-limesdr() {
     [ -n "$(/usr/local/bin/LimeUtil --find)" ]
 }
 
-doc-nodes warm-up "warm-ran: prepares enb - see --help"
+doc-nodes warm-up "Prepare SDR board (b210 or lime) for running an enb - see --help"
 function warm-up() {
-    local USAGE="Usage: $FUNCNAME [-r]
+    local USAGE="Usage: $FUNCNAME [-u]
   options:
-    -r: causes the USB to be reset"
+    -u: causes the USB to be reset"
 
-    local reset=true
-    while getopts ":n" opt; do
-        case "$opt" in
-            r) reset="" ;;
+    local reset=""
+    OPTIND=1
+    while getopts "u" opt -u; do
+        case $opt in
+            u) reset=true ;;
             *) echo -e "$USAGE"; return 1;;
         esac
     done
+    shift $((OPTIND-1))
 
     [[ -n "$@" ]] && { echo -e "$USAGE"; return 1; }
 
     # that's the best moment to do that
-    turn-on-data
+    echo "Checking interface is up : $(turn-on-data)"
 
-    echo "Warming up RAN, doing USB=$reset"
-    stop
+    # stopping enb service in case of a lingering instance
+    echo -n "ENB service ... "
+    echo -n "stopping ... "
+    stop > /dev/null
+    echo -n "status ... "
     status
+    echo
+
+    echo -n "Warming up RAN ... "
+    # focusing on b210 for this first version
+    if [ -n "$reset" ]; then
+        echo -n "USB off (reset requested) ... "
+        usb-off >& /dev/null
+    fi
+    # this is required b/c otherwise node-has-b210 won't find anything
+    echo -n "USB on ... "
+    usb-on >& /dev/null
+    delay=3
+    echo -n "Sleeping $delay "
+    sleep $delay
+    echo Done
+    echo ""
+
     if node-has-b210; then
-        # reset USB if required
-        # note that the USB reset MUST be done at least once
-        # after an image load
-        [ -n "$reset" ] && { echo Resetting USB; usb-reset; sleep 5; } || echo "SKIPPING USB reset"
-        # Load firmware on the B210 device
-	    # uhd_usrp_probe --init
+        uhd_find_devices >& /dev/null
+        echo "Loading b200 image..."
         uhd_image_loader --args="type=b200" \
          --fw-path /snap/oai-ran/current/uhd_images/usrp_b200_fw.hex \
          --fpga-path /snap/oai-ran/current/uhd_images/usrp_b200_fpga.bin || {
             echo "WARNING: USRP B210 board could not be loaded - probably need a RESET"
             return 1
 	    }
+        echo "B210 ready"
     elif node-has-limesdr; then
 	    # Load firmware on the LimeSDR device
 	    echo "Running LimeUtil --update"
@@ -175,6 +195,7 @@ function start() {
 
     local graphical=""
 
+    OPTIND=1
     while getopts ":xo" opt; do
         case $opt in
             x|o)
@@ -183,9 +204,11 @@ function start() {
                 echo -e "$USAGE"; return 1;;
         esac
     done
+    shift $((OPTIND-1))
 
     [[ -n "$@" ]] && { echo -e "$USAGE"; return 1; }
-    turn-on-data
+    echo "Checking interface is up : $(turn-on-data)"
+
     if [ -n "$graphical" ]; then
         echo "e-nodeB with X11 graphical output not yet implemented - running in background instead for now"
         oai-ran.enb-start

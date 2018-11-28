@@ -186,12 +186,22 @@ doc-nodes-sep
 # to build an IP address you need to remove leading 0s
 # it actually only triggers for 08 and 09, somehow
 #
-# dataip="data$(r2lab-id)"
+# dataip="data$(r2lab-id -s)"
 #
-# ipaddr_mask=10.0.0.$(r2lab-ip)/24
+# ipaddr_mask=10.0.0.$(r2lab-ip -s)/24
 #
-doc-nodes r2lab-id "returns id in the range 01-37; adjusts hostname if needed"
+doc-nodes r2lab-id "returns id in the range 01-37; adjusts hostname if needed - silent with -s"
 function r2lab-id() {
+    local USAGE="Usage: $FUNCNAME [-s]"
+    local silent=""
+    OPTIND=1
+    while getopts ":s" opt; do
+        case $opt in
+            s) silent=true;;
+            *) echo $USAGE; return 1;;
+        esac
+    done
+    shift $((OPTIND-1))
 
     # when hostname is correctly set, e.g. fit16
     local fitid=$(hostname)
@@ -207,15 +217,17 @@ function r2lab-id() {
              cut -d. -f4)
         fitid=fit$id
         origin="from ip addr show"
-        echo "Forcing hostname to be $fitid" >&2-
+        [ -n "$silent" ] || echo "Forcing hostname to be $fitid" >&2-
         hostname $fitid
     fi
-    echo "Using id=$id and fitid=$fitid - $origin" >&2-
+    [ -n "$silent" ] || echo "Using id=$id and fitid=$fitid - $origin" >&2-
     echo $id
 }
 
 doc-nodes r2lab-ip "same as r2lab-id, but returns a single digit on nodes 1-9 - useful for buidling IP addresses"
-function r2lab-ip() { r2lab-id | sed -e 's,^0,,'; }
+function r2lab-ip() {
+    r2lab-id "$@" | sed -e 's,^0,,'
+ }
 
 doc-nodes turn-on-data "turn up the data interface; returns the interface name (should be data)"
 # should maybe better use wait-for-interface-on-driver e1000e
@@ -490,7 +502,7 @@ function unbuf-var-log-syslog() {
 function -start-tcpdump() {
     local interface="$1"; shift
     local name="$1"; shift
-    [ -z "$name" ] && name=$(r2lab-id)
+    [ -z "$name" ] && name=$(r2lab-id -s)
     cd
     local pcap="${interface}-${name}.pcap"
     local pidfile="tcpdump-${interface}.pid"
@@ -507,7 +519,7 @@ function -start-tcpdump() {
 function -stop-tcpdump() {
     local interface="$1"; shift
     local name="$1"; shift
-    [ -z "$name" ] && name=$(r2lab-id)
+    [ -z "$name" ] && name=$(r2lab-id -s)
     cd
     local pcap="${interface}-${name}.pcap"
     local pidfile="tcpdump-${interface}.pid"
@@ -546,7 +558,7 @@ function -offload () {
 
 doc-nodes enable-nat-data "Makes the data interface NAT-enabled to reach the outside world"
 function enable-nat-data() {
-    local id=$(r2lab-id)
+    local id=$(r2lab-id -s)
     ip route add default via 192.168.2.100 dev data table 200
     ip rule add from 192.168.2.2/24 table 200 priority 200
 }
@@ -569,7 +581,7 @@ function -usb-verb() {
     # take into account cases where a node does not
     # sit in its nominal location
     # like if node 42 sits in slot 4
-    local id=$(r2lab-id)
+    local id=$(r2lab-id -s)
     local cmc="reboot${id}"
     echo "$msg USB device on node $id"
     curl http://$cmc/$verb
