@@ -44,19 +44,19 @@ function -git-pull-repos() {
     local repo_branches="$@"
     local repo_branch
     for repo_branch in $repo_branches; do
-	local repo=$(split_repo_branch repo $repo_branch)
-	local branch=$(split_repo_branch branch $repo_branch)
-	[ -d $repo ] || { echo "WARNING: cannot git pull in $repo - not found"; continue; }
-	[ -n "$branch" ] || { echo "WARNING: cannot git pull in $repo - branch not specified"; continue; }
-	echo "========== Updating $repo for branch $branch"
-	cd $repo
-	# always undo any local change
-	git reset --hard HEAD
-	# fetch everything
-	git fetch --all
-	git checkout $branch
-	git pull origin $branch
-	cd - >& /dev/null
+        local repo=$(split_repo_branch repo $repo_branch)
+        local branch=$(split_repo_branch branch $repo_branch)
+        [ -d $repo ] || { echo "WARNING: cannot git pull in $repo - not found"; continue; }
+        [ -n "$branch" ] || { echo "WARNING: cannot git pull in $repo - branch not specified"; continue; }
+        echo "========== Updating $repo for branch $branch"
+        cd $repo
+        # always undo any local change
+        git reset --hard HEAD
+        # fetch everything
+        git fetch --all
+        git checkout $branch
+        git pull origin $branch
+        cd - >& /dev/null
     done
 }
 
@@ -75,11 +75,11 @@ function rimage() { tail -1 /etc/rhubarbe-image; }
 doc-nodes update-os-packages "runs the core OS package update (dnf or apt-get) to update to latest versions"
 function update-os-packages () {
     if type -p dnf >& /dev/null; then
-	update-dnf-packages
+        update-dnf-packages
     elif type -p apt-get >& /dev/null; then
-	update-apt-get-packages
+        update-apt-get-packages
     else
-	echo update-core-os unknown package manager
+        echo update-core-os unknown package manager
     fi
 }
 
@@ -98,7 +98,7 @@ function update-apt-get-packages () {
     # debconf-get-selections | grep grub-pc
     # dpkg-reconfigure grub-pc
     apt install debconf-utils
-    debconf-set-selections <<< 'grub-pc	grub-pc/install_devices	multiselect /dev/sda'
+    debconf-set-selections <<< 'grub-pc grub-pc/install_devices multiselect /dev/sda'
     debconf-set-selections <<< 'console-setup console-setup/charmap47 select UTF-8'
     # try to get more
     export DEBCONF_DEBUG=developer
@@ -111,11 +111,11 @@ function update-apt-get-packages () {
 doc-nodes init-ntp-clock "Sets date from ntp"
 function init-ntp-clock() {
     if type ntpdate >& /dev/null; then
-	echo "Running ntpdate rhubarbe-control"
-	ntpdate rhubarbe-control
+        echo "Running ntpdate rhubarbe-control"
+        ntpdate rhubarbe-control
     else
-	echo "ERROR: cannot init clock - ntpdate not found"
-	return 1
+        echo "ERROR: cannot init clock - ntpdate not found"
+        return 1
     fi
 }
 
@@ -123,8 +123,8 @@ doc-nodes apt-upgrade-all "refresh all packages with apt-get"
 function apt-upgrade-all() {
     apt-get -y update
     # for grub-pc
-    debconf-set-selections <<< 'grub-pc	grub-pc/install_devices_disks_changed multiselect /dev/sda'
-    debconf-set-selections <<< 'grub-pc	grub-pc/install_devices	multiselect /dev/sda'
+    debconf-set-selections <<< 'grub-pc grub-pc/install_devices_disks_changed multiselect /dev/sda'
+    debconf-set-selections <<< 'grub-pc grub-pc/install_devices multiselect /dev/sda'
     apt-get -y upgrade
     # turn off automatic updates
     apt-get -y purge unattended-upgrades
@@ -192,22 +192,23 @@ doc-nodes-sep
 #
 doc-nodes r2lab-id "returns id in the range 01-37; adjusts hostname if needed"
 function r2lab-id() {
+
     # when hostname is correctly set, e.g. fit16
     local fitid=$(hostname)
     local id=$(sed -e s,fit,, <<< $fitid)
     local origin="from hostname"
     if [ "$fitid" == "$id" ]; then
-	# sample output
-	#inet 192.168.3.16/24 brd 192.168.3.255 scope global control
-	id=$(ip addr show control | \
-		    grep 'inet '| \
-		    awk '{print $2;}' | \
-		    cut -d/ -f1 | \
-		    cut -d. -f4)
-	fitid=fit$id
-	origin="from ip addr show"
-	echo "Forcing hostname to be $fitid" >&2-
-	hostname $fitid
+        # sample output
+        #inet 192.168.3.16/24 brd 192.168.3.255 scope global control
+        id=$(ip addr show control | \
+             grep 'inet '| \
+             awk '{print $2;}' | \
+             cut -d/ -f1 | \
+             cut -d. -f4)
+        fitid=fit$id
+        origin="from ip addr show"
+        echo "Forcing hostname to be $fitid" >&2-
+        hostname $fitid
     fi
     echo "Using id=$id and fitid=$fitid - $origin" >&2-
     echo $id
@@ -223,14 +224,14 @@ data_ifnames="data"
 function turn-on-data() {
     local ifname
     for ifname in $data_ifnames; do
-	ip addr sh dev $ifname >& /dev/null && {
-	    ip link show $ifname | grep -q UP || {
-		echo "turn-on-data: data network on interface" $ifname >&2-
-		ifup $ifname >&2-
-	    }
-	    echo $ifname
-	    break
-	}
+        ip addr sh dev $ifname >& /dev/null && {
+            ip link show $ifname | grep -q UP || {
+                echo "turn-on-data: data network on interface" $ifname >&2-
+                ifup $ifname >&2-
+            }
+            echo $ifname
+            break
+        }
     done
 }
 
@@ -239,13 +240,13 @@ function list-interfaces () {
     set +x
     local f
     for f in /sys/class/net/*; do
-	local dev=$(basename $f)
-	local driver=$(readlink $f/device/driver/module)
-	[ -n "$driver" ] && driver=$(basename $driver)
-	local addr=$(cat $f/address)
-	local operstate=$(cat $f/operstate)
-	local flags=$(cat $f/flags)
-	printf "%10s [%s]: %10s flags=%6s (%s)\n" "$dev" "$addr" "$driver" "$flags" "$operstate"
+        local dev=$(basename $f)
+        local driver=$(readlink $f/device/driver/module)
+        [ -n "$driver" ] && driver=$(basename $driver)
+        local addr=$(cat $f/address)
+        local operstate=$(cat $f/operstate)
+        local flags=$(cat $f/flags)
+        printf "%10s [%s]: %10s flags=%6s (%s)\n" "$dev" "$addr" "$driver" "$flags" "$operstate"
     done
 }
 
@@ -255,18 +256,18 @@ doc-nodes list-wireless "list currently available wireless interfaces"
 function list-wireless () {
     local ifnames
     if [[ -n "$@" ]]; then
-	ifnames="$@"
+        ifnames="$@"
     else
-	ifnames=""
-	local w
-	for w in $(ls -d /sys/class/net/*/wireless 2> /dev/null); do
-	    ifnames="$ifnames $(basename $(dirname $w))"
-	done
+        ifnames=""
+        local w
+        for w in $(ls -d /sys/class/net/*/wireless 2> /dev/null); do
+            ifnames="$ifnames $(basename $(dirname $w))"
+        done
     fi
     local ifname
     for ifname in $ifnames; do
-	iw dev $ifname info
-	iw dev $ifname link
+        iw dev $ifname info
+        iw dev $ifname link
     done
 }
 
@@ -274,17 +275,17 @@ doc-nodes turn-off-wireless "rmmod both wireless drivers from the kernel"
 function turn-off-wireless() {
     local driver
     for driver in iwlwifi ath9k; do
-	local _found=$(find-interface-by-driver $driver)
-	if [ -n "$_found" ]; then
-	    >&2 echo "turn-off-wireless: shutting down device $_found"
-	    ip link set down dev $_found
-	else
-	    >&2 echo "turn-off-wireless: driver $driver not used";
-	fi
-	lsmod | grep -q "^${driver} " && {
-	    >&2 echo "turn-off-wireless: removing driver $driver"
-	    modprobe -q -r $driver
-	}
+        local _found=$(find-interface-by-driver $driver)
+        if [ -n "$_found" ]; then
+            >&2 echo "turn-off-wireless: shutting down device $_found"
+            ip link set down dev $_found
+        else
+            >&2 echo "turn-off-wireless: driver $driver not used";
+        fi
+        lsmod | grep -q "^${driver} " && {
+            >&2 echo "turn-off-wireless: removing driver $driver"
+            modprobe -q -r $driver
+        }
     done
 }
 
@@ -307,13 +308,13 @@ function find-interface-by-driver () {
     local search_driver=$1; shift
     local f
     for f in /sys/class/net/*; do
-	local _if=$(basename $f)
-	local driver=$(readlink $f/device/driver/module)
-	[ -n "$driver" ] && driver=$(basename $driver)
-	if [ "$driver" == "$search_driver" ]; then
-	    echo $_if
-	    return
-	fi
+        local _if=$(basename $f)
+        local driver=$(readlink $f/device/driver/module)
+        [ -n "$driver" ] && driver=$(basename $driver)
+        if [ "$driver" == "$search_driver" ]; then
+            echo $_if
+            return
+        fi
     done
 }
 
@@ -330,15 +331,15 @@ function wait-for-interface-on-driver() {
     sleep 1
 
     while true; do
-	# use the first device that runs on iwlwifi
-	local _found=$(find-interface-by-driver $driver)
-	if [ -n "$_found" ]; then
-	    >&2 echo Using device $_found
-	    echo $_found
-	    return
-	else
-	    >&2 echo "Waiting for some interface to run on driver $driver"; sleep 1
-	fi
+        # use the first device that runs on iwlwifi
+        local _found=$(find-interface-by-driver $driver)
+        if [ -n "$_found" ]; then
+            >&2 echo Using device $_found
+            echo $_found
+            return
+        else
+            >&2 echo "Waiting for some interface to run on driver $driver"; sleep 1
+        fi
     done
 }
 
@@ -349,14 +350,14 @@ function wait-for-device () {
     local wait_state="$1"; shift
 
     while true; do
-	local f=/sys/class/net/$dev
-	local operstate=$(cat $f/operstate 2> /dev/null)
-	if [ "$operstate" == "$wait_state" ]; then
-	    2>& echo Device $dev is $wait_state
-	    break
-	else
-	    >&2 echo "Device $dev is $operstate - waiting 1s"; sleep 1
-	fi
+        local f=/sys/class/net/$dev
+        local operstate=$(cat $f/operstate 2> /dev/null)
+        if [ "$operstate" == "$wait_state" ]; then
+            2>& echo Device $dev is $wait_state
+            break
+        else
+            >&2 echo "Device $dev is $operstate - waiting 1s"; sleep 1
+        fi
     done
 }
 
@@ -383,8 +384,8 @@ function oai-as() {
     local candidate=""
     local script=""
     for candidate in $candidates; do
-	local path=$candidate/oai-${oai_role}.sh
-	[ -f $path ] && { script=$path; break; }
+        local path=$candidate/oai-${oai_role}.sh
+        [ -f $path ] && { script=$path; break; }
     done
     [ -n "$script" ] || { echo "Cannot locate oai-${oai_role}.sh" >&2-; return; }
     source $path
@@ -452,9 +453,9 @@ function define-peer() {
 doc-nodes get-peer "retrieve the value defined with define-peer"
 function get-peer() {
     if [ ! -f $peer_id_file ]; then
-	echo "ERROR: you need to run define-peer first" >&2-
+        echo "ERROR: you need to run define-peer first" >&2-
     else
-	echo $(cat $peer_id_file)
+        echo $(cat $peer_id_file)
     fi
 }
 
@@ -463,9 +464,9 @@ doc-nodes dump-dmesg "run dmesg every second and stores into /root/dmesg/dmesg-h
 function dump-dmesg() {
     mkdir -p /root/dmesg
     while true; do
-	dmesg > /root/dmesg/dmesg-$(date +"%H-%M-%S")
-	echo -n "."
-	sleep 1
+        dmesg > /root/dmesg/dmesg-$(date +"%H-%M-%S")
+        echo -n "."
+        sleep 1
     done
 }
 
@@ -511,12 +512,12 @@ function -stop-tcpdump() {
     local pcap="${interface}-${name}.pcap"
     local pidfile="tcpdump-${interface}.pid"
     if [ ! -f $pidfile ]; then
-	echo "Could not spot tcpdump pid from $pidfile - exiting"
+        echo "Could not spot tcpdump pid from $pidfile - exiting"
     else
-	local pid=$(cat $pidfile)
-	echo "Killing tcpdump pid $pid"
-	kill $pid
-	rm $pidfile
+        local pid=$(cat $pidfile)
+        echo "Killing tcpdump pid $pid"
+        kill $pid
+        rm $pidfile
     fi
 }
 
@@ -525,41 +526,6 @@ function start-tcpdump-data() { -start-tcpdump data "$@"; }
 doc-nodes stop-tcpdump-data "Stop recording pcap data about SCTP traffic"
 function stop-tcpdump-data() { -stop-tcpdump data "$@"; }
 
-####################
-# keep it in here just in case but this hack is no longer needed
-#doc-nodes demo "set ups nodes for the skype demo - based on their id"
-function demo() {
-    case $(r2lab-id) in
-	38)
-	    oai-as-hss
-	    define-peer 39
-	    ;; # for preplab
-	39)
-	    oai-as-epc
-	    define-peer 38
-	    ;; # for preplab
-	03)
-	    oai-as-epc
-	    define-peer 04
-	    ;;
-	04)
-            oai-as-hss
-            define-peer 03
-            ;;
-	16)
-	    oai-as-enb
-	    define-peer 03
-	    ;;
-	23)
-	    oai-as-enb
-	    define-peer 03
-	    ;;
-    esac
-    echo "========== Demo setup on node $(r2lab-id)"
-    echo "running as a ${oai_role}"
-    echo "config uses peer=$(get-peer)"
-    echo "using interface ${oai_ifname} on subnet ${oai_subnet}"
-}
 
 # long names are tcp-segmentation-offload udp-fragmentation-offload
 # generic-segmentation-offload generic-receive-offload
@@ -572,9 +538,9 @@ function -offload () {
     local mode="$1"; shift
     local ifname=$1; shift
     for feature in tso gso gro ; do
-	local command="ethtool -K $ifname $feature $mode"
-	echo $command
-	$command
+        local command="ethtool -K $ifname $feature $mode"
+        echo $command
+        $command
     done
 }
 
@@ -653,10 +619,10 @@ function -scramble() {
 
     local command="uhd_siggen --gaussian"
     case "$link" in
-	up*)
-	    command="$command $uplink_freq" ;;
-	down*)
-	    command="$command $downlink_freq" ;;
+        up*)
+            command="$command $uplink_freq" ;;
+        down*)
+            command="$command $downlink_freq" ;;
     esac
     command="$command $force"
 
