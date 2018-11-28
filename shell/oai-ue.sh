@@ -7,7 +7,7 @@ doc-nodes-sep "#################### For managing an OAI UE"
 source $(dirname $(readlink -f $BASH_SOURCE))/oai-common.sh
 
 OPENAIR_DIR=/root/openairinterface5g
-run_dir=$OPENAIR_DIR/targets/bin 
+run_dir=$OPENAIR_DIR/targets/bin
 build_dir=$OPENAIR_DIR/cmake_targets
 tools_dir=$OPENAIR_DIR/cmake_targets/tools/
 lte_log="$run_dir/softmodem-ue.log"
@@ -46,11 +46,11 @@ function image() {
 ####################
 # would make sense to add more stuff in the base image - see the NEWS file
 base_packages="git subversion libboost-all-dev libusb-1.0-0-dev python-mako doxygen python-docutils cmake build-essential libffi-dev
-texlive-base texlive-latex-base ghostscript gnuplot-x11 dh-apparmor graphviz gsfonts imagemagick-common 
+texlive-base texlive-latex-base ghostscript gnuplot-x11 dh-apparmor graphviz gsfonts imagemagick-common
  gdb ruby flex bison gfortran xterm mysql-common python-pip python-numpy qtcore4-l10n tcl tk xorg-sgml-doctools xterm
 "
 
-doc-nodes base "the script to install base software on top of a raw image" 
+doc-nodes base "the script to install base software on top of a raw image"
 function base() {
 
     git-pull-r2lab
@@ -60,14 +60,14 @@ function base() {
     apt-get update
     apt-get install -y $base_packages
 
-    # 
+    #
     git-ssl-turn-off-verification
 
     echo "========== Running git clone for r2lab and openinterface5g"
     cd
 
     [ -d openairinterface5g ] || git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
-    [ -d /root/r2lab-embedded ] || git clone git@github.com:fit-r2lab/r2lab-embedded.git
+    [ -d /root/r2lab-embedded ] || git clone https://github.com/fit-r2lab/r2lab-embedded.git
 
 }
 
@@ -82,7 +82,7 @@ function build() {
     build-oai5g -x >& build-oai5g-ue.log
 }
 
-doc-nodes build-oai5g "builds oai5g UE - run with -x for building with software oscilloscope" 
+doc-nodes build-oai5g "builds oai5g UE - run with -x for building with software oscilloscope"
 function build-oai5g() {
 
     oscillo=""
@@ -190,9 +190,9 @@ s|HPLMN=.*|HPLMN= "20893";|
 s|"20893"|"20895"|
 EOF
     echo in $(pwd)
-    sed -i -f oai-ue.sed $template 
+    sed -i -f oai-ue.sed $template
     echo "Adapt $template to R2lab in $(pwd)"
-    
+
     # Set OAI environment variables
     cd $OPENAIR_DIR
     source oaienv
@@ -210,7 +210,7 @@ EOF
 doc-nodes configure-ue "configure UE (no need of define-peer but later maybe add fake SIM number)"
 
 ####################
-doc-nodes start "starts lte-softmodem - run with -d to turn on soft oscilloscope" 
+doc-nodes start "starts lte-softmodem - run with -d to turn on soft oscilloscope"
 function start() {
 
     oscillo=""
