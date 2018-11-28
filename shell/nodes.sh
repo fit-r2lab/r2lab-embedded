@@ -620,7 +620,7 @@ doc-nodes usb-reset "Reset the USB port where the external device (USRP2/N210/e3
 function usb-reset() {
     usb-off
     sleep 1
-    usboff
+    usb-on
 }
 
 
