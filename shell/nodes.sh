@@ -606,7 +606,7 @@ function -usb-verb() {
     local id=$(r2lab-id)
     local cmc="reboot${id}"
     echo "$msg USB device on node $id"
-    curl http://$cmc/usrpon
+    curl http://$cmc/$verb
 }
 
 doc-nodes usb-on "Turn on the USB port where the external device (USRP2/N210/e3372) is attached"
