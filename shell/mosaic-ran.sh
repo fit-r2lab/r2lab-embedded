@@ -75,7 +75,7 @@ function configure() {
     echo "Configuring RAN on node $r2lab_id for CN on node $cn_id and nrb=$nrb"
 
     -sed-configurator $enbconf << EOF
-s|mnc.*=.*[0-9]+;|mnc = 95;|
+s|mnc\s*=\s*[0-9][0-9]*|mnc = 95|
 s|downlink_frequency\s*=.*;|downlink_frequency = 2660000000L;|
 s|\(mme_ip_address.*ipv4.*=\).*|\1 "192.168.${mosaic_subnet}.${cn_id}";|
 s|ENB_INTERFACE_NAME_FOR_S1_MME.*=.*"[^"]*";|ENB_INTERFACE_NAME_FOR_S1_MME = "${mosaic_ifname}";|
