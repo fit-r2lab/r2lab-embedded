@@ -135,7 +135,10 @@ function apt-upgrade-all() {
 function -have-bashrc-source() {
     local file_to_source="$1"; shift
     local target=/root/.bashrc
-    [ -f $local_target ] || touch $local_target
+    # older images might have a synlink here
+    [ -h $target ] && rm $target
+    # create if not there yet
+    [ -f $target ] || touch $target
     grep -q "source $file_to_source" $target >& /dev/null && return 0
     # do not silent it down if such a file is missing
     #echo "[ -f $file_to_source ] && source $file_to_source" >> $target
