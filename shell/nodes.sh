@@ -140,8 +140,8 @@ function -have-bashrc-source() {
     # do not silent it down if such a file is missing
     #echo "[ -f $file_to_source ] && source $file_to_source" >> $target
     echo "source $file_to_source" >> $target
-    # also load it in current shell
-    source $file_to_source
+    # DON'T load it in current shell, this is likely to cause endless recursion
+    # source $file_to_source
 }
 
 function -add-in-path() {
