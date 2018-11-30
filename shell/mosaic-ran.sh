@@ -10,9 +10,14 @@ source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
 # image: install stuff on top of a basic ubuntu image
 # warm-up: make sure the USB is there, and similar
 # configure: do at least once after restoring an image
+#
 # start: start services
 # stop:
+# status
+#
 # journal: wrapper around journalctl for the 3 bundled services
+# config-dir: echo's the configuration directory
+# inspect-config-changes: show everything changed from the snap configs
 
 ### to test locally (adjust slicename if needed)
 # apssh -g inria_oai@faraday.inria.fr -t root@fit01 -i nodes.sh -i r2labutils.sh -i mosaic-common.sh -s mosaic-ran.sh image
@@ -50,6 +55,17 @@ function install-radio-access-network() {
 
 ###### configuring
 # nrb business : see oai-enb.sh for details
+
+doc-nodes config-dir "echo the location of the configuration dir"
+function config-dir() {
+    (cd /var/snap/oai-ran/current; pwd -P)
+}
+
+function inspect-config-changes() {
+    -inspect-config-changes $(config-dir);
+}
+
+
 doc-nodes configure "configure RAN, i.e. tweaks e-nodeB config file - see --help"
 function configure() {
     local nrb=50

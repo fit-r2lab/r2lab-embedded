@@ -11,9 +11,14 @@ doc-nodes-sep "#################### commands for managing a MOSAIC core-network"
 ### frontend:
 # image: install stuff on top of a basic ubuntu image
 # configure: do at least once after restoring an image
+#
 # start: start services
 # stop:
+# status
+#
 # journal: wrapper around journalctl for the 3 bundled services
+# config-dir: echo's the configuration directory
+# inspect-config-changes: show everything changed from the snap configs
 
 ### to test locally (adjust slicename if needed)
 # apssh -g inria_oai@faraday.inria.fr -t root@fit01 -i nodes.sh -i r2labutils.sh -i mosaic-common.sh -s mosaic-cn.sh image
@@ -89,6 +94,16 @@ function install-core-network() {
 
 
 ###### configuring
+
+doc-nodes config-dir "echo the location of the configuration dir"
+function config-dir() {
+    (cd /var/snap/oai-cn/current; pwd -P)
+}
+
+function inspect-config-changes() {
+    -inspect-config-changes $(config-dir);
+}
+
 
 doc-nodes configure "configure core network for r2lab"
 function configure() {

@@ -38,14 +38,6 @@ function -snap-install() {
 }
 
 
-# convenient for debugging
-function inspect-config-diffs() {
-    for orig in *.orig; do
-        local current=$(basename $orig .orig)
-        echo ==================== $orig - $current
-        diff $orig $current
-    done
-}
 ############################ xxx potentially old stuff - check if still relevant
 
 

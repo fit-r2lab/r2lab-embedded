@@ -181,6 +181,21 @@ function -sed-configurator() {
     }
 }
 
+# convenient for debugging
+function -inspect-config-changes() {
+    local directory=$1; shift
+    if [ -z "$directory" ]; then
+        directory=$(pwd)
+        echo Warning: searching modified configs in $directory
+    fi
+    for orig in $directory/*.orig; do
+        local stem=$(basename $orig .orig)
+        local conf=$directory/$stem
+        echo ==================== $orig - $conf
+        diff $orig $conf
+    done
+}
+
 ##########
 doc-nodes-sep
 
