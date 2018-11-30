@@ -103,6 +103,7 @@ function configure-core-network() {
 
     #-enable-snap-bins
     local r2lab_id=$(r2lab-id -s)
+    local r2lab_ip=$(r2lab-ip -s)
     # not quite sure how this sohuld work
     # the conf-get commands return file paths
     # but that works only for the 3 main conf files
@@ -126,7 +127,7 @@ EOF
     -sed-configurator mme_fd.conf << EOF
 s|^Identity.*=.*|Identity = "fit${r2lab_id}.${mosaic_realm}";|
 s|^Realm.*=.*|Realm = "${mosaic_realm}";|
-s|^ConnectPeer.*|ConnectPeer= "fit${r2lab_id}.${mosaic_realm}" { ConnectTo = "192.168.${mosaic_subnet}.${r2lab_id}"; No_SCTP ; No_IPv6; Prefer_TCP; No_TLS; port = 3868;  realm = "${mosaic_realm}";};|
+s|^ConnectPeer.*|ConnectPeer= "fit${r2lab_id}.${mosaic_realm}" { ConnectTo = "192.168.${mosaic_subnet}.${r2lab_ip}"; No_SCTP ; No_IPv6; Prefer_TCP; No_TLS; port = 3868;  realm = "${mosaic_realm}";};|
 
 EOF
 
@@ -138,9 +139,9 @@ EOF
     -sed-configurator mme.conf << EOF
 s|REALM.*=.*|REALM = "${mosaic_realm}";|
 s|HSS_HOSTNAME.*=.*|HSS_HOSTNAME = "fit${r2lab_id}";|
-s|MNC="[0-9]+"|MNC="95"|
+s|MNC="[0-9][0-9]*"|MNC="95"|
 s|MME_INTERFACE_NAME_FOR_S1_MME.*=.*"[^"]*";|MME_INTERFACE_NAME_FOR_S1_MME = "${mosaic_ifname}";|
-s|MME_IPV4_ADDRESS_FOR_S1_MME.*=.*"[^"]*";|MME_IPV4_ADDRESS_FOR_S1_MME = "192.168.${mosaic_subnet}.${r2lab_id}/24";|
+s|MME_IPV4_ADDRESS_FOR_S1_MME.*=.*"[^"]*";|MME_IPV4_ADDRESS_FOR_S1_MME = "192.168.${mosaic_subnet}.${r2lab_ip}/24";|
 s|MME_IPV4_ADDRESS_FOR_S11_MME.*=.*"[^"]*";|MME_IPV4_ADDRESS_FOR_S11_MME = "127.0.2.1/8";|
 s|SGW_IPV4_ADDRESS_FOR_S11.*=.*"[^"]*";|SGW_IPV4_ADDRESS_FOR_S11 = "127.0.3.1/8";|
 EOF
@@ -148,7 +149,7 @@ EOF
     -sed-configurator spgw.conf << EOF
 s|SGW_IPV4_ADDRESS_FOR_S11.*=.*"[^"]*";|SGW_IPV4_ADDRESS_FOR_S11 = "127.0.3.1/8";|
 s|SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP.*=.*"[^"]*";|SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP = "${mosaic_ifname}";|
-s|SGW_IPV4_ADDRESS_FOR_S1U_S12_S4_UP.*=.*"[^"]*";|SGW_IPV4_ADDRESS_FOR_S1U_S12_S4_UP = "192.168.${mosaic_subnet}.${r2lab_id}/24";|
+s|SGW_IPV4_ADDRESS_FOR_S1U_S12_S4_UP.*=.*"[^"]*";|SGW_IPV4_ADDRESS_FOR_S1U_S12_S4_UP = "192.168.${mosaic_subnet}.${r2lab_ip}/24";|
 s|PGW_INTERFACE_NAME_FOR_SGI.*=.*"[^"]*";|PGW_INTERFACE_NAME_FOR_SGI = "control";|
 s|PGW_MASQUERADE_SGI.*=.*"[^"]*";|PGW_MASQUERADE_SGI = "yes";|
 s|DEFAULT_DNS_IPV4_ADDRESS.*=.*"[^"]*";|DEFAULT_DNS_IPV4_ADDRESS = "138.96.0.10";|
