@@ -108,10 +108,12 @@ function inspect-config-changes() {
 doc-nodes configure "configure core network for r2lab"
 function configure() {
 
-    oai-cn.stop-all 
+    # first stop all previous oai code running
+    oai-cn.stop-all  
     configure-core-network
-    configure-r2lab-devices
     reinit-core-network
+    # following configuration should be done after reinit-core-network
+    configure-r2lab-devices
 }
 
 doc-nodes configure-core-network "configure hss, mme, spgw, and /etc/hosts"
