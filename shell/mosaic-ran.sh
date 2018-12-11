@@ -61,6 +61,7 @@ function config-dir() {
     (cd /var/snap/oai-ran/current; pwd -P)
 }
 
+doc-nodes inspect-config-changes "show all changes done by configure"
 function inspect-config-changes() {
     -inspect-config-changes $(config-dir);
 }
@@ -233,7 +234,7 @@ function start() {
     fi
 }
 
-doc-nodes status "Stop RAN service(s)"
+doc-nodes stop "Stop RAN service(s)"
 function stop() {
     oai-ran.enb-stop
 }
@@ -251,7 +252,7 @@ function journal() {
     journalctl $jopts "$@"
 }
 
-doc-nodes "cd into configuration directory for RAN service(s)"
+doc-nodes configure-directory "cd into configuration directory for RAN service(s)"
 function configure-directory() {
     local conf_dir=$(dirname $(oai-ran.enb-conf-get))
     cd $conf_dir
