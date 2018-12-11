@@ -108,6 +108,7 @@ function inspect-config-changes() {
 doc-nodes configure "configure core network for r2lab"
 function configure() {
 
+    reinit-core-network
     configure-core-network
     configure-r2lab-devices
     reinit-core-network
