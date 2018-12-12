@@ -232,8 +232,10 @@ alias fa="focus-nodes-on -a"
 doc-selection "fa" "Select all nodes currently ON - i.e. focus-nodes-on -a"
 
 ### first things first
-alias rleases="rhubarbe leases"
-doc-selection rleases "display current leases (rhubarbe leases)"
+function rleases() {
+    rhubarbe leases "$@" | grep -v nightly
+}
+doc-selection rleases "display current leases (rhubarbe leases) - nightly leases are ignored"
 
 #
 alias rbye="rhubarbe bye"
