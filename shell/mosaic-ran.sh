@@ -72,7 +72,7 @@ function configure() {
     local nrb=50
     local USAGE="Usage: $FUNCNAME [options] cn-id
   options:
-    -b nrb: sets NRB - default is $nrb (not yet implemented)"
+    -b nrb: sets NRB - default is $nrb"
     OPTIND=1
     while getopts ":b" opt; do
         case $opt in
@@ -90,10 +90,20 @@ function configure() {
     local enbconf=$(oai-ran.enb-conf-get)
 
     echo "Configuring RAN on node $r2lab_id for CN on node $cn_id and nrb=$nrb"
+    case $nrb in
+	25) refSignalPower=-24;;
+	50) refSignalPower=-27;;
+        *) echo -e "Bad N_RB_DL value $nrb"; return 1;;
+    esac
+    
 
     -sed-configurator $enbconf << EOF
 s|mnc\s*=\s*[0-9][0-9]*|mnc = 95|
 s|downlink_frequency\s*=.*;|downlink_frequency = 2660000000L;|
+s|tx_gain.*=.*"[^"]*"|tx_gain = 100;|
+s|pdsch_referenceSignalPower.*=.*"[^"]*"|pdsch_referenceSignalPower = ${refSignalPower};|
+s|pusch_p0_Nominal.*=.*"[^"]*"|pusch_p0_Nominal = -90;| 
+s|pucch_p0_Nominal.*=.*"[^"]*"|pucch_p0_Nominal = -96;|
 s|\(mme_ip_address.*ipv4.*=\).*|\1 "192.168.${mosaic_subnet}.${cn_id}";|
 s|ENB_INTERFACE_NAME_FOR_S1_MME.*=.*"[^"]*";|ENB_INTERFACE_NAME_FOR_S1_MME = "${mosaic_ifname}";|
 s|ENB_IPV4_ADDRESS_FOR_S1_MME.*=.*"[^"]*";|ENB_IPV4_ADDRESS_FOR_S1_MME = "192.168.${mosaic_subnet}.${r2lab_id}/24";|
