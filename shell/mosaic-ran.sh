@@ -74,7 +74,7 @@ function configure() {
   options:
     -b nrb: sets NRB - default is $nrb"
     OPTIND=1
-    while getopts ":b" opt; do
+    while getopts "b:" opt; do
         case $opt in
             b) nrb=$OPTARG;;
             *) echo -e "$USAGE"; return 1;;
