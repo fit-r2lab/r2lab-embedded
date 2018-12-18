@@ -100,6 +100,7 @@ function configure() {
     -sed-configurator $enbconf << EOF
 s|mnc\s*=\s*[0-9][0-9]*|mnc = 95|
 s|downlink_frequency\s*=.*;|downlink_frequency = 2660000000L;|
+s|N_RB_DL\s*=.*|N_RB_DL = ${nrb};|
 s|tx_gain\s*=.*;|tx_gain = 100;|
 s|pdsch_referenceSignalPower\s*=.*;|pdsch_referenceSignalPower = ${refSignalPower};|
 s|pusch_p0_Nominal\s*=.*;|pusch_p0_Nominal = -90;| 
@@ -235,6 +236,9 @@ function start() {
 
     [[ -n "$@" ]] && { echo -e "$USAGE"; return 1; }
     echo "Checking interface is up : $(turn-on-data)"
+
+    echo "Show r2lab conf before running the eNB"
+    oai-ran.enb-conf-show
 
     if [ -n "$graphical" ]; then
         echo "e-nodeB with X11 graphical output not yet implemented - running in background instead for now"
