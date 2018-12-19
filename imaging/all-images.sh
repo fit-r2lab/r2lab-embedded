@@ -270,14 +270,17 @@ function mosaic-base() {
         "imaging.sh new-common-setup-root-bash2"
     bim 2 $mosaic_base1 $mosaic_base2 \
         "nodes.sh apt-upgrade-all"
+    bim 3 $mosaic_base1 $mosaic_base3 \
+	"imaging.sh activate-lowlatency" \
+	"nodes.sh apt-upgrade-all"
 }
 
 function mosaic-cn() {
-    bim 3 $mosaic_base2 mosaic-cn "mosaic-cn.sh image"
+    bim 4 $mosaic_base2 mosaic-cn "mosaic-cn.sh image"
 }
 
 function mosaic-ran() {
-    bim 19 $mosaic_base2 mosaic-ran "mosaic-ran.sh image"
+    bim 19 $mosaic_base3 mosaic-ran "mosaic-ran.sh image"
 }
 
 ####################
