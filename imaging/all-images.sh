@@ -265,27 +265,29 @@ mosaic_base2=u16.04-lts-update
 # we need to do this in 2 steps so that the node reboots
 # on the right kernel after we move to lts
 function mosaic-base() {
-    bim 1 u16.04 $mosaic_base1 \
+    bim 1 u16.04 u16.04-lts \
         "imaging.sh u16-optin-lts-kernel" \
         "imaging.sh new-common-setup-root-bash2"
-    bim 2 $mosaic_base1 $mosaic_base2 \
+    bim 2 u16.04-lts u16.04-lts-update \
         "nodes.sh apt-upgrade-all"
-    bim 3 $mosaic_base1 $mosaic_base3 \
-	"imaging.sh activate-lowlatency" \
-	"nodes.sh apt-upgrade-all"
 }
 
 function mosaic-cn() {
-    bim 4 $mosaic_base2 mosaic-cn "mosaic-cn.sh image"
+    bim 3 u16.04-lts-update mosaic-cn "mosaic-cn.sh image"
 }
 
 function mosaic-ran() {
-    bim 19 $mosaic_base3 mosaic-ran "mosaic-ran.sh image"
+    # ditto, there is a need to reboot after activate-lowlatency
+    bim 4 u16.04-lts-update mosaic-ran-base \
+        "imaging.sh activate-lowlatency"
+    bim 5 mosaic-ran-base mosaic-ran \
+        "mosaic-ran.sh image"
 }
 
 ####################
 # xxx this clearly should be specified on the command line some day
-mosaic-base
-mosaic-cn &
-mosaic-ran &
-wait %1 %2
+# mosaic-base
+# mosaic-ran &
+# mosaic-cn &
+# wait %1 %2
+mosaic-ran 
