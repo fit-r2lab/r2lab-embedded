@@ -95,7 +95,7 @@ function configure() {
 	50) refSignalPower=-27;;
         *) echo -e "Bad N_RB_DL value $nrb"; return 1;;
     esac
-    
+
 
     -sed-configurator $enbconf << EOF
 s|mnc\s*=\s*[0-9][0-9]*|mnc = 95|
@@ -103,7 +103,7 @@ s|downlink_frequency\s*=.*;|downlink_frequency = 2660000000L;|
 s|N_RB_DL\s*=.*|N_RB_DL = ${nrb};|
 s|tx_gain\s*=.*;|tx_gain = 100;|
 s|pdsch_referenceSignalPower\s*=.*;|pdsch_referenceSignalPower = ${refSignalPower};|
-s|pusch_p0_Nominal\s*=.*;|pusch_p0_Nominal = -90;| 
+s|pusch_p0_Nominal\s*=.*;|pusch_p0_Nominal = -90;|
 s|pucch_p0_Nominal\s*=.*;|pucch_p0_Nominal = -96;|
 s|\(mme_ip_address.*ipv4.*=\).*|\1 "192.168.${mosaic_subnet}.${cn_id}";|
 s|ENB_INTERFACE_NAME_FOR_S1_MME.*=.*"[^"]*";|ENB_INTERFACE_NAME_FOR_S1_MME = "${mosaic_ifname}";|
