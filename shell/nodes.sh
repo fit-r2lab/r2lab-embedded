@@ -510,52 +510,33 @@ function unbuf-var-log-syslog() {
 }
 
 #################### tcpdump
-# 2 commands to start and stop tcpdump on the data interface
-# output is in /root/data-<name>.pcap
-# with <name> provided as a first argument (defaults to r2lab-id)
-# it is desirable to set a different name on each host, so that when collected
-# data gets merged into a single file tree they don't overlap each other
+# Usage: tcpdump-capture <interface> <service-name> tcpdump-arg1 .. tcpdump-argn
+#
+# Example: tcpdump-capture data core-network ip proto 132
+#
+# output goes into /root/<interface>-<name>.pcap
+#
+# it is desirable to set a different name on each host
+# this way, once collected from a central place, data
+# can be stored into a single file tree without overlap
+#
+# does not do pid bookkeeping, use systemd-run instead
 
-# Usage -start-tcpdump data|control some-distinctive-name tcpdump-arg..s
-function -start-tcpdump() {
+doc-nodes tcpdump-capture "designed to start tcpdump capture under systemd-run"
+function tcpdump-capture() {
     local interface="$1"; shift
-    local name="$1"; shift
-    [ -z "$name" ] && name=$(r2lab-id -s)
+    local output="$1"; shift
+
+    local USAGE="Usage; $FUNCNAME interface output [tcpdump extra args]"
+
+    [ -z "$output" ] && { echo $USAGE; return 1; }
+
     cd
-    local pcap="${interface}-${name}.pcap"
-    local pidfile="tcpdump-${interface}.pid"
-    local command="tcpdump -n -U -w $pcap -i ${interface}" "$@"
+    local command="tcpdump -n -U -w ${output} -i ${interface}" "$@"
     echo "${interface} traffic tcpdump'ed into $pcap with command:"
     echo "$command"
-    nohup $command >& /dev/null < /dev/null &
-    local pid=$!
-    ps $pid
-    echo $pid > $pidfile
+    $command
 }
-
-# Usage -stop-tcpdump data|control some-distinctive-name
-function -stop-tcpdump() {
-    local interface="$1"; shift
-    local name="$1"; shift
-    [ -z "$name" ] && name=$(r2lab-id -s)
-    cd
-    local pcap="${interface}-${name}.pcap"
-    local pidfile="tcpdump-${interface}.pid"
-    if [ ! -f $pidfile ]; then
-        echo "Could not spot tcpdump pid from $pidfile - exiting"
-    else
-        local pid=$(cat $pidfile)
-        echo "Killing tcpdump pid $pid"
-        kill $pid
-        rm $pidfile
-    fi
-}
-
-doc-nodes start-tcpdump-data "Start recording pcap data about traffic on the data interface"
-function start-tcpdump-data() { -start-tcpdump data "$@"; }
-doc-nodes stop-tcpdump-data "Stop recording pcap data about SCTP traffic"
-function stop-tcpdump-data() { -stop-tcpdump data "$@"; }
-
 
 # long names are tcp-segmentation-offload udp-fragmentation-offload
 # generic-segmentation-offload generic-receive-offload
