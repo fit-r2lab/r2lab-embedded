@@ -510,7 +510,7 @@ function unbuf-var-log-syslog() {
 }
 
 #################### tcpdump
-# Usage: tcpdump-capture <interface> <service-name> tcpdump-arg1 .. tcpdump-argn
+# Usage: tcpdump-capture <interface> <output-pcap-file> tcpdump-arg1 .. tcpdump-argn
 #
 # Example: tcpdump-capture data core-network ip proto 132
 #
@@ -521,6 +521,8 @@ function unbuf-var-log-syslog() {
 # can be stored into a single file tree without overlap
 #
 # does not do pid bookkeeping, use systemd-run instead
+# NOTE: when using an apssh Service, it might be easier to
+# write the tcpdump command directly in the Service definition
 
 doc-nodes tcpdump-capture "designed to start tcpdump capture under systemd-run"
 function tcpdump-capture() {
