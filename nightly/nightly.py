@@ -49,7 +49,7 @@ from nightmail import complete_html, send_email
 
 # global - need to be configurable ?
 nightly_slice = "inria_r2lab.nightly"
-email_from = "root@faraday.inria.fr"
+email_from = "nightly@faraday.inria.fr"
 email_to = [
     "fit-r2lab-dev@inria.fr",
 ]
@@ -190,8 +190,10 @@ class Nightly:
         jobs = [Job(ssh.wait_for(self.backoff), critical=False)
                 for ssh in sshs]
 
-        scheduler = Scheduler(Job(display.run(), forever=True), *jobs)
-        if not scheduler.orchestrate(timeout=self.wait_timeout):
+        scheduler = Scheduler(Job(display.run(), forever=True),
+                              *jobs,
+                              timeout=self.wait_timeout)
+        if not scheduler.run():
             self.verbose and scheduler.debrief()
         # exclude nodes that have not behaved
         for node, job in zip(nodes, jobs):
@@ -217,8 +219,10 @@ class Nightly:
             for node in nodes
         ]
 
-        scheduler = Scheduler(Job(display.run(), forever=True), *jobs)
-        if not scheduler.orchestrate(timeout=self.wait_timeout):
+        scheduler = Scheduler(Job(display.run(), forever=True),
+                              *jobs,
+                              timeout=self.wait_timeout)
+        if not scheduler.run():
             self.verbose and scheduler.debrief()
         # exclude nodes that have not behaved
         for node, job in zip(nodes, jobs):

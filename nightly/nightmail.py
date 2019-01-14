@@ -6,11 +6,11 @@ import smtplib
 
 
 def font_color_tick(column, failed_column):
-    "return a couple of style and content for a span element" 
+    "return a couple of style and content for a span element"
 
     return (
         # all is fine, show a green dot
-        ('32px Arial, Tahoma, Sans-serif' , '#42c944' , '&#8226;') if column < failed_column 
+        ('32px Arial, Tahoma, Sans-serif' , '#42c944' , '&#8226;') if column < failed_column
         # otherwise, a red cross
         else ('18px Arial, Tahoma, Sans-serif',  'red', '&#215;') if column == failed_column
         else ('18px Arial, Tahoma, Sans-serif',  'gray', '&#65110;'))
@@ -18,7 +18,7 @@ def font_color_tick(column, failed_column):
 
 def summary_table(failures):
     """
-    based on the failures structure 
+    based on the failures structure
     that maps node ids to a failure reason
     produce a summary mail
     """
@@ -89,9 +89,12 @@ def send_email(sender, receiver, subject, content):
 
     # Create message container - the correct MIME type is multipart/alternative.
     msg = MIMEMultipart('alternative')
-    msg['Subject']  = subject
-    msg['From']     = sender
-    msg['To']       = ", ".join(receiver)
+    msg['Subject'] = subject                            # pylint: disable=c0326
+    msg['From']    = sender                             # pylint: disable=c0326
+    if isinstance(receiver, str):
+        msg['To']  = receiver                           # pylint: disable=c0326
+    else:
+        msg['To']  = ", ".join(receiver)                # pylint: disable=c0326
 
     # Record the MIME types of both parts - text/plain and text/html.
     body = MIMEText(content, 'html')
