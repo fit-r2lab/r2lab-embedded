@@ -192,6 +192,7 @@ class Nightly:
 
         scheduler = Scheduler(Job(display.run(), forever=True),
                               *jobs,
+                              critical=False,
                               timeout=self.wait_timeout)
         if not scheduler.run():
             self.verbose and scheduler.debrief()
@@ -221,6 +222,7 @@ class Nightly:
 
         scheduler = Scheduler(Job(display.run(), forever=True),
                               *jobs,
+                              critical=False,
                               timeout=self.wait_timeout)
         if not scheduler.run():
             self.verbose and scheduler.debrief()
