@@ -37,7 +37,7 @@ cd
 case $(hostname) in
     faraday*)
         pip3 install -U rhubarbe 2> /dev/null
-	systemctl restart monitor
+	systemctl restart monitornodes
 	systemctl restart monitorphones
 	systemctl restart accountsmanager
 	;;
@@ -49,4 +49,3 @@ case $(hostname) in
 	systemctl restart httpd
 	;;
 esac
-
