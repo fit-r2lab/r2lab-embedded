@@ -108,17 +108,22 @@ class Nightly:                                         # pylint: disable=r0902
         config = Config()
         self.bandwidth = int(config.value('networking', 'bandwidth'))
         self.backoff = int(config.value('networking', 'ssh_backoff'))
-        #self.cmc_timeout = float(config.value('nodes', 'cmc_default_timeout'))
         self.load_timeout = float(config.value(
-            'nodes', 'load_default_timeout'))
+            'nodes', 'load_nightly_timeout'))
         self.wait_timeout = float(config.value(
-            'nodes', 'wait_default_timeout'))
+            'nodes', 'wait_nightly_timeout'))
         self.bus = asyncio.Queue()
+        self.nodes = {Node(x, self.bus) for x in self.selector.cmc_names()}
+        self.display = NoProgressBarDisplay(self.nodes, self.bus)
 
+
+    def print(self, *args):
+        message = " ".join(str(x) for x in args)
+        self.display.dispatch(message)
 
     def verbose_msg(self, *args):
         if self.verbose:
-            print("verbose:", *args)
+            self.print("verbose:", *args)
 
     def mark_and_exclude(self, node, reason):
         """
@@ -133,9 +138,10 @@ class Nightly:                                         # pylint: disable=r0902
         # is not properly installed...
         unavailable_script = Path.home() / "r2lab-python/examples/unavailable.py"
         if not unavailable_script.exists():
-            print(f"Cannot locate unavailable script {unavailable_script}"
-                  f" - skipping")
+            self.print(f"Cannot locate unavailable script {unavailable_script}"
+                       f" - skipping")
             return
+        self.print(f"marking node {node.id} as unavailable")
         command = f"{unavailable_script} {node.id}"
         os.system(command)
 
@@ -153,7 +159,7 @@ class Nightly:                                         # pylint: disable=r0902
             else Reason.WONT_RESET
         for node in nodes:
             if node.action:
-                print(f"{node.control_hostname()}: {mode} OK")
+                self.print(f"{node.control_hostname()}: {mode} OK")
             else:
                 self.mark_and_exclude(node, reason)
 
@@ -164,49 +170,48 @@ class Nightly:                                         # pylint: disable=r0902
         actual_image = the_imagesrepo.locate_image(
             image_name, look_in_global=True)
         if not actual_image:
-            print(f"Image file {image_name} not found - emergency exit")
+            self.print(f"Image file {image_name} not found - emergency exit")
             exit(1)
 
         # load image
-        nodes = {Node(x, self.bus) for x in self.selector.cmc_names()}
-        display = NoProgressBarDisplay(nodes, self.bus)
         self.verbose_msg(f"image={actual_image}")
         self.verbose_msg(f"bandwidth={self.bandwidth}")
         self.verbose_msg(f"timeout={self.load_timeout}")
-        loader = ImageLoader(nodes, image=actual_image,
+        loader = ImageLoader(self.nodes, image=actual_image,
                              bandwidth=self.bandwidth,
-                             message_bus=self.bus, display=display)
+                             message_bus=self.bus,
+                             display=self.display)
+        self.print(f"Loading image {actual_image}"
+                   f" (timeout = {self.load_timeout})")
         loader.main(reset=True, timeout=self.load_timeout)
+        self.print("Load done")
 
     def global_wait_ssh(self):
         # wait for nodes to be ssh-reachable
-        nodes = {Node(x, self.bus) for x in self.selector.cmc_names()}
-        display = NoProgressBarDisplay(nodes, self.bus)
-        print(f"Waiting for {len(nodes)} nodes (timeout={self.wait_timeout})")
-        sshs = [SshWaiter(node, verbose=self.verbose) for node in nodes]
+        self.print(f"Waiting for {len(self.nodes)} nodes"
+                   f" (timeout={self.wait_timeout})")
+        sshs = [SshWaiter(node, verbose=self.verbose) for node in self.nodes]
         jobs = [Job(ssh.wait_for(self.backoff), critical=False)
                 for ssh in sshs]
 
-        scheduler = Scheduler(Job(display.run(), forever=True),
+        scheduler = Scheduler(Job(self.display.run(), forever=True),
                               *jobs,
                               critical=False,
                               timeout=self.wait_timeout)
         if not scheduler.run():
             self.verbose and scheduler.debrief()        # pylint: disable=w0106
         # exclude nodes that have not behaved
-        for node, job in zip(nodes, jobs):
-            print(f"node-> {node.id} job -> done={job.is_done()}"
-                  f" exc={job.raised_exception()}")
+        for node, job in zip(self.nodes, jobs):
+            self.print(f"node-> {node.id} job -> done={job.is_done()}",
+                       f"exc={job.raised_exception()}")
 
             if job.raised_exception():
                 self.mark_and_exclude(node, Reason.WONT_SSH)
 
     def global_check_image(self, _image, check_strings):
         # on the remaining nodes: check image marker
-        nodes = {Node(x, self.bus) for x in self.selector.cmc_names()}
-        display = NoProgressBarDisplay(nodes, self.bus)
-        print(f"Checking {len(nodes)} nodes"
-              f" against {check_strings} in /etc/rhubarbe-image")
+        self.print(f"Checking {len(self.nodes)} nodes"
+                   f" against {check_strings} in /etc/rhubarbe-image")
 
         grep_pattern = "|".join(check_strings)
         check_command = (
@@ -215,17 +220,17 @@ class Nightly:                                         # pylint: disable=r0902
             SshJob(node=SshNode(hostname=node.control_hostname(), keys=[]),
                    command=check_command,
                    critical=False)
-            for node in nodes
+            for node in self.nodes
         ]
 
-        scheduler = Scheduler(Job(display.run(), forever=True),
+        scheduler = Scheduler(Job(self.display.run(), forever=True),
                               *jobs,
                               critical=False,
                               timeout=self.wait_timeout)
         if not scheduler.run():
             self.verbose and scheduler.debrief()        # pylint: disable=w0106
         # exclude nodes that have not behaved
-        for node, job in zip(nodes, jobs):
+        for node, job in zip(self.nodes, jobs):
             if not job.is_done() or job.raised_exception():
                 self.verbose_msg(
                     f"something went badly wrong with {node}")
@@ -255,7 +260,7 @@ class Nightly:                                         # pylint: disable=r0902
 
     def all_off(self):
         if self.verbose:
-            print("verbose mode: skip all-off")
+            self.print("verbose mode: skip all-off")
             return
         command = "rhubarbe bye"
         for host in self.all_names:
@@ -270,13 +275,13 @@ class Nightly:                                         # pylint: disable=r0902
 
         # we have the lease, let's get down to business
         # skip this test in verbose mode
-        print(40*'=')
+        self.print(40*'=')
         showtime = time.strftime(
             "%Y-%m-%d@%H:%M:%S",
             time.localtime(time.time()))
-        print(f"Nightly check - starting at {showtime}")
+        self.print(f"Nightly check - starting at {showtime}")
 
-        print(40*'=')
+        self.print(40*'=')
 
         self.verbose_msg(f"focus is {self.all_names}")
 
@@ -314,11 +319,11 @@ class Nightly:                                         # pylint: disable=r0902
 
         html = complete_html(self.all_names, self.failures)
         if self.failures:
-            subject = (f"R2lab nightly on {number_nodes} node(s)"
-                       f" - found {len(self.failures)} issue(s)")
+            subject = (f"R2lab nightly : {len(self.failures)} issue(s)"
+                       f" on {number_nodes} node(s)")
         else:
-            subject = (f"R2lab nightly on {number_nodes} node(s)s "
-                       f"- everything is fine")
+            subject = (f"R2lab nightly : all is fine"
+                       f" on {number_nodes} node(s)")
 
         if self.verbose:
             print("verbose mode: skip sending mail")
