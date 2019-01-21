@@ -102,7 +102,7 @@ s|mnc\s*=\s*[0-9][0-9]*|mnc = 95|
 s|downlink_frequency\s*=.*;|downlink_frequency = 2660000000L;|
 s|N_RB_DL\s*=.*|N_RB_DL = ${nrb};|
 s|tx_gain\s*=.*;|tx_gain = 100;|
-s|rx_gain\s*=.*;|tx_gain = 115;|
+s|rx_gain\s*=.*;|rx_gain = 115;|
 s|pdsch_referenceSignalPower\s*=.*;|pdsch_referenceSignalPower = ${refSignalPower};|
 s|pusch_p0_Nominal\s*=.*;|pusch_p0_Nominal = -90;|
 s|pucch_p0_Nominal\s*=.*;|pucch_p0_Nominal = -96;|
