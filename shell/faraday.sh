@@ -363,8 +363,9 @@ alias reload="source /home/faraday/r2lab-embedded/shell/faraday.sh"
 # git pull and then reload; not allowed to everybody
 function refresh() {
     [ $(id -u) == 0 ] || { echo refresh must be run by root; return 1; }
-    /home/faraday/diana/auto-update.sh
-    /home/faraday/r2lab-embedded/auto-update.sh
+    /root/bin/auto-update-reset.sh /root/diana
+    /root/bin/auto-update-reset.sh /root/r2lab-embedded
+    /root/bin/auto-update-reset.sh /home/faraday/r2lab-embedded
     chown -R faraday:faraday ~faraday/r2lab-embedded
     reload
 }
