@@ -23,3 +23,6 @@ function gitup() {
     cd /root/r2lab-embedded
     git pull
 }
+
+# for use with diana systemd bash component
+SERVICES="sidecar httpd"

@@ -634,6 +634,9 @@ function all-off() {
     macphone phone-off
 }
 
+# for use with diana systemd bash component
+SERVICES="monitornodes monitorphones monitorleases accountsmanager"
+
 ########################################
 define-main "$0" "$BASH_SOURCE"
 main "$@"
