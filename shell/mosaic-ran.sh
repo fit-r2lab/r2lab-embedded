@@ -231,12 +231,17 @@ function start() {
     -x: start in graphical mode (or -o for compat)"
 
     local graphical=""
+    local tracer=""
+    local tracer_opt=""
+    local enb_opt="" 
 
     OPTIND=1
-    while getopts ":xo" opt; do
+    while getopts "T:xo" opt; do
         case $opt in
             x|o)
                 graphical=true;;
+	    T)
+		tracer=true; tracer_opt=$OPTARG;;
             *)
                 echo -e "$USAGE"; return 1;;
         esac
@@ -251,10 +256,13 @@ function start() {
 
     if [ -n "$graphical" ]; then
         echo "e-nodeB with X11 graphical output not yet implemented - running in background instead for now"
-        oai-ran.enb-start
-    else
-        oai-ran.enb-start
+        enb_opt+=""
     fi
+    if [ -n "$tracer" ]; then
+        echo "run eNB with tracer option"
+        enb_opt+="--T_stdout 0"
+    fi
+    oai-ran.enb-start $enb_opt
 }
 
 doc-nodes stop "Stop RAN service(s)"
