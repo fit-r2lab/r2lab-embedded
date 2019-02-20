@@ -232,16 +232,15 @@ function start() {
 
     local graphical=""
     local tracer=""
-    local tracer_opt=""
     local enb_opt="" 
 
     OPTIND=1
-    while getopts "T:xo" opt; do
+    while getopts "Txo" opt; do
         case $opt in
             x|o)
                 graphical=true;;
 	    T)
-		tracer=true; tracer_opt=$OPTARG;;
+		tracer=true;;
             *)
                 echo -e "$USAGE"; return 1;;
         esac
@@ -260,7 +259,7 @@ function start() {
     fi
     if [ -n "$tracer" ]; then
         echo "run eNB with tracer option"
-        enb_opt+="--T_stdout 0"
+        enb_opt+=" --T_stdout 0"
     fi
     oai-ran.enb-start $enb_opt
 }
