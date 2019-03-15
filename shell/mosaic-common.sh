@@ -27,7 +27,7 @@ function mosaic-as-ran() {
     -have-bashrc-source /etc/profile.d/mosaic-ran.sh
 }
 
-function mosaic-as-ue() {
+function mosaic-as-oai-ue() {
     git-pull-r2lab
     ln -sf /root/r2lab-embedded/shell/mosaic-oai-ue.sh /etc/profile.d
     -have-bashrc-source /etc/profile.d/mosaic-oai-ue.sh
