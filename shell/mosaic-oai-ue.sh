@@ -88,7 +88,7 @@ function configure() {
 
     local r2lab_id=$(r2lab-id -s)
     local ue_args_cmd=$(oai-ue.ue-cmd-get)
-    local usim_conf=$(oai-ue.usim-show)
+    local usim_conf=$(oai-ue.usim-get)
 
     case $r2lab_id in
 	06) msin="0000000003";;
