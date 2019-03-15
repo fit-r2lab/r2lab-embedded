@@ -282,6 +282,8 @@ function mosaic-ran() {
         "imaging.sh activate-lowlatency"
     bim 5 mosaic-ran-base mosaic-ran \
         "mosaic-ran.sh image"
+    bim 6 mosaic-ran-base mosaic-ue \
+        "mosaic-oai-ue.sh image"
 }
 
 ####################
@@ -290,4 +292,4 @@ function mosaic-ran() {
 # mosaic-ran &
 # mosaic-cn &
 # wait %1 %2
-mosaic-ran 
+mosaic-ran
