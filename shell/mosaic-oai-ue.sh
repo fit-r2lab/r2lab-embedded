@@ -39,7 +39,7 @@ function image() {
 function dependencies-for-oai-ue() {
     git-pull-r2lab
     apt-get update
-    apt-get install -y emacs
+    apt-get install -y libelf-dev emacs
 }
 
 function install-uhd-images() {
@@ -50,6 +50,10 @@ function install-uhd-images() {
 function install-oai-ue() {
     -snap-install oai-ue
     oai-ue.ue-stop
+    # Compile the OAI UE_IP module
+    cd /root/snap/oai-ue/current/ue-ip
+    make
+    cd -
 }
 
 
@@ -112,7 +116,10 @@ EOF
         *) echo -e "Bad N_RB value $nrb"; return 1;;
     esac
 
-    echo " -C 2660000000 -r $nrb --ue-scan-carrier --ue-rxgain $rxgain --ue-txgain $txgain --ue-max-power maxpower" > $ue_args_cmd 
+    echo " -C 2660000000 -r $nrb --ue-scan-carrier --ue-rxgain $rxgain --ue-txgain $txgain --ue-max-power $maxpower" > $ue_args_cmd 
+
+    echo "Set up the OAI UE IP interface"
+    oai-ue.oip
 
     echo "will run OAI UE with following args"
     cat $ue_args_cmd
@@ -235,6 +242,7 @@ function start() {
 
     echo "Show OAI UE conf and the command before running it"
     oai-ue.ue-conf-show
+    echo -n "Running oai-ue "
     oai-ue.ue-cmd-show
 
     oai-ue.ue-start $oai_ue_opt
@@ -242,7 +250,7 @@ function start() {
 
 doc-nodes stop "Stop OAI UE service(s)"
 function stop() {
-    oai-ue.stop
+    oai-ue.ue-stop
 }
 
 doc-nodes status "Displays status of OAI UE service(s)"
@@ -252,15 +260,15 @@ function status() {
 
 doc-nodes journal "Wrapper around journalctl about OAI UE service(s) - use with -f to follow up"
 function journal() {
-    units="snap.oai-ran.enbd.service"
+    units="snap.oai-ue.ued.service"
     jopts=""
     for unit in $units; do jopts="$jopts --unit $unit"; done
     journalctl $jopts "$@"
 }
 
-doc-nodes configure-directory "cd into configuration directory for RAN service(s)"
+doc-nodes configure-directory "cd into configuration directory for UE service(s)"
 function configure-directory() {
-    local conf_dir=$(dirname $(oai-ran.enb-conf-get))
+    local conf_dir=$(dirname $(oai-ue.ue-conf-get))
     cd $conf_dir
 }
 
