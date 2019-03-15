@@ -49,7 +49,7 @@ function install-uhd-images() {
 
 function install-oai-ue() {
     -snap-install oai-ue
-    oai-ue.stop-all
+    oai-ue.ue-stop
 }
 
 
@@ -85,18 +85,18 @@ function configure() {
     [[ -n "$@" ]] && { echo -e "$USAGE"; return 1; }
 
     local r2lab_id=$(r2lab-id -s)
-    local ue_cmd=$(oai-ue.ue-cmd-get)
-    local ue_conf=$(oai-ue.ue-conf-get)
+    local ue_args_cmd=$(oai-ue.ue-cmd-get)
+    local usim_conf=$(oai-ue.usim-show)
 
     case $r2lab_id in
-	6)  msin="0000000003";;
+	06) msin="0000000003";;
 	19) msin="0000000006";;
         *) echo -e "OAI UE cannot run on node fit$nrb"; return 1;;
     esac
 
     echo "Configuring UE on node $r2lab_id for nrb=$nrb"
 
-    -sed-configurator $ue_conf <<EOF
+    -sed-configurator $usim_conf <<EOF
 s|MNC="93";|MNC="95";|
 s|MSIN=.*|MSIN=${msin};|
 s|OPC=.*|OPC="8E27B6AF0E692E750F32667A3B14605D";|
@@ -110,8 +110,10 @@ EOF
         *) echo -e "Bad N_RB value $nrb"; return 1;;
     esac
 
-    echo "./lte-uesoftmodem.Rel14 -C 2660000000 -r $nrb --ue-scan-carrier --ue-rxgain $rxgain --ue-txgain $txgain --ue-max-power maxpower" > $ue_cmd 
+    echo " -C 2660000000 -r $nrb --ue-scan-carrier --ue-rxgain $rxgain --ue-txgain $txgain --ue-max-power maxpower" > $ue_args_cmd 
 
+    echo "will run OAI UE with following args"
+    cat $ue_args_cmd
 }
 
 
@@ -178,7 +180,7 @@ function warm-up() {
     status
     echo
 
-    echo -n "Warming up RAN ... "
+    echo -n "Warming up OAI UE... "
     # focusing on b210 for this first version
     if [ -n "$reset" ]; then
         echo -n "USB off (reset requested) ... "
@@ -222,37 +224,18 @@ function warm-up() {
     fi
 }
 
-doc-nodes start "Start OAI UE; option -x means graphical - requires X11-enabled ssh session"
+doc-nodes start "Start OAI UE"
 function start() {
-    local USAGE="Usage: $FUNCNAME [options]
-  options:
-    -x: start in graphical mode (or -o for compat)"
-
-    local graphical=""
-    local oai_ue_opt="" 
-
-    OPTIND=1
-    while getopts "xo" opt; do
-        case $opt in
-            x|o)
-                graphical=true;;
-            *)
-                echo -e "$USAGE"; return 1;;
-        esac
-    done
-    shift $((OPTIND-1))
+    local USAGE="Usage: $FUNCNAME"
 
     [[ -n "$@" ]] && { echo -e "$USAGE"; return 1; }
     echo "Checking interface is up : $(turn-on-data)"
 
-    echo "Show r2lab conf before running the eNB"
-    oai-ue.conf-show
+    echo "Show OAI UE conf and the command before running it"
+    oai-ue.ue-conf-show
+    oai-ue.ue-cmd-show
 
-    if [ -n "$graphical" ]; then
-        echo "e-nodeB with X11 graphical output not yet implemented - running in background instead for now"
-        oai_ue_opt+=" -d"
-    fi
-    oai-ue.start $oai_ue_opt
+    oai-ue.ue-start $oai_ue_opt
 }
 
 doc-nodes stop "Stop OAI UE service(s)"
@@ -262,7 +245,7 @@ function stop() {
 
 doc-nodes status "Displays status of OAI UE service(s)"
 function status() {
-    oai-ue.status
+    oai-ue.ue-status
 }
 
 doc-nodes journal "Wrapper around journalctl about OAI UE service(s) - use with -f to follow up"
