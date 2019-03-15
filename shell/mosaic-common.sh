@@ -27,6 +27,12 @@ function mosaic-as-ran() {
     -have-bashrc-source /etc/profile.d/mosaic-ran.sh
 }
 
+function mosaic-as-ue() {
+    git-pull-r2lab
+    ln -sf /root/r2lab-embedded/shell/mosaic-oai-ue.sh /etc/profile.d
+    -have-bashrc-source /etc/profile.d/mosaic-oai-ue.sh
+}
+
 
 # the options to use with snap for these packages
 function -snap-install() {

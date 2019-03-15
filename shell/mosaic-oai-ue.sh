@@ -2,7 +2,7 @@
 
 source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
 
-doc-nodes-sep "#################### For managing a mosaic OAI UE"
+doc-nodes-sep "#################### For managing a Mosaic snap for OAI UE"
 
 source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
 
@@ -58,7 +58,7 @@ function install-oai-ue() {
 
 doc-nodes config-dir "echo the location of the configuration dir"
 function config-dir() {
-    (cd /var/snap/oai-ran/current; pwd -P)
+    (cd /var/snap/oai-ue/current; pwd -P)
 }
 
 doc-nodes inspect-config-changes "show all changes done by configure"
@@ -67,10 +67,11 @@ function inspect-config-changes() {
 }
 
 
-doc-nodes configure "configure RAN, i.e. tweaks e-nodeB config file - see --help"
+doc-nodes configure "configure oai-ue, i.e. tweaks OAI UE config file - see --help"
 function configure() {
     local nrb=50
-    local USAGE="Usage: $FUNCNAME [options] cn-id
+    local rxgain, txgain, maxpower
+    local USAGE="Usage: $FUNCNAME [options]
   options:
     -b nrb: sets NRB - default is $nrb"
     OPTIND=1
@@ -81,39 +82,35 @@ function configure() {
         esac
     done
     shift $((OPTIND-1))
-
-    [[ -z "$@" ]] && { echo -e "$USAGE"; return 1; }
-    local cn_id=$1; shift
     [[ -n "$@" ]] && { echo -e "$USAGE"; return 1; }
 
     local r2lab_id=$(r2lab-id -s)
-    local enbconf=$(oai-ran.enb-conf-get)
+    local ue_cmd=$(oai-ue.ue-cmd-get)
+    local ue_conf=$(oai-ue.ue-conf-get)
 
-    echo "Configuring RAN on node $r2lab_id for CN on node $cn_id and nrb=$nrb"
-    case $nrb in
-	25) refSignalPower=-24;;
-	50) refSignalPower=-27;;
-        *) echo -e "Bad N_RB_DL value $nrb"; return 1;;
+    case $r2lab_id in
+	6)  msin="0000000003";;
+	19) msin="0000000006";;
+        *) echo -e "OAI UE cannot run on node fit$nrb"; return 1;;
     esac
 
-# The good command for 25: ./lte-uesoftmodem.Rel14 -C 2660000000 -r 25 --ue-scan-carrier --ue-rxgain 110 --ue-txgain 15 --ue-max-power 0
+    echo "Configuring UE on node $r2lab_id for nrb=$nrb"
 
-    -sed-configurator $enbconf << EOF
-s|mnc\s*=\s*[0-9][0-9]*|mnc = 95|
-s|downlink_frequency\s*=.*;|downlink_frequency = 2660000000L;|
-s|N_RB_DL\s*=.*|N_RB_DL = ${nrb};|
-s|tx_gain\s*=.*;|tx_gain = 100;|
-s|rx_gain\s*=.*;|rx_gain = 125;|
-s|pdsch_referenceSignalPower\s*=.*;|pdsch_referenceSignalPower = ${refSignalPower};|
-s|pusch_p0_Nominal\s*=.*;|pusch_p0_Nominal = -90;|
-s|pucch_p0_Nominal\s*=.*;|pucch_p0_Nominal = -96;|
-s|\(mme_ip_address.*ipv4.*=\).*|\1 "192.168.${mosaic_subnet}.${cn_id}";|
-s|ENB_INTERFACE_NAME_FOR_S1_MME.*=.*"[^"]*";|ENB_INTERFACE_NAME_FOR_S1_MME = "${mosaic_ifname}";|
-s|ENB_IPV4_ADDRESS_FOR_S1_MME.*=.*"[^"]*";|ENB_IPV4_ADDRESS_FOR_S1_MME = "192.168.${mosaic_subnet}.${r2lab_id}/24";|
-s|ENB_INTERFACE_NAME_FOR_S1U.*=.*"[^"]*";|ENB_INTERFACE_NAME_FOR_S1U = "${mosaic_ifname}";|
-s|ENB_IPV4_ADDRESS_FOR_S1U.*=.*"[^"]*";|ENB_IPV4_ADDRESS_FOR_S1U = "192.168.${mosaic_subnet}.${r2lab_id}/24";|
-s|ENB_IPV4_ADDRESS_FOR_X2C.*=.*"[^"]*";|ENB_IPV4_ADDRESS_FOR_X2C = "192.168.${mosaic_subnet}.${r2lab_id}/24";|
+    -sed-configurator $ue_conf <<EOF
+s|MNC="93";|MNC="95";|
+s|MSIN=.*|MSIN=${msin};|
+s|OPC=.*|OPC="8E27B6AF0E692E750F32667A3B14605D";|
+s|HPLMN=.*|HPLMN= "20895";|
+s|"20893"|"20895"|
 EOF
+
+    case $nrb in
+	25) rxgain=110; txgain=15; maxpower=0;;
+	50) rxgain=110; txgain=15; maxpower=0;;#numbers have to be tuned for NRB=50
+        *) echo -e "Bad N_RB value $nrb"; return 1;;
+    esac
+
+    echo "./lte-uesoftmodem.Rel14 -C 2660000000 -r $nrb --ue-scan-carrier --ue-rxgain $rxgain --ue-txgain $txgain --ue-max-power maxpower" > $ue_cmd 
 
 }
 
