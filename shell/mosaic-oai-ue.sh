@@ -48,11 +48,10 @@ function install-uhd-images() {
 }
 
 function install-oai-ue() {
-    local conf_dir=$(dirname $(oai-ue.ue-conf-get))
-
     -snap-install oai-ue
     oai-ue.ue-stop
     # Compile the OAI UE_IP module
+    local conf_dir=$(dirname $(oai-ue.ue-conf-get))
     cd ${conf_dir}/ue_ip; make; cd -
 }
 
