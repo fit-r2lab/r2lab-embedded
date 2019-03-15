@@ -26,6 +26,14 @@ source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
 mosaic_role="oai-ue"
 mosaic_long="OAI User Equipment"
 
+###### utility
+doc-nodes configure-directory "cd into configuration directory for UE service(s)"
+function configure-directory() {
+    local conf_dir=$(dirname $(oai-ue.ue-conf-get))
+    cd $conf_dir
+}
+
+
 
 ###### imaging
 doc-nodes image "frontend for rebuilding this image"
@@ -51,9 +59,8 @@ function install-oai-ue() {
     -snap-install oai-ue
     oai-ue.ue-stop
     # Compile the OAI UE_IP module
-    cd /root/snap/oai-ue/current/ue-ip
-    make
-    cd -
+    configure-directory
+    cd ue-ip; make
 }
 
 
@@ -264,12 +271,6 @@ function journal() {
     jopts=""
     for unit in $units; do jopts="$jopts --unit $unit"; done
     journalctl $jopts "$@"
-}
-
-doc-nodes configure-directory "cd into configuration directory for UE service(s)"
-function configure-directory() {
-    local conf_dir=$(dirname $(oai-ue.ue-conf-get))
-    cd $conf_dir
 }
 
 ########################################
