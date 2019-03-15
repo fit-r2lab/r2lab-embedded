@@ -53,7 +53,7 @@ function install-oai-ue() {
     -snap-install oai-ue
     oai-ue.ue-stop
     # Compile the OAI UE_IP module
-    cd ${conf_dir}/ue-ip; make; cd -
+    cd ${conf_dir}/ue_ip; make; cd -
 }
 
 
