@@ -70,7 +70,9 @@ function inspect-config-changes() {
 doc-nodes configure "configure oai-ue, i.e. tweaks OAI UE config file - see --help"
 function configure() {
     local nrb=50
-    local rxgain, txgain, maxpower
+    local rxgain=110
+    local txgain=15
+    local maxpower=0
     local USAGE="Usage: $FUNCNAME [options]
   options:
     -b nrb: sets NRB - default is $nrb"
@@ -106,7 +108,7 @@ EOF
 
     case $nrb in
 	25) rxgain=110; txgain=15; maxpower=0;;
-	50) rxgain=110; txgain=15; maxpower=0;;#numbers have to be tuned for NRB=50
+	50) rxgain=110; txgain=15; maxpower=0;;
         *) echo -e "Bad N_RB value $nrb"; return 1;;
     esac
 
