@@ -2,7 +2,7 @@
 
 source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
 
-doc-nodes-sep "#################### For managing a mosaic OAI UE
+doc-nodes-sep "#################### For managing a mosaic OAI UE"
 
 source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
 
@@ -96,6 +96,7 @@ function configure() {
         *) echo -e "Bad N_RB_DL value $nrb"; return 1;;
     esac
 
+# The good command for 25: ./lte-uesoftmodem.Rel14 -C 2660000000 -r 25 --ue-scan-carrier --ue-rxgain 110 --ue-txgain 15 --ue-max-power 0
 
     -sed-configurator $enbconf << EOF
 s|mnc\s*=\s*[0-9][0-9]*|mnc = 95|
