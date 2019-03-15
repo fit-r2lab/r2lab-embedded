@@ -53,8 +53,8 @@ function install-oai-ue() {
     # Compile the OAI UE_IP module
     local conf_dir=$(dirname $(oai-ue.ue-conf-get))
     conf_dir=$(echo ${conf_dir//var/root})
-    echo "compiling in ${conf_dir}/ue_ip"
-    cd ${conf_dir}/ue_ip; pwd; make; cd -
+    echo "compiling OAI UE_IP in ${conf_dir}/ue_ip"
+    cd ${conf_dir}/ue_ip; pwd; make; ./oip add ./ue_ip.ko; cd -
 }
 
 
