@@ -241,8 +241,8 @@ function start() {
     [[ -n "$@" ]] && { echo -e "$USAGE"; return 1; }
     echo "Checking interface is up : $(turn-on-data)"
 
-    echo "Show OAI UE conf and the command before running it"
-    oai-ue.ue-conf-show
+    echo "Show OAI USIM conf"
+    oai-ue.usim-show
     echo -n "Running oai-ue "
     oai-ue.ue-cmd-show
 
