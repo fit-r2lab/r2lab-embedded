@@ -246,7 +246,7 @@ function start() {
     echo -n "Running oai-ue "
     oai-ue.ue-cmd-show
 
-    oai-ue.ue-start $oai_ue_opt
+    oai-ue.ue-start
 }
 
 doc-nodes stop "Stop OAI UE service(s)"
