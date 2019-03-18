@@ -105,7 +105,7 @@ function configure() {
 
     -sed-configurator $usim_conf <<EOF
 s|MNC="93";|MNC="95";|
-s|MSIN=.*|MSIN=${msin};|
+s|MSIN=.*|MSIN="${msin}";|
 s|OPC=.*|OPC="8E27B6AF0E692E750F32667A3B14605D";|
 s|HPLMN=.*|HPLMN= "20895";|
 s|"20893"|"20895"|
