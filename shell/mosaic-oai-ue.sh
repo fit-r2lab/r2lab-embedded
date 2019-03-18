@@ -118,7 +118,8 @@ EOF
     esac
 
     echo " -C 2660000000 -r $nrb --ue-scan-carrier --ue-rxgain $rxgain --ue-txgain $txgain --ue-max-power $maxpower" > $ue_args_cmd 
-
+    echo "generate usim"
+    oai-ue.usim-gen
     echo "Set up the OAI UE IP interface"
     oai-ue.oip
 
