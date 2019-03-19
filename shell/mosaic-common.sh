@@ -41,6 +41,7 @@ function -snap-install() {
     echo "Installing: $command"
     $command
     -have-bashrc-source /etc/profile.d/apps-bin-path.sh
+    source /etc/profile.d/apps-bin-path.sh
 }
 
 
