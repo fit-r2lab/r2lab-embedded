@@ -148,14 +148,13 @@ def send_email(sender, receiver, subject, content):
     msg.attach(body)
 
     # Send the message via local SMTP server.
-    mailer = smtplib.SMTP('localhost')
-    # sendmail function takes 3 arguments: sender's address, recipient's address
-    # and message to send - here it is sent as one string.
-    mailer.sendmail(sender, receiver, msg.as_string())
-    mailer.quit()
-
-
-
+    with smtplib.SMTP('localhost') as mailer:
+        # sendmail function takes 3 arguments:
+        # sender's address, recipient's address
+        # and message to send - here it is sent as one string.
+        mailer.sendmail(sender, receiver, msg.as_string())
+        # I take it this is taken care of by context manager
+        # mailer.quit()
 
 
 def main():
