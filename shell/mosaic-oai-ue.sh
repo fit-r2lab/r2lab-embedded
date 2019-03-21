@@ -97,7 +97,7 @@ function configure() {
 
     case $r2lab_id in
 	06) msin="0000000003"; rxgain=110; txgain=15;;
-	19) msin="0000000006"; rxgain=90; txgain=7;;
+	19) msin="0000000006"; rxgain=90; txgain=9;;
         *) echo -e "OAI UE cannot run on node fit$nrb"; return 1;;
     esac
 
