@@ -6,7 +6,7 @@ case $(hostname) in
         gitroot=/root/r2lab-embedded
     ;;
     *)
-        gateway=inria_mosaic@faraday.inria.fr
+        gateway=inria_r2lab.admin@faraday.inria.fr
         gitroot=$HOME/git/r2lab-embedded
     ;;
 esac
@@ -286,10 +286,16 @@ function mosaic-ran() {
         "mosaic-oai-ue.sh image"
 }
 
+function u18-04.2() {
+    bim 36 u18.04 u18.04-$DATE-tmp "nodes.sh git-pull-r2lab" "nodes.sh apt-upgrade-all" 
+    bim 37 u18.04-$DATE-tmp u18.04-$DATE "imaging.sh clean-kernel-build"
+}
+
 ####################
 # xxx this clearly should be specified on the command line some day
 # mosaic-base
 # mosaic-ran &
 # mosaic-cn &
 # wait %1 %2
-mosaic-ran
+# mosaic-ran
+u18-04.2
