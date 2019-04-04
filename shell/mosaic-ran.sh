@@ -106,6 +106,7 @@ s|rx_gain\s*=.*;|rx_gain = 125;|
 s|pdsch_referenceSignalPower\s*=.*;|pdsch_referenceSignalPower = ${refSignalPower};|
 s|pusch_p0_Nominal\s*=.*;|pusch_p0_Nominal = -90;|
 s|pucch_p0_Nominal\s*=.*;|pucch_p0_Nominal = -96;|
+s|max_rxgain\s*=.*;|max_rxgain = 120;|
 s|\(mme_ip_address.*ipv4.*=\).*|\1 "192.168.${mosaic_subnet}.${cn_id}";|
 s|ENB_INTERFACE_NAME_FOR_S1_MME.*=.*"[^"]*";|ENB_INTERFACE_NAME_FOR_S1_MME = "${mosaic_ifname}";|
 s|ENB_IPV4_ADDRESS_FOR_S1_MME.*=.*"[^"]*";|ENB_IPV4_ADDRESS_FOR_S1_MME = "192.168.${mosaic_subnet}.${r2lab_id}/24";|
