@@ -96,7 +96,7 @@ function configure() {
     local usim_conf=$(oai-ue.usim-get)
 
     case $r2lab_id in
-	06) msin="0000000003"; rxgain=110; txgain=16; maxpower=-21;;
+	06) msin="0000000003"; rxgain=110; txgain=18; maxpower=-23;;
 	19) msin="0000000006"; rxgain=90; txgain=9; maxpower=-14;;
         *) echo -e "OAI UE cannot run on node fit$nrb"; return 1;;
     esac
