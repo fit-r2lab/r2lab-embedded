@@ -96,6 +96,7 @@ function configure() {
         *) echo -e "Bad N_RB_DL value $nrb"; return 1;;
     esac
 
+#s|max_rxgain\s*=.*;|max_rxgain = 125;| /* default value but generates too high I0 value */
 
     -sed-configurator $enbconf << EOF
 s|mnc\s*=\s*[0-9][0-9]*|mnc = 95|
@@ -106,13 +107,14 @@ s|rx_gain\s*=.*;|rx_gain = 125;|
 s|pdsch_referenceSignalPower\s*=.*;|pdsch_referenceSignalPower = ${refSignalPower};|
 s|pusch_p0_Nominal\s*=.*;|pusch_p0_Nominal = -90;|
 s|pucch_p0_Nominal\s*=.*;|pucch_p0_Nominal = -96;|
-s|max_rxgain\s*=.*;|max_rxgain = 125;|
+s|max_rxgain\s*=.*;|max_rxgain = 120;|
 s|\(mme_ip_address.*ipv4.*=\).*|\1 "192.168.${mosaic_subnet}.${cn_id}";|
 s|ENB_INTERFACE_NAME_FOR_S1_MME.*=.*"[^"]*";|ENB_INTERFACE_NAME_FOR_S1_MME = "${mosaic_ifname}";|
 s|ENB_IPV4_ADDRESS_FOR_S1_MME.*=.*"[^"]*";|ENB_IPV4_ADDRESS_FOR_S1_MME = "192.168.${mosaic_subnet}.${r2lab_id}/24";|
 s|ENB_INTERFACE_NAME_FOR_S1U.*=.*"[^"]*";|ENB_INTERFACE_NAME_FOR_S1U = "${mosaic_ifname}";|
 s|ENB_IPV4_ADDRESS_FOR_S1U.*=.*"[^"]*";|ENB_IPV4_ADDRESS_FOR_S1U = "192.168.${mosaic_subnet}.${r2lab_id}/24";|
 s|ENB_IPV4_ADDRESS_FOR_X2C.*=.*"[^"]*";|ENB_IPV4_ADDRESS_FOR_X2C = "192.168.${mosaic_subnet}.${r2lab_id}/24";|
+s|parallel_config\s*=.*;|parallel_config = "PARALLEL_SINGLE_THREAD";|
 EOF
 
 }
