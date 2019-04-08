@@ -96,9 +96,19 @@ function configure() {
     local usim_conf=$(oai-ue.usim-get)
 
     case $r2lab_id in
-	06) msin="0000000003"; rxgain=130; txgain=1; maxpower=-6;;
-	19) msin="0000000006"; rxgain=95; txgain=9; maxpower=-14;;
-        *) echo -e "OAI UE cannot run on node fit$nrb"; return 1;;
+        06) msin="0000000003";
+            case $nrb in
+                  25) rxgain=130; txgain=1; maxpower=-6;;
+                  50) rxgain=125; txgain=0; maxpower=-5;;
+                  *) echo -e "ERROR: Bad N_RB value $nrb"; return 1;;
+            esac;;
+        19) msin="0000000006";
+            case $nrb in
+                25) rxgain=95; txgain=9; maxpower=-14;;
+                50) rxgain=95; txgain=10; maxpower=-15;; # to be tuned...
+                *) echo -e "ERROR: Bad N_RB value $nrb"; return 1;;
+            esac;;
+        *) echo -e "ERROR: OAI UE cannot run on node fit$nrb"; return 1;;
     esac
 
     echo "Configuring UE on node $r2lab_id for nrb=$nrb"
@@ -110,12 +120,6 @@ s|OPC=.*|OPC="8E27B6AF0E692E750F32667A3B14605D";|
 s|HPLMN=.*|HPLMN= "20895";|
 s|"20893"|"20895"|
 EOF
-
-    case $nrb in
-	25) ;; 
-	50) ;; # check if some parameters need to be tuned
-        *) echo -e "Bad N_RB value $nrb"; return 1;;
-    esac
 
     echo " -C 2660000000 -r $nrb --ue-scan-carrier --ue-rxgain $rxgain --ue-txgain $txgain --ue-max-power $maxpower" > $ue_args_cmd 
     echo "generate usim"
