@@ -108,10 +108,8 @@ function configure() {
                 50) rxgain=95; txgain=10; maxpower=-15;; # to be tuned...
                 *) echo -e "ERROR: Bad N_RB value $nrb"; return 1;;
             esac;;
-        *) echo -e "ERROR: OAI UE cannot run on node fit$nrb"; return 1;;
+        *) echo -e "ERROR: OAI UE cannot run on node fit$r2lab_id"; return 1;;
     esac
-
-    echo "Configuring UE on node $r2lab_id for nrb=$nrb"
 
     -sed-configurator $usim_conf <<EOF
 s|MNC="93";|MNC="95";|
@@ -122,6 +120,11 @@ s|"20893"|"20895"|
 EOF
 
     echo " -C 2660000000 -r $nrb --ue-scan-carrier --ue-rxgain $rxgain --ue-txgain $txgain --ue-max-power $maxpower" > $ue_args_cmd 
+
+    echo "Configuring UE on fit$r2lab_id for nrb=$nrb"
+    echo "will run oai-ue with following args: "
+    cat $ue_args_cmd
+
     echo "generate usim"
     oai-ue.usim-gen
     echo "Set up the OAI UE IP interface"
