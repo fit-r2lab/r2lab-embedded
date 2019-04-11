@@ -122,7 +122,7 @@ function configure-core-network() {
     #-enable-snap-bins
     local r2lab_id=$(r2lab-id -s)
     local r2lab_ip=$(r2lab-ip -s)
-    # not quite sure how this sohuld work
+    # not quite sure how this should work
     # the conf-get commands return file paths
     # but that works only for the 3 main conf files
     local hss_conf=$(oai-cn.hss-conf-get)
