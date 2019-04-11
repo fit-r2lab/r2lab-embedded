@@ -91,8 +91,8 @@ function configure() {
 
     echo "Configuring RAN on node $r2lab_id for CN on node $cn_id and nrb=$nrb"
     case $nrb in
-	25) refSignalPower=-24;;
-	50) refSignalPower=-27;;
+	25) refSignalPower=-24; puSch10xSnr=100; puCch10xSnr=100;;
+	50) refSignalPower=-27; puSch10xSnr=100; puCch10xSnr=100;;
         *) echo -e "Bad N_RB_DL value $nrb"; return 1;;
     esac
 
@@ -107,6 +107,8 @@ s|rx_gain\s*=.*;|rx_gain = 125;|
 s|pdsch_referenceSignalPower\s*=.*;|pdsch_referenceSignalPower = ${refSignalPower};|
 s|pusch_p0_Nominal\s*=.*;|pusch_p0_Nominal = -90;|
 s|pucch_p0_Nominal\s*=.*;|pucch_p0_Nominal = -96;|
+s|puSch10xSnr\s*=.*;|puSch10xSnr = ${puSch10xSnr};|
+s|puCch10xSnr\s*=.*;|puCch10xSnr = ${puCch10xSnr};|
 s|max_rxgain\s*=.*;|max_rxgain = 120;|
 s|\(mme_ip_address.*ipv4.*=\).*|\1 "192.168.${mosaic_subnet}.${cn_id}";|
 s|ENB_INTERFACE_NAME_FOR_S1_MME.*=.*"[^"]*";|ENB_INTERFACE_NAME_FOR_S1_MME = "${mosaic_ifname}";|
