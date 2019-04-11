@@ -126,6 +126,7 @@ function configure-core-network() {
     # the conf-get commands return file paths
     # but that works only for the 3 main conf files
     local hss_conf=$(oai-cn.hss-conf-get)
+    echo "in configure-core-network, hss_conf=${hss_conf}"
     local snap_config_dir=$(dirname $hss_conf)
 
     cd $snap_config_dir
