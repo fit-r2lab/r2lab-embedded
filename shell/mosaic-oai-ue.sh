@@ -98,7 +98,7 @@ function configure() {
     case $r2lab_id in
         06) msin="0000000003";
             case $nrb in
-                  25) rxgain=130; txgain=1; maxpower=-6;;
+                  25) rxgain=125; txgain=1; maxpower=-6;;
                   50) rxgain=125; txgain=0; maxpower=-5;;
                   *) echo -e "ERROR: Bad N_RB value $nrb"; return 1;;
             esac;;
