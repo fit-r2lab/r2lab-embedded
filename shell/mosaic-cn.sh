@@ -110,7 +110,6 @@ function configure() {
 
     # first stop all previous oai code running
     oai-cn.stop-all  
-    reinit-core-network
     configure-core-network
     reinit-core-network
     # following configuration should be done after reinit-core-network
