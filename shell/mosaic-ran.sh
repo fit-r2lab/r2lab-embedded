@@ -237,7 +237,7 @@ function start() {
 
     local graphical=""
     local tracer=""
-    local enb_opt="" 
+    local enb_opt=""
 
     OPTIND=1
     while getopts "Txo" opt; do

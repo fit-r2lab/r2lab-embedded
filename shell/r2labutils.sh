@@ -8,7 +8,7 @@
 #    will define 3 functions
 #    help-cat : user-oriented, to get help on that category
 #    doc-cat  : devel-oriented, to add a line in that help
-#    dac-cat-sep : same, but to insert separators
+#    doc-cat-sep : same, but to insert separators
 
 function create-doc-category () {
     category="$1"; shift
@@ -38,10 +38,10 @@ function augment-help-with() {
     defalias="alias help=\"echo '#################### Native bash help'; \\help; help-$category\""
     eval "$defalias"
 }
-    
+
 
 ### private stuff, not to be used from the outside
-# -doc-helper <category> 
+# -doc-helper <category>
 function -doc-helper () {
     category=$1; shift
     fun=$1; shift;
@@ -65,7 +65,7 @@ function -doc-helper-sep() {
 	assign="$varname=\"${!varname}\n============================== $contents\""
     fi
     eval "$assign"
-} 
+}
 
 ########################################
 ########## utilities to deal with a set of files of the same kind
@@ -135,7 +135,7 @@ function define-main() {
 	    case $(type -t $subcommand) in
 		function)
 		    $subcommand "$@" ;;
-		*) 
+		*)
 		    echo "$subcommand not a function : $(type -t $subcommand) - exiting" ;;
 	    esac
 	fi
@@ -145,5 +145,5 @@ function define-main() {
 ####################
 # said file just needs to end up with these 2 lines
 ####################
-define-main "$0" "$BASH_SOURCE" 
+define-main "$0" "$BASH_SOURCE"
 main "$@"

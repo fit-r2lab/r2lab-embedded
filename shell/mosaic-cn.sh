@@ -109,7 +109,7 @@ doc-nodes configure "configure core network for r2lab"
 function configure() {
 
     # first stop all previous oai code running
-    oai-cn.stop-all  
+    oai-cn.stop-all
     configure-core-network
     reinit-core-network
     # following configuration should be done after reinit-core-network

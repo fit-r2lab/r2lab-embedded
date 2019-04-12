@@ -119,7 +119,7 @@ s|HPLMN=.*|HPLMN= "20895";|
 s|"20893"|"20895"|
 EOF
 
-    echo " -C 2660000000 -r $nrb --ue-scan-carrier --ue-rxgain $rxgain --ue-txgain $txgain --ue-max-power $maxpower" > $ue_args_cmd 
+    echo " -C 2660000000 -r $nrb --ue-scan-carrier --ue-rxgain $rxgain --ue-txgain $txgain --ue-max-power $maxpower" > $ue_args_cmd
 
     echo "Configuring UE on fit$r2lab_id for nrb=$nrb"
     echo "will run oai-ue with following args: "
