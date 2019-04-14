@@ -130,7 +130,7 @@ function configure-core-network() {
     # but that works only for the 3 main conf files
     local hss_conf=$(oai-cn.hss-conf-get)
 
-    while [-z "$hss_conf"]
+    while [ -z "$hss_conf"]
     do
 	echo "** oai-cn.hss-conf-get returns null; sleep 1s"
 	sleep 1
