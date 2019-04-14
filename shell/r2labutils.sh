@@ -74,16 +74,23 @@ function random-string() {
 }
 
 function create-file-category() {
-    catname=$1; shift
-    plural=${catname}s
-    codefile="/tmp/def-category-$(random-string 12)"
+    local catname=$1; shift
+    local plural=${catname}s
+    local codefile="/tmp/def-category-$(random-string 12)"
     cat << EOF > "$codefile"
 function clear-${plural}() {
     _${plural}=""
 }
 clear-${plural}
+function add-one-to-${plural}() {
+    local addition="\$1"
+    local item
+    for item in \${_${plural}}; do [[ "\$item" == "\$addition" ]] && return; done
+    _${plural}="\${_${plural}} \$addition"
+}
 function add-to-${plural}() {
-    _${plural}="\$_${plural} \$@";
+    local item
+    for item in "\$@"; do add-one-to-${plural} \${item}; done
 }
 # get-logs will just echo $_logs, while get-logs <anything> will issue
 # a warning on stderr if the result is empty
@@ -103,6 +110,7 @@ function grep-${plural}() {
 }
 function tail-${plural}() {
     local files="\$(ls-${plural})"
+    local file
     for file in \$files; do
 	[ -f \$file ] || { echo "Touching \$file"; touch \$file; }
     done
