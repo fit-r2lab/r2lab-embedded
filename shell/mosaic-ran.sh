@@ -92,7 +92,7 @@ function configure() {
     echo "Configuring RAN on node $r2lab_id for CN on node $cn_id and nrb=$nrb"
     case $nrb in
 	25) refSignalPower=-24; puSch10xSnr=100; puCch10xSnr=100;;
-	50) refSignalPower=-27; puSch10xSnr=100; puCch10xSnr=100;;
+	50) refSignalPower=-27; puSch10xSnr=160; puCch10xSnr=160;;
         *) echo -e "Bad N_RB_DL value $nrb"; return 1;;
     esac
 

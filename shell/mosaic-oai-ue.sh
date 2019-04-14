@@ -99,13 +99,13 @@ function configure() {
         06) msin="0000000003";
             case $nrb in
                   25) rxgain=125; txgain=1; maxpower=-6;;
-                  50) rxgain=125; txgain=0; maxpower=-5;;
+                  50) rxgain=127; txgain=1; maxpower=-6;;
                   *) echo -e "ERROR: Bad N_RB value $nrb"; return 1;;
             esac;;
         19) msin="0000000006";
             case $nrb in
                 25) rxgain=95; txgain=9; maxpower=-14;;
-                50) rxgain=95; txgain=10; maxpower=-15;; # to be tuned...
+                50) rxgain=98; txgain=8; maxpower=-13;; # to be tuned...
                 *) echo -e "ERROR: Bad N_RB value $nrb"; return 1;;
             esac;;
         *) echo -e "ERROR: OAI UE cannot run on node fit$r2lab_id"; return 1;;
