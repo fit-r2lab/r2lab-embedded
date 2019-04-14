@@ -26,6 +26,7 @@ source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
 mosaic_role="ran"
 mosaic_long="radio access network"
 
+add-to-configs $(oai-ran.enb-conf-get >& /dev/null)
 
 ###### imaging
 doc-nodes image "frontend for rebuilding this image"

@@ -26,6 +26,8 @@ source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
 mosaic_role="oai-ue"
 mosaic_long="OAI User Equipment"
 
+add-to-configs $(oai-ue.usim-get >& /dev/null)
+add-to-configs $(oai-ue.ue-cmd-get >& /dev/null)
 
 ###### imaging
 doc-nodes image "frontend for rebuilding this image"

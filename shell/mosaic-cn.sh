@@ -27,6 +27,9 @@ doc-nodes-sep "#################### commands for managing a MOSAIC core-network"
 mosaic_role="cn"
 mosaic_long="core network"
 
+add-to-configs $(oai-cn.hss-conf-get >& /dev/null)
+add-to-configs $(oai-cn.mme-conf-get >& /dev/null)
+add-to-configs $(oai-cn.spgw-conf-get >& /dev/null)
 
 ###### imaging
 
