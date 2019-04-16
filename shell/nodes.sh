@@ -265,6 +265,12 @@ function turn-on-data() {
     done
 }
 
+doc-nodes increase-data-mtu "increase to 1600 MTU the data interface (useful for OAI eNB and CN); Requirement: data interface should be up"
+function increase-data-mtu() {
+    ip link set dev data mtu 1600 up
+    ip link list data
+}
+
 doc-nodes list-interfaces "list the current status of all interfaces"
 function list-interfaces () {
     set +x

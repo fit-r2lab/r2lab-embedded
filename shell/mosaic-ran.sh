@@ -177,6 +177,7 @@ function warm-up() {
 
     # that's the best moment to do that
     echo "Checking interface is up : $(turn-on-data)"
+    echo "Increase data interface's MTU: $(increase-data-mtu)"
 
     # stopping enb service in case of a lingering instance
     echo -n "ENB service ... "

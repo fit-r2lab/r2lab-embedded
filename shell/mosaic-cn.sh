@@ -224,6 +224,8 @@ function reinit-core-network() {
 doc-nodes start "Start all CN services"
 function start() {
     echo "Checking interface is up : $(turn-on-data)"
+    echo "Increase data interface's MTU: $(increase-data-mtu)"
+
     #-enable-snap-bins
     oai-cn.start-all
 }
