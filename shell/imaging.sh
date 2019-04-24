@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
+[ -z "$_sourced_nodes" ] && source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
 
 create-doc-category imaging "tools for creating images"
 augment-help-with imaging

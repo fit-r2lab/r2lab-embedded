@@ -3,7 +3,7 @@
 # not sure where this log file is going to end up
 
 # use the micro doc-help tool
-source $(dirname $(readlink -f $BASH_SOURCE))/r2labutils.sh
+[ -z "$_sourced_r2labutils" ] && source $(dirname $(readlink -f $BASH_SOURCE))/r2labutils.sh
 
 create-doc-category admin "admin-oriented commands"
 

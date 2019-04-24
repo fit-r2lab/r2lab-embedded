@@ -1,8 +1,8 @@
 #!/bin/bash
 
-source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
+[ -z "$_sourced_nodes" ] && source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
 
-source $(dirname $(readlink -f $BASH_SOURCE))/oai-common.sh
+[ -z "$_sourced_oai_common" ] && source $(dirname $(readlink -f $BASH_SOURCE))/oai-common.sh
 
 COMMAND=$(basename "$BASH_SOURCE")
 case $COMMAND in

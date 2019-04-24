@@ -2,7 +2,7 @@
 shopt -s expand_aliases
 
 ########## pseudo docstrings
-source $(dirname $(readlink -f $BASH_SOURCE))/r2labutils.sh
+[ -z "$_sourced_r2labutils" ] && source $(dirname $(readlink -f $BASH_SOURCE))/r2labutils.sh
 
 create-doc-category selection "commands that work on a selection of nodes"
 augment-help-with selection

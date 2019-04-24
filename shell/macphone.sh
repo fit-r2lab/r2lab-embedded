@@ -1,7 +1,7 @@
 # These helpers target the MAC that is sitting in the R2lab chamber
 # and has a USB connection to a commercial phone (nexus 6 as of now)
 
-source $(dirname "$BASH_SOURCE")/r2labutils.sh
+[ -z "$_sourced_r2labutils" ] && source $(dirname $(readlink -f $BASH_SOURCE))/r2labutils.sh
 
 adb=$(type -p adb)
 

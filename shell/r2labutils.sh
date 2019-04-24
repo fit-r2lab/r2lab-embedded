@@ -1,3 +1,5 @@
+export _sourced_r2labutils=true
+
 ########################################
 #
 ########## micro doc tool - to provide online help

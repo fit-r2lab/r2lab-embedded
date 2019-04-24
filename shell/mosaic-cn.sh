@@ -1,8 +1,10 @@
 #!/bin/bash
 
-source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
+export _sourced_mosaic_cn=true
 
-source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
+[ -z "$_sourced_nodes" ] && source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
+
+[ -z "$_sourced_mosaic_common" ] && source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
 
 COMMAND=$(basename "$BASH_SOURCE")
 

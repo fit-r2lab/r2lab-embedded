@@ -1,4 +1,6 @@
-source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
+export _sourced_oai_common=true
+
+[ -z "$_sourced_nodes" ] && source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
 
 # this is included (i.e. source'd) from places that all have
 # included nodes.sh

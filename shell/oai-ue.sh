@@ -1,10 +1,10 @@
 #!/bin/bash
 
-source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
+[ -z "$_sourced_nodes" ] && source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
 
 doc-nodes-sep "#################### For managing an OAI UE"
 
-source $(dirname $(readlink -f $BASH_SOURCE))/oai-common.sh
+[ -z "$_sourced_oai_common" ] && source $(dirname $(readlink -f $BASH_SOURCE))/oai-common.sh
 
 OPENAIR_DIR=/root/openairinterface5g
 run_dir=$OPENAIR_DIR/targets/bin

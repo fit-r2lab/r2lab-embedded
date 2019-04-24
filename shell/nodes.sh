@@ -1,3 +1,5 @@
+export _sourced_nodes=true
+
 # set of convenience tools to be used on the nodes
 #
 # on these images, we have a symlink
@@ -10,7 +12,7 @@
 unalias ls 2> /dev/null
 
 # use the micro doc-help tool
-source $(dirname $(readlink -f $BASH_SOURCE))/r2labutils.sh
+[ -z "$_sourced_r2labutils" ] && source $(dirname $(readlink -f $BASH_SOURCE))/r2labutils.sh
 
 create-doc-category nodes "#################### commands available on each r2lab node"
 augment-help-with nodes
