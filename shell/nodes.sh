@@ -1,3 +1,7 @@
+# temporary, to see how many times the file gets loaded upon bash startup
+nodes_counter=${nodes_counter:-0}
+nodes_counter=$((nodes_counter+1))
+
 export _sourced_nodes=true
 
 # set of convenience tools to be used on the nodes
