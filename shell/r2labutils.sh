@@ -163,18 +163,6 @@ function ls-${plural}() {
     local files=\$(get-${plural} "\$@")
     [ -n "\$files" ] && ls \$files
 }
-function grep-${plural}() {
-    [[ -z "\$@" ]] && { echo usage: grep-${plural} grep-arg..s; return; }
-    grep "\$@" \$(ls-${plural})
-}
-function tail-${plural}() {
-    local files="\$(ls-${plural})"
-    local file
-    for file in \$files; do
-        [ -f \$file ] || { echo "Touching \$file"; touch \$file; }
-    done
-    tail -f \$files
-}
 EOF
     source "$codefile"
     rm "$codefile"

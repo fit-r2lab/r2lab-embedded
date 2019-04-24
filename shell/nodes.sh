@@ -466,7 +466,6 @@ create-file-category lock
 
 
 doc-nodes ls-logs     "list (using ls) the log files defined with add-to-logs"
-doc-nodes grep-logs   "run grep on logs, e.g grep-logs -i open"
 doc-nodes ls-configs  "lists config files declared with add-to-configs"
 doc-nodes ls-datas    "you got the idea; you have also grep-configs and similar combinations"
 
