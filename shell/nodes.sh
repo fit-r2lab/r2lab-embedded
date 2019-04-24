@@ -137,18 +137,25 @@ function apt-upgrade-all() {
 
 }
 
-###
+### optionnally provide as a second argument a variable name like
+# _sourced_nodes that, if already defined,
+# will cause the source'ing to be skipped
 function -have-bashrc-source() {
     local file_to_source="$1"; shift
+    local sourced_variable="$1"; shift
     local target=/root/.bashrc
-    # older images might have a synlink here
+    # older images might have a symlink here
     [ -h $target ] && rm $target
     # create if not there yet
     [ -f $target ] || touch $target
     grep -q "source $file_to_source" $target >& /dev/null && return 0
     # do not silent it down if such a file is missing
     #echo "[ -f $file_to_source ] && source $file_to_source" >> $target
-    echo "source $file_to_source" >> $target
+    if [ -z "$sourced_variable" ]; then
+        echo "source $file_to_source" >> $target
+    else
+        echo "[ -z \"$sourced_variable\" ] && source $file_to_source" >> $target
+    fi
     # DON'T load it in current shell, this is likely to cause endless recursion
     # source $file_to_source
 }

@@ -535,7 +535,10 @@ function new-common-setup-root-bash2 () {
     ln -sf /root/r2lab-embedded/shell/nodes.sh .
     cd /root
     ln -sf .bashrc .bash_profile
-    [ -h .bashrc ] && { rm .bashrc; -have-bashrc-source /root/r2lab-embedded/shell/nodes.sh; }
+    [ -h .bashrc ] && {
+        rm .bashrc
+        -have-bashrc-source /root/r2lab-embedded/shell/nodes.sh _sourced_nodes
+    }
 }
 
 doc-imaging new-common-setup-node-ssh-key "install standard R2lab key as the ssh node's key"

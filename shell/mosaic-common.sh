@@ -20,19 +20,19 @@ mosaic_long="redefine-me"
 function mosaic-as-cn() {
     git-pull-r2lab
     ln -sf /root/r2lab-embedded/shell/mosaic-cn.sh /etc/profile.d
-    -have-bashrc-source /etc/profile.d/mosaic-cn.sh
+    -have-bashrc-source /etc/profile.d/mosaic-cn.sh _sourced_mosaic_cn
 }
 
 function mosaic-as-ran() {
     git-pull-r2lab
     ln -sf /root/r2lab-embedded/shell/mosaic-ran.sh /etc/profile.d
-    -have-bashrc-source /etc/profile.d/mosaic-ran.sh
+    -have-bashrc-source /etc/profile.d/mosaic-ran.sh _sourced_mosaic_ran
 }
 
 function mosaic-as-oai-ue() {
     git-pull-r2lab
     ln -sf /root/r2lab-embedded/shell/mosaic-oai-ue.sh /etc/profile.d
-    -have-bashrc-source /etc/profile.d/mosaic-oai-ue.sh
+    -have-bashrc-source /etc/profile.d/mosaic-oai-ue.sh _sourced_mosaic_oai_ue
 }
 
 
