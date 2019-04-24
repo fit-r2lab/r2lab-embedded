@@ -60,9 +60,9 @@ function -doc-helper-sep() {
     varname=_doc_$category
     contents="$@"
     if [ -z "$contents" ] ; then
-	assign="$varname=\"${!varname}\n---------------\""
+        assign="$varname=\"${!varname}\n---------------\""
     else
-	assign="$varname=\"${!varname}\n============================== $contents\""
+        assign="$varname=\"${!varname}\n============================== $contents\""
     fi
     eval "$assign"
 }
@@ -112,7 +112,7 @@ function tail-${plural}() {
     local files="\$(ls-${plural})"
     local file
     for file in \$files; do
-	[ -f \$file ] || { echo "Touching \$file"; touch \$file; }
+        [ -f \$file ] || { echo "Touching \$file"; touch \$file; }
     done
     tail -f \$files
 }
@@ -133,20 +133,20 @@ function define-main() {
     zero="$1"; shift
     bash_source="$1"; shift
     function main() {
-	if [ "$zero" = "$bash_source" ]; then
-	    if [[ -z "$@" ]]; then
-		 help
-		 return
-	    fi
-	    subcommand="$1"; shift
-	    # accept only subcommands that match a function
-	    case $(type -t $subcommand) in
-		function)
-		    $subcommand "$@" ;;
-		*)
-		    echo "$subcommand not a function : $(type -t $subcommand) - exiting" ;;
-	    esac
-	fi
+        if [ "$zero" = "$bash_source" ]; then
+            if [[ -z "$@" ]]; then
+                help
+                return
+            fi
+            subcommand="$1"; shift
+            # accept only subcommands that match a function
+            case $(type -t $subcommand) in
+                function)
+                    $subcommand "$@" ;;
+                *)
+                    echo "$subcommand not a function : $(type -t $subcommand) - exiting" ;;
+            esac
+        fi
     }
 }
 

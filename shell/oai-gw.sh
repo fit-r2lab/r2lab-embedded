@@ -15,7 +15,7 @@ case $COMMAND in
     *)
 	echo OOPS ;;
 esac
-    
+
 doc-nodes-sep "#################### commands for managing an OAI gateway"
 
 ####################
@@ -91,13 +91,13 @@ function base() {
     apt-get install -y mysql-server
 
     echo "========== Installing phpmyadmin - provide mysql-server password as linux and set password=admin"
-    debconf-set-selections <<< 'phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2' 
-    debconf-set-selections <<< 'phpmyadmin phpmyadmin/dbconfig-install boolean true' 
+    debconf-set-selections <<< 'phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2'
+    debconf-set-selections <<< 'phpmyadmin phpmyadmin/dbconfig-install boolean true'
     # the one we used just above for mysql-server
     debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/admin-pass password linux'
     # password for phpadmin itself
-    debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/app-pass password admin' 
-    debconf-set-selections <<< 'phpmyadmin phpmyadmin/app-password-confirm password admin' 
+    debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/app-pass password admin'
+    debconf-set-selections <<< 'phpmyadmin phpmyadmin/app-password-confirm password admin'
     apt-get install -y phpmyadmin
 
     echo "========== Running git clone for openair-cn and r2lab .."
@@ -119,9 +119,9 @@ function base() {
 
 }
 
-doc-nodes deps "builds hss and epc and installs dependencies" 
+doc-nodes deps "builds hss and epc and installs dependencies"
 function deps() {
-    
+
     git-pull-r2lab
     git-pull-oai
     cd $run_dir
@@ -150,10 +150,10 @@ function build-epc() {
     echo "========== Rebuilding mme"
     # option --debug is in the doc but not in the code
     run-in-log build-mme.log ./build_mme --clean
-    
+
     echo "========== Rebuilding spgw"
     run-in-log build-spgw.log ./build_spgw --clean
-}    
+}
 
 ########################################
 # end of image
@@ -234,8 +234,8 @@ function check-etc-hosts() {
 	echo "192.168.${oai_subnet}.${hss_id} hss.${oai_realm} hss" >> /etc/hosts
     fi
 }
-	
-    
+
+
 function configure() {
     configure-hss "$@"
     configure-epc "$@"
@@ -255,7 +255,7 @@ function configure-epc() {
     echo "EPC: Using  HSS on $hss_id"
 
     check-etc-hosts $hss_id
-    
+
     hss_id=$(echo $hss_id | sed  's/^0*//')
     mkdir -p /usr/local/etc/oai/freeDiameter
     local id=$(r2lab-id)
@@ -291,7 +291,7 @@ s|openair4G.eur|r2lab.fr|g
 EOF
     echo "(Over)writing $conf_dir/freeDiameter/mme_fd.conf"
     sed -f mme_fd-r2lab.sed < mme_fd.conf > $conf_dir/freeDiameter/mme_fd.conf
-    
+
     cat > spgw-r2lab.sed <<EOF
 s|SGW_INTERFACE_NAME_FOR_S11.*=.*|SGW_INTERFACE_NAME_FOR_S11 = "lo";|
 s|SGW_IPV4_ADDRESS_FOR_S11.*=.*|SGW_IPV4_ADDRESS_FOR_S11 = "127.0.3.1/8";|
@@ -333,7 +333,7 @@ function configure-hss() {
     local localip="192.168.${oai_subnet}.${id}/24"
 
     if [ -n "$runs_epc" ]; then
-        # box runs both services                                                                                                      
+        # box runs both services
 	echo "/etc/hosts already configured"
     else
 	clean-hosts
@@ -379,18 +379,18 @@ function populate-hss-db() {
     [ -z "$epc_id" ] && { echo "check-etc-hosts requires hss-id - exiting" ; return ; }
     # ensure that epc_id is encoded with 2 digits
     epc_id=$(echo -n "0"${epc_id}|tail -c 2)
-    
+
     # insert our SIM in the hss db
     # NOTE: setting the 'key' column raises a special issue as key is a keyword in
     # the mysql syntax
     # this will need to be fixed if it's important that we set a key
 
-# sample from the doc    
+# sample from the doc
 # ('208930000000001',  '33638060010', NULL, NULL,
-#  'PURGED', '120', '50000000', '100000000', 
+#  'PURGED', '120', '50000000', '100000000',
 #  '47', '0000000000', '3', 0x8BAF473F2F8FD09487CCCBD7097C6862,
 #  '1', '0', '', 0x00000000000000000000000000000000, '');
-###    insert_command="INSERT INTO users (imsi, msisdn, imei, imei_sv, 
+###    insert_command="INSERT INTO users (imsi, msisdn, imei, imei_sv,
 ###                                       ms_ps_status, rau_tau_timer, ue_ambr_ul, ue_ambr_dl,
 ###                                       access_restriction, mme_cap, mmeidentity_idmmeidentity, key,
 ###                                       RFSP-Index, urrp_mme, sqn, rand, OPc) VALUES ("
@@ -449,7 +449,7 @@ function populate-hss-db() {
     idmmeidentity=100
     mmehost=fit${epc_id}.${oai_realm}
 
-###    
+###
 ###    # users table
 ###    insert_command="INSERT INTO users (imsi, msisdn, access_restriction, mmeidentity_idmmeidentity, \`key\`, sqn) VALUES ("
 ###    update_command="ON DUPLICATE KEY UPDATE "
@@ -460,7 +460,7 @@ function populate-hss-db() {
 ###    name_value "\`key\`" "0x8BAF473F2F8FD09487CCCBD7097C6862"
 ###    name_value sqn "'000000000020'" last
 ###
-####    mysql --user=root --password=linux -e 'select imsi from users where imsi like "20895%"' oai_db 
+####    mysql --user=root --password=linux -e 'select imsi from users where imsi like "20895%"' oai_db
 ###
 ###    echo issuing SQL "$insert_command $update_command"
 ###    mysql --user=root --password=linux -e "$insert_command $update_command" oai_db
@@ -496,12 +496,12 @@ function populate-hss-db() {
 
     name_value idmmeidentity ${idmmeidentity}
     name_value mmehost "'${mmehost}'"
-    name_value mmerealm "'${oai_realm}'" 
+    name_value mmerealm "'${oai_realm}'"
     name_value "\`UE-Reachability\`" 0 last
-    
+
     echo issuing SQL "$insert_command $update_command"
     mysql --user=root --password=linux -e "$insert_command $update_command" oai_db
-    
+
 }
 
 ####################
@@ -546,11 +546,11 @@ function -list-processes() {
 }
 
 ####################
-doc-nodes manage-db "runs mysql on the oai_db database" 
+doc-nodes manage-db "runs mysql on the oai_db database"
 function manage-db() {
     mysql --user=root --password=linux oai_db
 }
 
 ########################################
-define-main "$0" "$BASH_SOURCE" 
+define-main "$0" "$BASH_SOURCE"
 main "$@"

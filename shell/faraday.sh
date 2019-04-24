@@ -589,28 +589,28 @@ doc-selection-sep "See also help-alt for other commands"
 # function snap () {
 #   python3 /root/r2lab/nodes/snap.py "$@"
 # }
-# 
+#
 # doc-admin inspect "check the status of a default domain list and some other customized services"
 # function inspect () {
 #   python3 /root/r2lab-embedded/nightly/inspect.py "$@"
 # }
-# 
+#
 # doc-admin maintenance "update a json file which contains information about nodes maintenance | maitenance -i|r <node> -m <the message>"
 # function maintenance () {
 #   python3 /root/r2lab/nodes/maintenance.py "$@"
 # }
-# 
+#
 # # info is already used for the CMC verb
 # doc-admin information "to be completed"
 # function information () {
 #   python3 /root/r2lab/nodes/information.py "$@"
 # }
-# 
+#
 # doc-admin table "to be completed"
 # function table () {
 #   python3 /root/r2lab/nodes/table.py "$@"
 # }
-# 
+#
 # doc-admin publish "to be completed"
 # function publish () {
 #   /root/r2lab/infra/scripts/sync-nightly-results-at-r2lab.sh
