@@ -75,32 +75,89 @@ function random-string() {
     cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w ${1:-32} | head -n 1
 }
 
+# a category is typically 'config' or 'log'
+# it is used to define a set of files that play an identical role
+# in a category, one may add either
+# * plain files, like e.g. /var/log/softmodem.log
+# * commands that print paths on their stdout,
+#   like e.g. oai-cn.hss-conf-get
+# * commands to be executed to produce output,
+#   like e.g. journalctl -u softmodem
+#
+# a family is one of the three: files filecommands commands
+#    for the three above cases, respectively
+#
+# in the first 2 cases, absolute paths are required to denote a file
+#
+# current implementation is limited to the first 2 families
+# * we need to assess the impact on all locations
+#   where we do e.g. ls-configs; what should that output ?
+#
 function create-file-category() {
-    local catname=$1; shift
-    local plural=${catname}s
+    # singular is the category's name
+    local singular=$1; shift
+    local plural=${singular}s
     local codefile="/tmp/def-category-$(random-string 12)"
     cat << EOF > "$codefile"
+
 function clear-${plural}() {
-    _${plural}=""
+    declare -a _${plural}_files
+    declare -a _${plural}_filecommands
+    declare -a _${plural}_commands
 }
 clear-${plural}
-function add-one-to-${plural}() {
-    local addition="\$1"
+
+# not able to avoid duplication here despite having tried rather hard
+function -add-files-${plural}() { _${plural}_files+=( "\$@" ); }
+function -add-filecommands-${plural}() { _${plural}_filecommands+=( "\$@" ); }
+function -add-commands-${plural}() { _${plural}_commands+=( "\$@" ); }
+
+# helper to add items in arrays and avoid duplications
+function -add-one-in-family-${plural}() {
+    local family="\$1"; shift
+    local addition="\$1"; shift
     local item
-    for item in \${_${plural}}; do [[ "\$item" == "\$addition" ]] && return; done
-    _${plural}="\${_${plural}} \$addition"
+    local varname="_${plural}_\${family}"
+    for item in "\${!varname}"; do
+        [[ "\$item" == "\$addition" ]] && return
+    done
+    -add-\$family-${plural} "\$addition"
 }
-function add-to-${plural}() {
+
+function add-files-to-${plural}() {
     local item
-    for item in "\$@"; do add-one-to-${plural} \${item}; done
+    for item in "\$@"; do
+        -add-one-in-family-${plural} files \${item}
+    done
 }
+# for historical reasons, e.g. add-to-configs
+# means adding to the 'files' family
+alias add-to-${plural}=add-files-to-${plural}
+
+function add-filecommands-to-${plural}() {
+    local item
+    for item in "\$@"; do
+        -add-one-in-family-${plural} filecommands \${item}
+    done
+}
+
+function add-commands-to-${plural} () {
+    echo "$FUNCNAME is not yet implemented"
+    return 1
+}
+
 # get-logs will just echo $_logs, while get-logs <anything> will issue
 # a warning on stderr if the result is empty
 function get-${plural}() {
-    if [ -n "\$1" -a -z "\$_${plural}" ]; then
-        echo "The \'_${plural}\' env. variable is empty - Use add-to-${plural} to define some"  >&2-
+    if [ -n "\$1" -a -z "\${_${plural}_files}""\${_${plural}_filecommands}"  ]; then
+        echo "The ${plural} category is empty - use add-files-to-${plural} to fill it" >&2-
+        return
     fi
-    echo \$_${plural};
+    local varname
+    varname="_${plural}_files[@]"
+    for file in "\${!varname}"; do echo \$file; done
+    varname="_${plural}_filecommands[@]"
+    for command in "\${!varname}"; do \$command; done
 }
 function ls-${plural}() {
     local files=\$(get-${plural} "\$@")
