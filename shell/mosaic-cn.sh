@@ -29,9 +29,16 @@ doc-nodes-sep "#################### commands for managing a MOSAIC core-network"
 mosaic_role="cn"
 mosaic_long="core network"
 
-add-filecommands-to-configs oai-cn.hss-conf-get
-add-filecommands-to-configs oai-cn.mme-conf-get
-add-filecommands-to-configs oai-cn.spgw-conf-get
+add-filecommand-to-configs oai-cn.hss-conf-get
+add-filecommand-to-configs oai-cn.mme-conf-get
+add-filecommand-to-configs oai-cn.spgw-conf-get
+
+# -b is to retrieve everything since last boot
+# it might make sense to clear these journals at the beginning
+# of an experiment though
+add-command-to-logs 'journalctl --unit=snap.oai-cn.hssd.service -b'
+add-command-to-logs 'journalctl --unit=snap.oai-cn.mmed.service -b'
+add-command-to-logs 'journalctl --unit=snap.oai-cn.spgwd.service -b'
 
 ###### imaging
 

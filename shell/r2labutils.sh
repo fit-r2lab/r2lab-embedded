@@ -75,23 +75,26 @@ function random-string() {
     cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w ${1:-32} | head -n 1
 }
 
-# a category is typically 'config' or 'log'
+# a file category is typically 'config' or 'log'
 # it is used to define a set of files that play an identical role
 # in a category, one may add either
 # * plain files, like e.g. /var/log/softmodem.log
 # * commands that print paths on their stdout,
+#   this is for the OAI snap-based tools
 #   like e.g. oai-cn.hss-conf-get
 # * commands to be executed to produce output,
-#   like e.g. journalctl -u softmodem
+#   like e.g. journalctl -u softmodem --since '1 hour ago'
 #
 # a family is one of the three: files filecommands commands
 #    for the three above cases, respectively
 #
 # in the first 2 cases, absolute paths are required to denote a file
 #
-# current implementation is limited to the first 2 families
-# * we need to assess the impact on all locations
-#   where we do e.g. ls-configs; what should that output ?
+# as compared with the previous implementation (for example on the config cat.)
+#
+# * grep-configs and tail-configs are no longer supported
+# * show-configs gives the details of a category for the 3 families
+# * run-configs allows to run all attached commands
 #
 function create-file-category() {
     # singular is the category's name
@@ -133,6 +136,8 @@ function add-files-to-${plural}() {
 # for historical reasons, e.g. add-to-configs
 # means adding to the 'files' family
 alias add-to-${plural}=add-files-to-${plural}
+# designed to work on several files, so of course also with one
+alias add-file-to-${plural}=add-files-to-${plural}
 
 function add-filecommands-to-${plural}() {
     local item
@@ -140,10 +145,14 @@ function add-filecommands-to-${plural}() {
         -add-one-in-family-${plural} filecommands \${item}
     done
 }
+# ditto
+alias add-filecommand-to-${plural}=add-filecommands-to-${plural}
 
-function add-commands-to-${plural} () {
-    echo "$FUNCNAME is not yet implemented"
-    return 1
+
+# this one OTOH can only work with ONE command
+# because a command typically has spaces..
+function add-command-to-${plural} () {
+    -add-one-in-family-${plural} commands "\$@"
 }
 
 # get-logs will just echo $_logs, while get-logs <anything> will issue
@@ -157,11 +166,34 @@ function get-${plural}() {
     varname="_${plural}_files[@]"
     for file in "\${!varname}"; do echo \$file; done
     varname="_${plural}_filecommands[@]"
-    for command in "\${!varname}"; do \$command; done
+    for filecommand in "\${!varname}"; do \$filecommand; done
 }
+
 function ls-${plural}() {
     local files=\$(get-${plural} "\$@")
     [ -n "\$files" ] && ls \$files
+}
+
+function show-${plural}() {
+    local varname
+    echo "----- files"
+    varname="_${plural}_files[@]"
+    for file in "\${!varname}"; do echo \$file; done
+    echo "----- file commands"
+    varname="_${plural}_filecommands[@]"
+    for filecommand in "\${!varname}"; do echo \$filecommand; done
+    echo "----- commands"
+    varname="_${plural}_commands[@]"
+    for command in "\${!varname}"; do echo \$command; done
+}
+
+function run-${plural}() {
+    local varname
+    varname="_${plural}_commands[@]"
+    for command in "\${!varname}"; do
+        echo ">>>>>>>>>>" \$command
+        bash -c "\$command"
+    done
 }
 EOF
     source "$codefile"

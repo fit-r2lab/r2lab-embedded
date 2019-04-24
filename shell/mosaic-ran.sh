@@ -28,7 +28,7 @@ doc-nodes-sep "#################### For managing a mosaic enode-B"
 mosaic_role="ran"
 mosaic_long="radio access network"
 
-add-to-configs $(oai-ran.enb-conf-get >& /dev/null)
+add-filecommand-to-configs oai-ran.enb-conf-get
 
 ###### imaging
 doc-nodes image "frontend for rebuilding this image"

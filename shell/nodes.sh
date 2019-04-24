@@ -457,7 +457,8 @@ function oai-as-ue() { oai-as ue; }
 
 doc-nodes-sep
 
-# this will define add-to-logs and get-logs and grep-logs and tail-logs
+# this will define add-file-to-logs and add-filecommand-to-logs and add-command-to-logs
+# and get-logs (for files) and run-logs (to actually run the commands that produce the logs)
 create-file-category log
 # other similar categories
 create-file-category data
@@ -465,8 +466,9 @@ create-file-category config
 create-file-category lock
 
 
-doc-nodes ls-logs     "list (using ls) the log files defined with add-to-logs"
-doc-nodes ls-configs  "lists config files declared with add-to-configs"
+doc-nodes ls-logs     "list (using ls) the log files defined with add-file-to-logs"
+doc-nodes run-logs    "run all commands defined with add-command-to-logs"
+doc-nodes ls-configs  "lists config files declared with add-file-to-configs"
 doc-nodes ls-datas    "you got the idea; you have also grep-configs and similar combinations"
 
 doc-nodes capture-all "captures logs and datas and configs in a tgz"

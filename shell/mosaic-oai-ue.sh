@@ -28,8 +28,8 @@ doc-nodes-sep "#################### For managing a Mosaic snap for OAI UE"
 mosaic_role="oai-ue"
 mosaic_long="OAI User Equipment"
 
-add-to-configs $(oai-ue.usim-get >& /dev/null)
-add-to-configs $(oai-ue.ue-cmd-get >& /dev/null)
+add-filecommand-to-configs oai-ue.usim-get
+add-filecommand-to-configs oai-ue.ue-cmd-get
 
 ###### imaging
 doc-nodes image "frontend for rebuilding this image"
