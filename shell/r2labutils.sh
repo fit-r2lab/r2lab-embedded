@@ -102,6 +102,7 @@ function create-file-category() {
     local plural=${singular}s
     local codefile="/tmp/def-category-$(random-string 12)"
     cat << EOF > "$codefile"
+}
 
 function clear-${plural}() {
     declare -a _${plural}_files
