@@ -2,9 +2,11 @@
 
 export _sourced_mosaic_cn=true
 
-[ -z "$_sourced_nodes" ] && source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
+#[ -z "$_sourced_nodes" ] && source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
+source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
 
-[ -z "$_sourced_mosaic_common" ] && source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
+#[ -z "$_sourced_mosaic_common" ] && source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
+source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
 
 COMMAND=$(basename "$BASH_SOURCE")
 

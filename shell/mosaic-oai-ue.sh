@@ -2,11 +2,13 @@
 
 export _sourced_mosaic_oai_ue=true
 
-[ -z "$_sourced_nodes" ] && source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
+#[ -z "$_sourced_nodes" ] && source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
+source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
 
 doc-nodes-sep "#################### For managing a Mosaic snap for OAI UE"
 
-[ -z "$_sourced_mosaic_common" ] && source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
+#[ -z "$_sourced_mosaic_common" ] && source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
+source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
 
 ### frontend:
 # image: install stuff on top of a basic ubuntu image

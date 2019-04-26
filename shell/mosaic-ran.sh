@@ -7,7 +7,8 @@ source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
 
 doc-nodes-sep "#################### For managing a mosaic enode-B"
 
-[ -z "$_sourced_mosaic_common" ] && source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
+#[ -z "$_sourced_mosaic_common" ] && source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
+source $(dirname $(readlink -f $BASH_SOURCE))/mosaic-common.sh
 
 ### frontend:
 # image: install stuff on top of a basic ubuntu image
