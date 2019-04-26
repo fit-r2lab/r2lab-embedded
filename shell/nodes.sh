@@ -16,7 +16,8 @@ export _sourced_nodes=true
 unalias ls 2> /dev/null
 
 # use the micro doc-help tool
-[ -z "$_sourced_r2labutils" ] && source $(dirname $(readlink -f $BASH_SOURCE))/r2labutils.sh
+source $(dirname $(readlink -f $BASH_SOURCE))/r2labutils.sh
+#[ -z "$_sourced_r2labutils" ] && source $(dirname $(readlink -f $BASH_SOURCE))/r2labutils.sh
 
 create-doc-category nodes "#################### commands available on each r2lab node"
 augment-help-with nodes
