@@ -135,9 +135,9 @@ function add-files-to-${plural}() {
 }
 # for historical reasons, e.g. add-to-configs
 # means adding to the 'files' family
-alias add-to-${plural}=add-files-to-${plural}
+function add-to-${plural}() { add-files-to-${plural} "\$@"; }
 # designed to work on several files, so of course also with one
-alias add-file-to-${plural}=add-files-to-${plural}
+function add-file-to-${plural}() { add-files-to-${plural} "\$@"; }
 
 function add-filecommands-to-${plural}() {
     local item
@@ -146,8 +146,7 @@ function add-filecommands-to-${plural}() {
     done
 }
 # ditto
-alias add-filecommand-to-${plural}=add-filecommands-to-${plural}
-
+function add-filecommand-to-${plural}() { add-filecommands-to-${plural} "\$@"; }
 
 # this one OTOH can only work with ONE command
 # because a command typically has spaces..
