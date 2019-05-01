@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export _sourced_mosaic_ran=true
+_sourced_mosaic_ran=true
 
 [ -z "$_sourced_nodes" ] && source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
 

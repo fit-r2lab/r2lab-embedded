@@ -1,4 +1,4 @@
-export _sourced_oai_common=true
+_sourced_oai_common=true
 
 [ -z "$_sourced_nodes" ] && source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
 

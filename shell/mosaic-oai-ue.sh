@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export _sourced_mosaic_oai_ue=true
+_sourced_mosaic_oai_ue=true
 
 [ -z "$_sourced_nodes" ] && source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
 

@@ -1,4 +1,4 @@
-export _sourced_mosaic_common=true
+_sourced_mosaic_common=true
 
 [ -z "$_sourced_nodes" ] && source $(dirname $(readlink -f $BASH_SOURCE))/nodes.sh
 

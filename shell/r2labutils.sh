@@ -1,4 +1,4 @@
-export _sourced_r2labutils=true
+_sourced_r2labutils=true
 
 ########################################
 #
