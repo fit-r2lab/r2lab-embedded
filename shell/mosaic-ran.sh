@@ -291,6 +291,8 @@ function journal() {
     journalctl $jopts "$@"
 }
 
+add-command-to-logs 'journalctl --unit=snap.oai-ran.enbd.service -b'
+
 doc-nodes configure-directory "cd into configuration directory for RAN service(s)"
 function configure-directory() {
     local conf_dir=$(dirname $(oai-ran.enb-conf-get))

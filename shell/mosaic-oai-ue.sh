@@ -279,6 +279,9 @@ function journal() {
     journalctl $jopts "$@"
 }
 
+add-command-to-logs 'journalctl --unit=snap.oai-ue.ued.service -b'
+
+
 doc-nodes configure-directory "cd into configuration directory for UE service(s)"
 function configure-directory() {
     local conf_dir=$(dirname $(oai-ue.ue-conf-get))

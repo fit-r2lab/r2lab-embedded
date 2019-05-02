@@ -51,16 +51,6 @@ function -snap-install() {
 
 
 ####################
-doc-nodes capture "expects one arg - capture logs and datas and configs under provided name, suffixed with -\$mosaic_role"
-function capture() {
-    local run_name="$1"; shift
-    # journal is a function defined according to the context
-    local log=${run_name}-${mosaic_role}.log
-    echo "Gathering journal (current boot) about ${mosaic_long} into $log"
-    journal -b > $log
-}
-
-####################
 # designed for interactive usage; tcpdump stops upon Control-C
 doc-nodes tcpdump-sctp "interactive tcpdump of the SCTP traffic on interface ${mosaic_ifname}
                 with one arg, stores into a .pcap"

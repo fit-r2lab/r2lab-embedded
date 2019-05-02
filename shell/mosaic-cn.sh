@@ -33,13 +33,6 @@ add-filecommand-to-configs oai-cn.hss-conf-get
 add-filecommand-to-configs oai-cn.mme-conf-get
 add-filecommand-to-configs oai-cn.spgw-conf-get
 
-# -b is to retrieve everything since last boot
-# it might make sense to clear these journals at the beginning
-# of an experiment though
-add-command-to-logs 'journalctl --unit=snap.oai-cn.hssd.service -b'
-add-command-to-logs 'journalctl --unit=snap.oai-cn.mmed.service -b'
-add-command-to-logs 'journalctl --unit=snap.oai-cn.spgwd.service -b'
-
 ###### imaging
 
 doc-nodes image "frontend for rebuilding this image"
@@ -257,6 +250,14 @@ function journal() {
     for unit in $units; do jopts="$jopts --unit $unit"; done
     journalctl $jopts "$@"
 }
+
+# -b is to retrieve everything since last boot
+# it might make sense to clear these journals at the beginning
+# of an experiment though
+add-command-to-logs 'journalctl --unit=snap.oai-cn.hssd.service -b'
+add-command-to-logs 'journalctl --unit=snap.oai-cn.mmed.service -b'
+add-command-to-logs 'journalctl --unit=snap.oai-cn.spgwd.service -b'
+
 
 doc-nodes "cd into configuration directory for CN service"
 function configure-directory() {
