@@ -18,6 +18,11 @@ unalias ls 2> /dev/null
 # use the micro doc-help tool
 [ -z "$_sourced_r2labutils" ] && source $(dirname $(readlink -f $BASH_SOURCE))/r2labutils.sh
 
+# useful when a function's outcome goes on stdout
+function -echo-stderr() {
+    >&2 echo $(date "+%H:%M:%S") "$@"
+}
+
 create-doc-category nodes "#################### commands available on each r2lab node"
 augment-help-with nodes
 
@@ -466,23 +471,42 @@ create-file-category config
 create-file-category lock
 
 
-doc-nodes ls-logs     "list (using ls) the log files defined with add-file-to-logs"
-doc-nodes run-logs    "run all commands defined with add-command-to-logs"
-doc-nodes ls-configs  "lists config files declared with add-file-to-configs"
-doc-nodes ls-datas    "you got the idea; you have also grep-configs and similar combinations"
+doc-nodes ls-logs     "list (using ls) log files defined with add-file-to-logs and/or add-filecommand-to-logs"
+doc-nodes ls-configs  "same for configs"
+doc-nodes ls-datas    "you got the idea..."
+doc-nodes run-logs    "run all commands defined with add-command-to-logs; there is also run-datas and run-configs"
+
+# this commands writes on stdout the files that are produced, when non empty,
+# so that they can be embedded into the overall tgz
+doc-nodes capture-run-all "run commands attached to logs and datas and configs, save outputs in /tmp/*.log"
+function capture-run-all() {
+    local output=$1; shift
+    -echo-stderr "++++++++++"
+    -echo-stderr "capture-run-all: output = $output"
+    [ -z "$output" ] && { -echo-stderr usage: $FUNCNAME output; return; }
+    local category
+    for category in logs datas configs; do
+        local log=/tmp/${output}-run-${category}.log
+        run-$category > $log
+        [ -s $log ] && echo $log
+    done
+    -echo-stderr "++++++++++"
+}
 
 doc-nodes capture-all "captures logs and datas and configs in a tgz"
 function capture-all() {
     local output=$1; shift
-    echo "++++++++++++++++++++++++++++++++++++++++"
-    echo "capture-all: output = $output"
-    [ -z "$output" ] && { echo usage: capture-all output; return; }
-    local allfiles="$(ls-logs) $(ls-configs) $(ls-datas)"
-    local outpath=$HOME/$output.tgz
-    tar -czf $outpath $allfiles
-    echo "Captured in $outpath the following files:"
+    -echo-stderr "++++++++++++++++++++"
+    -echo-stderr "capture-all: output = $output"
+    [ -z "$output" ] && { -echo-stderr usage: $FUNCNAME output; return; }
+    local tarpath=$HOME/$output.tgz
+    local catfiles="$(ls-logs) $(ls-configs) $(ls-datas)"
+    local runfiles=$(capture-run-all $output)
+    local allfiles="${catfiles} ${runfiles}"
+    tar -czf $tarpath $allfiles
+    -echo-stderr "Captured in $tarpath the following files:"
     ls -l $allfiles
-    echo "++++++++++++++++++++++++++++++++++++++++"
+    -echo-stderr "++++++++++++++++++++"
 }
 
 doc-nodes-sep
