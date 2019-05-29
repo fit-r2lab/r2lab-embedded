@@ -6,7 +6,7 @@ case $(hostname) in
         gitroot=/root/r2lab-embedded
     ;;
     *)
-        gateway=inria_r2lab.admin@faraday.inria.fr
+        gateway=inria_mosaic@faraday.inria.fr
         gitroot=$HOME/git/r2lab-embedded
     ;;
 esac
@@ -265,24 +265,25 @@ mosaic_base2=u16.04-lts-update
 # we need to do this in 2 steps so that the node reboots
 # on the right kernel after we move to lts
 function mosaic-base() {
-    bim 1 u16.04 u16.04-lts \
+    bim 21 u16.04 u16.04-lts \
         "imaging.sh u16-optin-lts-kernel" \
         "imaging.sh new-common-setup-root-bash2"
-    bim 2 u16.04-lts u16.04-lts-update \
+    bim 22 u16.04-lts u16.04-lts-update \
+	"nodes.sh git-pull-r2lab" \
         "nodes.sh apt-upgrade-all"
 }
 
 function mosaic-cn() {
-    bim 3 u16.04-lts-update mosaic-cn "mosaic-cn.sh image"
+    bim 23 u16.04-lts-update mosaic-cn "mosaic-cn.sh image"
 }
 
 function mosaic-ran() {
     # ditto, there is a need to reboot after activate-lowlatency
-    bim 4 u16.04-lts-update mosaic-ran-base \
+    bim 24 u16.04-lts-update mosaic-ran-base \
         "imaging.sh activate-lowlatency"
-    bim 5 mosaic-ran-base mosaic-ran \
+    bim 25 mosaic-ran-base mosaic-ran \
         "mosaic-ran.sh image"
-    bim 6 mosaic-ran-base mosaic-ue \
+    bim 26 mosaic-ran-base mosaic-ue \
         "mosaic-oai-ue.sh image"
 }
 
@@ -293,9 +294,11 @@ function u18-04.2() {
 
 ####################
 # xxx this clearly should be specified on the command line some day
-# mosaic-base
-# mosaic-ran &
-# mosaic-cn &
-# wait %1 %2
+mosaic-base
+mosaic-ran &
+mosaic-cn &
+wait %1 %2
 # mosaic-ran
-u18-04.2
+#mosaic-base
+#mosaic-ran
+
