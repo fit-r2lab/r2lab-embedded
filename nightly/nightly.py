@@ -8,7 +8,7 @@ Features:
 (*) designed to be run on an hourly basis, at typically nn:01
     will check for a lease being currently held by nightly slice; returns if not
 (*) defaults to all nodes but can exclude some hand-picked ones on the command-line
-(*) updates sidecar status (available)
+(*) updates sidecar status (available / unavailable)
 (*) sends status mail
 
 Performed checks on all nodes:
@@ -26,7 +26,7 @@ Performed checks on all nodes:
 import sys
 import os
 import time
-from pathlib import Path
+import ssl
 from enum import IntEnum
 from argparse import ArgumentParser
 
@@ -34,6 +34,8 @@ import asyncio
 
 from asynciojobs import Scheduler, Job
 from apssh import SshNode, SshJob
+
+from r2lab.sidecar import SidecarSyncClient
 
 from rhubarbe.config import Config
 from rhubarbe.imagesrepo import ImagesRepo
@@ -55,6 +57,7 @@ NIGHTLY_SLICE = "inria_r2lab.nightly"
 EMAIL_FROM = "nightly@faraday.inria.fr"
 EMAIL_TO = ["fit-r2lab-dev@inria.fr"]
 
+SIDECAR_URL = "wss://r2lab.inria.fr:999/"
 
 # each image is defined by a tuple
 #  0: image name (for rload)
@@ -136,14 +139,10 @@ class Nightly:                                         # pylint: disable=r0902
         self.failures[node.id] = reason
         # ok, this may be a be a bit fragile, but given that sidecar_client
         # is not properly installed...
-        unavailable_script = Path.home() / "r2lab-python/examples/unavailable.py"
-        if not unavailable_script.exists():
-            self.print(f"Cannot locate unavailable script {unavailable_script}"
-                       f" - skipping")
-            return
         self.print(f"marking node {node.id} as unavailable")
-        command = f"{unavailable_script} {node.id}"
-        os.system(command)
+        with SidecarSyncClient(SIDECAR_URL, ssl=ssl.SSLContext()) as sidecar:
+            sidecar.set_node_attribute(node.id, 'available', 'ko')
+
 
     def global_send_action(self, mode):
         delay = 5.
@@ -326,7 +325,8 @@ class Nightly:                                         # pylint: disable=r0902
                        f" on {number_nodes} node(s)")
 
         if self.verbose:
-            print("verbose mode: skip sending mail")
+            print("verbose mode: sending just one mail")
+            send_email(EMAIL_FROM, ['thierry.parmentelat@inria.fr'], subject, html)
         else:
             send_email(EMAIL_FROM, EMAIL_TO, subject, html)
 
