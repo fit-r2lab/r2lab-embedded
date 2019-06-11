@@ -206,7 +206,11 @@ class ImageBuilder:
                          recurse = True),
                 ],
                 label = "set up and run scripts in /etc/rhubarbe-history/{}".format(self.to_image)),
-            SshJob(
+            )
+        # avoid creating an SshJob with void commands
+        if self.extra_logs:
+            sequence.append(
+                SshJob(
                 node = node_proxy,
                 label = "collecting extra logs",
                 critical = False,
@@ -215,8 +219,8 @@ class ImageBuilder:
                          remotepaths = extra_log,
                          recurse = True)
                     for extra_log in self.extra_logs ],
+                )
             )
-        )
 
         # creating these as critical = True means the whole
         # scenario will fail if these are not found
