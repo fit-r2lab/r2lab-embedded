@@ -128,6 +128,7 @@ class Nightly:                                         # pylint: disable=r0902
         if self.verbose:
             self.print("verbose:", *args)
 
+
     def mark_and_exclude(self, node, reason):
         """
         what to do when a node is found as being non-nominal
@@ -136,6 +137,8 @@ class Nightly:                                         # pylint: disable=r0902
         (*) remember the reason why for producing summary
         """
         self.selector.add_or_delete(node.id, add_if_true=False)
+        # propagate on this attribute
+        self.nodes = {n for n in self.nodes if n.id != node.id}
         self.failures[node.id] = reason
         # ok, this may be a be a bit fragile, but given that sidecar_client
         # is not properly installed...
@@ -162,6 +165,7 @@ class Nightly:                                         # pylint: disable=r0902
             else:
                 self.mark_and_exclude(node, reason)
 
+
     def global_load_image(self, image_name):
 
         # locate image
@@ -185,6 +189,7 @@ class Nightly:                                         # pylint: disable=r0902
         loader.main(reset=True, timeout=self.load_timeout)
         self.print("Load done")
 
+
     def global_wait_ssh(self):
         # wait for nodes to be ssh-reachable
         self.print(f"Waiting for {len(self.nodes)} nodes"
@@ -206,6 +211,7 @@ class Nightly:                                         # pylint: disable=r0902
 
             if job.raised_exception():
                 self.mark_and_exclude(node, Reason.WONT_SSH)
+
 
     def global_check_image(self, _image, check_strings):
         # on the remaining nodes: check image marker
@@ -241,6 +247,7 @@ class Nightly:                                         # pylint: disable=r0902
                 self.mark_and_exclude(node, Reason.DID_NOT_LOAD)
                 continue
 
+
     def current_owner(self):
         """
         return:
@@ -257,6 +264,7 @@ class Nightly:                                         # pylint: disable=r0902
             return True
         return False
 
+
     def all_off(self):
         if self.verbose:
             self.print("verbose mode: skip all-off")
@@ -266,6 +274,7 @@ class Nightly:                                         # pylint: disable=r0902
             command += f" {host}"
         command += "> /var/log/all-off.log"
         os.system(command)
+
 
     def run(self):
         """
