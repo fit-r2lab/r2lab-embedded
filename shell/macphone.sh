@@ -81,6 +81,20 @@ function phone-reboot() {
     $adb reboot
 }
 
+doc-phone phone-reset "reboot phone and set LTE-ONLY mode"
+function phone-reset() {
+    echo "REBOOTING phone ..."
+    #    $adb shell am broadcast -a android.intent.action.BOOT_COMPLETED
+    $adb reboot
+    $adb wait-for-device
+    echo "Set LTE-ONLY mode"
+    $adb shell settings put global preferred_network_mode 11
+    $adb shell settings put global preferred_network_mode1 11
+    $adb shell stop ril-daemon
+    $adb shell start ril-daemon
+    $adb shell settings list global | grep pref
+}
+
 # to set LTE only - except that sqlite3 is not known
 #$adb shell sqlite3 /data/data/com.android.providers.settings/databases/settings.db "update global SET value=11 WHERE name='preferred_network_mode'"
 #$adb shell sqlite3 /data/data/com.android.providers.settings/databases/settings.db "select value FROM secure WHERE name='preferred_network_mode'"
