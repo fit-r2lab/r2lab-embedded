@@ -86,8 +86,8 @@ function phone-reset() {
     echo "REBOOTING phone ..."
     $adb reboot
     $adb wait-for-device
-    echo "Wait 15s and Set LTE-ONLY mode"
-    sleep 15
+    echo "Wait 30s and Set LTE-ONLY mode"
+    sleep 30
     $adb shell "settings put global preferred_network_mode 11"
     $adb shell "settings put global preferred_network_mode1 11"
     $adb shell "settings put global airplane_mode_on 1; am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true"
