@@ -90,8 +90,9 @@ function phone-reset() {
     sleep 15
     $adb shell "settings put global preferred_network_mode 11"
     $adb shell "settings put global preferred_network_mode1 11"
-    $adb shell "stop ril-daemon"
-    $adb shell "start ril-daemon"
+    $adb shell "settings put global airplane_mode_on 1; am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true"
+    $adb shell "settings put global airplane_mode_on 0; am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false"
+    $adb shell "settings put global airplane_mode_on 1; am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true"
     $adb shell "settings list global | grep pref"
 }
 
