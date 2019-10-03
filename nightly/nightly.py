@@ -8,7 +8,7 @@ Features:
 (*) designed to be run on an hourly basis, at typically nn:01
     will check for a lease being currently held by nightly slice; returns if not
 (*) defaults to all nodes but can exclude some hand-picked ones on the command-line
-(*) updates sidecar status (available)
+(*) updates sidecar status (available / unavailable)
 (*) sends status mail
 
 Performed checks on all nodes:
@@ -26,14 +26,19 @@ Performed checks on all nodes:
 import sys
 import os
 import time
-from pathlib import Path
+import ssl
 from enum import IntEnum
 from argparse import ArgumentParser
+import logging
 
 import asyncio
 
+from asyncssh import set_log_level
+
 from asynciojobs import Scheduler, Job
 from apssh import SshNode, SshJob
+
+from r2lab.sidecar import SidecarSyncClient
 
 from rhubarbe.config import Config
 from rhubarbe.imagesrepo import ImagesRepo
@@ -55,6 +60,7 @@ NIGHTLY_SLICE = "inria_r2lab.nightly"
 EMAIL_FROM = "nightly@faraday.inria.fr"
 EMAIL_TO = ["fit-r2lab-dev@inria.fr"]
 
+SIDECAR_URL = "wss://r2lab.inria.fr:999/"
 
 # each image is defined by a tuple
 #  0: image name (for rload)
@@ -93,18 +99,28 @@ class NoProgressBarDisplay(Display):
         print('.', end='', flush=True)
 
 
+# hacky; buggy apssh creates verbose session{start/end} messages
+def silent_sshnode(rhubarbe_node, verbose):
+    ssh_node = SshNode(hostname=rhubarbe_node.control_hostname(),
+                       keys=[])
+    ssh_node.formatter.verbose = verbose
+    return ssh_node
+
+
 class Nightly:                                         # pylint: disable=r0902
 
-    def __init__(self, selector, verbose=False):
+    def __init__(self, selector, verbose, speedy):
         # work selector; will remove nodes as they fail
         self.selector = selector
         self.verbose = verbose
-        ##########
+        self.speedy = speedy
+        #
         # keep a backup of initial scope for proper cleanup
         self.all_names = list(selector.node_names())
         # the list of failed nodes together with the reason why
         self.failures = {}
-        # retrieve bandwidth and other deatils from rhubarbe config
+        #
+        # from rhubarbe config, retrieve bandwidth and other details
         config = Config()
         self.bandwidth = int(config.value('networking', 'bandwidth'))
         self.backoff = int(config.value('networking', 'ssh_backoff'))
@@ -112,6 +128,8 @@ class Nightly:                                         # pylint: disable=r0902
             'nodes', 'load_nightly_timeout'))
         self.wait_timeout = float(config.value(
             'nodes', 'wait_nightly_timeout'))
+        #
+        # accessories
         self.bus = asyncio.Queue()
         self.nodes = {Node(x, self.bus) for x in self.selector.cmc_names()}
         self.display = NoProgressBarDisplay(self.nodes, self.bus)
@@ -125,6 +143,7 @@ class Nightly:                                         # pylint: disable=r0902
         if self.verbose:
             self.print("verbose:", *args)
 
+
     def mark_and_exclude(self, node, reason):
         """
         what to do when a node is found as being non-nominal
@@ -133,22 +152,20 @@ class Nightly:                                         # pylint: disable=r0902
         (*) remember the reason why for producing summary
         """
         self.selector.add_or_delete(node.id, add_if_true=False)
+        # propagate on this attribute
+        self.nodes = {n for n in self.nodes if n.id != node.id}
         self.failures[node.id] = reason
         # ok, this may be a be a bit fragile, but given that sidecar_client
         # is not properly installed...
-        unavailable_script = Path.home() / "r2lab-python/examples/unavailable.py"
-        if not unavailable_script.exists():
-            self.print(f"Cannot locate unavailable script {unavailable_script}"
-                       f" - skipping")
-            return
-        self.print(f"marking node {node.id} as unavailable")
-        command = f"{unavailable_script} {node.id}"
-        os.system(command)
+        self.print(f"marking node {node.id} as unavailable for reason {reason}")
+        with SidecarSyncClient(SIDECAR_URL, ssl=ssl.SSLContext()) as sidecar:
+            sidecar.set_node_attribute(node.id, 'available', 'ko')
+
 
     def global_send_action(self, mode):
         delay = 5.
         self.verbose_msg(f"delay={delay}")
-        nodes = {Node(x, self.bus) for x in self.selector.cmc_names()}
+        nodes = self.nodes
         actions = (node.send_action(message=mode, check=True, check_delay=delay)
                    for node in nodes)
         _result = asyncio.get_event_loop().run_until_complete(
@@ -163,6 +180,7 @@ class Nightly:                                         # pylint: disable=r0902
             else:
                 self.mark_and_exclude(node, reason)
 
+
     def global_load_image(self, image_name):
 
         # locate image
@@ -170,7 +188,7 @@ class Nightly:                                         # pylint: disable=r0902
         actual_image = the_imagesrepo.locate_image(
             image_name, look_in_global=True)
         if not actual_image:
-            self.print(f"Image file {image_name} not found - emergency exit")
+            self.print(f"image file {image_name} not found - emergency exit")
             exit(1)
 
         # load image
@@ -181,14 +199,15 @@ class Nightly:                                         # pylint: disable=r0902
                              bandwidth=self.bandwidth,
                              message_bus=self.bus,
                              display=self.display)
-        self.print(f"Loading image {actual_image}"
+        self.print(f"loading image {actual_image}"
                    f" (timeout = {self.load_timeout})")
         loader.main(reset=True, timeout=self.load_timeout)
-        self.print("Load done")
+        self.print("load done")
+
 
     def global_wait_ssh(self):
         # wait for nodes to be ssh-reachable
-        self.print(f"Waiting for {len(self.nodes)} nodes"
+        self.print(f"waiting for {len(self.nodes)} nodes"
                    f" (timeout={self.wait_timeout})")
         sshs = [SshWaiter(node, verbose=self.verbose) for node in self.nodes]
         jobs = [Job(ssh.wait_for(self.backoff), critical=False)
@@ -202,22 +221,24 @@ class Nightly:                                         # pylint: disable=r0902
             self.verbose and scheduler.debrief()        # pylint: disable=w0106
         # exclude nodes that have not behaved
         for node, job in zip(self.nodes, jobs):
-            self.print(f"node-> {node.id} job -> done={job.is_done()}",
-                       f"exc={job.raised_exception()}")
+            self.verbose_msg(
+                f"node {node.id} wait_ssh_job -> done={job.is_done()}",
+                f"exc={job.raised_exception()}")
 
             if job.raised_exception():
                 self.mark_and_exclude(node, Reason.WONT_SSH)
 
+
     def global_check_image(self, _image, check_strings):
         # on the remaining nodes: check image marker
-        self.print(f"Checking {len(self.nodes)} nodes"
+        self.print(f"checking {len(self.nodes)} nodes"
                    f" against {check_strings} in /etc/rhubarbe-image")
 
         grep_pattern = "|".join(check_strings)
         check_command = (
             f"tail -1 /etc/rhubarbe-image | egrep -q '{grep_pattern}'")
         jobs = [
-            SshJob(node=SshNode(hostname=node.control_hostname(), keys=[]),
+            SshJob(node=silent_sshnode(node, verbose=self.verbose),
                    command=check_command,
                    critical=False)
             for node in self.nodes
@@ -233,14 +254,19 @@ class Nightly:                                         # pylint: disable=r0902
         for node, job in zip(self.nodes, jobs):
             if not job.is_done() or job.raised_exception():
                 self.verbose_msg(
-                    f"something went badly wrong with {node}")
+                    f"checking {grep_pattern}: something went badly wrong with {node}")
                 self.mark_and_exclude(node, Reason.CANT_CHECK_IMAGE)
                 continue
             if not job.result() == 0:
                 self.verbose_msg(
-                    f"Wrong image found on {node}")
+                    f"wrong image found on {node} - looking for {grep_pattern}")
                 self.mark_and_exclude(node, Reason.DID_NOT_LOAD)
                 continue
+            self.print(
+                f"node {node} checked out OK"
+            )
+
+
 
     def current_owner(self):
         """
@@ -258,6 +284,7 @@ class Nightly:                                         # pylint: disable=r0902
             return True
         return False
 
+
     def all_off(self):
         if self.verbose:
             self.print("verbose mode: skip all-off")
@@ -267,6 +294,7 @@ class Nightly:                                         # pylint: disable=r0902
             command += f" {host}"
         command += "> /var/log/all-off.log"
         os.system(command)
+
 
     def run(self):
         """
@@ -296,7 +324,7 @@ class Nightly:                                         # pylint: disable=r0902
         # nobody at all : make sure the testbed is switched off
         elif current_owner is None:
             self.all_off()
-            self.verbose_msg("No lease set - turning off")
+            self.verbose_msg("no lease set - turning off")
             return True
 
         if not self.verbose:
@@ -306,8 +334,10 @@ class Nightly:                                         # pylint: disable=r0902
         else:
             print("nightly in verbose mode won't check on and off and reset")
 
-        images_expected = IMAGES_TO_CHECK if not self.verbose \
-            else IMAGES_TO_CHECK[:1]
+        images_expected = (
+            IMAGES_TO_CHECK
+            if not self.speedy
+            else IMAGES_TO_CHECK[:1])
 
         for image, check_strings in images_expected:
             if not self.verbose:
@@ -317,6 +347,7 @@ class Nightly:                                         # pylint: disable=r0902
             self.global_wait_ssh()
             self.global_check_image(image, check_strings)
 
+        self.print("sending summary mail")
         html = complete_html(self.all_names, self.failures)
         if self.failures:
             subject = (f"R2lab nightly : {len(self.failures)} issue(s)"
@@ -326,11 +357,14 @@ class Nightly:                                         # pylint: disable=r0902
                        f" on {number_nodes} node(s)")
 
         if self.verbose:
-            print("verbose mode: skip sending mail")
+            print("verbose mode: sending just one mail")
+            send_email(EMAIL_FROM, ['thierry.parmentelat@inria.fr'], subject, html)
         else:
             send_email(EMAIL_FROM, EMAIL_TO, subject, html)
 
+        self.print("turning off")
         self.all_off()
+        self.print("turned off - bye")
 
         # True means everything is OK
         return True
@@ -346,12 +380,18 @@ def main(*argv):
     parser = ArgumentParser(usage=USAGE)
     parser.add_argument("-v", "--verbose", action='store_true', default=False,
                         help="for testing purposes only")
+    parser.add_argument("-s", "--speedy", action='store_true', default=False,
+                        help="for testing also, will only load one image")
     add_selector_arguments(parser)
 
     args = parser.parse_args(argv)
 
     selector = selected_selector(args, defaults_to_all=True)
-    nightly = Nightly(selector, verbose=args.verbose)
+    nightly = Nightly(selector, verbose=args.verbose, speedy=args.speedy)
+
+    # turn off asyncssh info message unless verbose
+    if not args.verbose:
+        set_log_level(logging.ERROR)
 
     return 0 if nightly.run() else 1
 
