@@ -88,11 +88,11 @@ function phone-reset() {
     $adb reboot
     $adb wait-for-device
     echo "Set LTE-ONLY mode"
-    $adb shell settings put global preferred_network_mode 11
-    $adb shell settings put global preferred_network_mode1 11
-    $adb shell stop ril-daemon
-    $adb shell start ril-daemon
-    $adb shell settings list global | grep pref
+    $adb shell "settings put global preferred_network_mode 11"
+    $adb shell "settings put global preferred_network_mode1 11"
+    $adb shell "stop ril-daemon"
+    $adb shell "start ril-daemon"
+    $adb shell "settings list global | grep pref"
 }
 
 # to set LTE only - except that sqlite3 is not known
