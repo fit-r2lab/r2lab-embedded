@@ -83,13 +83,11 @@ function phone-reboot() {
 
 doc-phone phone-reset "reboot phone and set LTE-ONLY mode"
 function phone-reset() {
-    $adb shell "settings list global | grep pref"
     echo "REBOOTING phone ..."
-    #    $adb shell am broadcast -a android.intent.action.BOOT_COMPLETED
     $adb reboot
     $adb wait-for-device
-    echo "Wait 20s and Set LTE-ONLY mode"
-    sleep 20
+    echo "Wait 15s and Set LTE-ONLY mode"
+    sleep 15
     $adb shell "settings put global preferred_network_mode 11"
     $adb shell "settings put global preferred_network_mode1 11"
     $adb shell "stop ril-daemon"
