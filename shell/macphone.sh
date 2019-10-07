@@ -1,7 +1,12 @@
 # These helpers target the MAC that is sitting in the R2lab chamber
 # and has a USB connection to a commercial phone (nexus 6 as of now)
 
-[ -z "$_sourced_r2labutils" ] && source $(dirname $(readlink -f $BASH_SOURCE))/r2labutils.sh
+# because readlink -f is not supported on MacOS, we rely on brew's coreutils
+# that comes with greadlink
+# prerequisite:
+# brew install coreutils
+
+[ -z "$_sourced_r2labutils" ] && source $(dirname $(greadlink -f $BASH_SOURCE))/r2labutils.sh
 
 adb=$(type -p adb)
 
