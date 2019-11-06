@@ -106,6 +106,12 @@ function configure() {
                   50) rxgain=127; txgain=1; maxpower=-6;;
                   *) echo -e "ERROR: Bad N_RB value $nrb"; return 1;;
             esac;;
+        08) msin="0000000008";
+            case $nrb in
+                  25) rxgain=125; txgain=1; maxpower=-6;;
+                  50) rxgain=127; txgain=1; maxpower=-6;;
+                  *) echo -e "ERROR: Bad N_RB value $nrb"; return 1;;
+            esac;;
         19) msin="0000000006";
             case $nrb in
                 25) rxgain=95; txgain=9; maxpower=-14;;
