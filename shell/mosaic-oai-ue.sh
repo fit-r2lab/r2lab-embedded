@@ -172,6 +172,13 @@ function node-has-b210() {
     uhd_find_devices 2>&1 | grep -q B210
 }
 
+doc-nodes node-has-b205 "Check if a USRP B205 is attached to the node"
+function node-has-b205() {
+    type uhd_find_devices >& /dev/null || {
+        echo "you need to install uhd_find_devices"; return 1;}
+    uhd_find_devices 2>&1 | grep -q B205
+}
+
 doc-nodes node-has-limesdr "Check if a LimeSDR is attached to the node"
 function node-has-limesdr() {
     ls /usr/local/bin/LimeUtil >& /dev/null || {
@@ -240,6 +247,24 @@ function warm-up() {
                 return 1
     	    }
             echo "B210 ready"
+        fi
+    elif node-has-b205; then
+        if [ -z "$reset" ]; then
+            echo "B205 left alone (reset not requested)"
+        else
+            uhd_find_devices >& /dev/null
+            echo "Loading b205 image..."
+            # this was an attempt at becoming ahead of ourselves
+            # by pre-loading the right OAI image at this earlier point
+            # it's not clear that it is helping, as enb seems to
+            # unconditionnally load the same stuff again, no matter what
+            uhd_image_loader --args="type=b200" \
+             --fw-path /snap/oai-ue/current/uhd_images/usrp_b200_fw.hex \
+             --fpga-path /snap/oai-ue/current/uhd_images/usrp_b205mini_fpga.bin || {
+                echo "WARNING: USRP B205 board could not be loaded - probably need a RESET"
+                return 1
+    	    }
+            echo "B205 ready"
         fi
     elif node-has-limesdr; then
 	    # Load firmware on the LimeSDR device
