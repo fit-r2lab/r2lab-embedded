@@ -240,8 +240,8 @@ function warm-up() {
             # it's not clear that it is helping, as enb seems to
             # unconditionnally load the same stuff again, no matter what
 	    uhd_image_loader --args="type=b200" \
-		--fw-path /snap/oai-ue/current/uhd_images/usrp_b200_fw.hex \
-		--fpga-path /snap/oai-ue/current/uhd_images/usrp_b205mini_fpga.bin || {
+		--fw-path /snap/oai-ran/current/uhd_images/usrp_b200_fw.hex \
+		--fpga-path /snap/oai-ran/current/uhd_images/usrp_b205mini_fpga.bin || {
 		echo "WARNING: USRP B205 board could not be loaded - probably need a RESET"
 		return 1
 	    }
