@@ -210,6 +210,9 @@ function configure-r2lab-devices() {
     oai-cn.hss-add-user 208950000000006 8BAF473F2F8FD09487CCCBD7097C6862 20 7 # SIM 06, OAI UE on fit19
     oai-cn.hss-add-user 208950000000007 8BAF473F2F8FD09487CCCBD7097C6862 20 7 # SIM 07, Huawei 3372 LTE on fit02
     oai-cn.hss-add-user 208950000000008 8BAF473F2F8FD09487CCCBD7097C6862 20 7 # SIM 08, OAI UE on fit08
+    oai-cn.hss-add-user 208950000000009 8BAF473F2F8FD09487CCCBD7097C6862 20 7 # SIM 09, Huawei E392 on fit09
+    oai-cn.hss-add-user 208950000000010 8BAF473F2F8FD09487CCCBD7097C6862 20 7 # SIM 10, Huawei E3276 on fit29
+    oai-cn.hss-add-user 208950000000011 8BAF473F2F8FD09487CCCBD7097C6862 20 7 # SIM 11, Nexus 5 - phone 3
 }
 
 doc-nodes reinit-core-network "Required to have configuration changes taken into account"
