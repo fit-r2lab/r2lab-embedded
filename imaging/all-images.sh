@@ -288,17 +288,29 @@ function mosaic-ran() {
 }
 
 function u18-04.2() {
-    bim 36 u18.04 u18.04-$DATE-tmp "nodes.sh git-pull-r2lab" "nodes.sh apt-upgrade-all" 
-    bim 37 u18.04-$DATE-tmp u18.04-$DATE "imaging.sh clean-kernel-build"
+    bim 36 u18.04 u18.04-$DATE-tmp \
+        "nodes.sh git-pull-r2lab" "nodes.sh apt-upgrade-all" 
+    bim 37 u18.04-$DATE-tmp u18.04-$DATE \
+        "imaging.sh clean-kernel-build"
+}
+
+function centos-8() {
+    bim 42 centos-8-ssh centos-8-r2lab \
+     "imaging.sh fedora-base fedora-setup-ntp network-names-udev centos-8-ifcfg new-common-setup"
+}
+
+function fedora-31() {
+    bim 41 fedora-31-ssh fedora-31-r2lab \
+     "imaging.sh fedora-base fedora-setup-ntp network-names-udev fedora-31-ifcfg new-common-setup"
 }
 
 ####################
 # xxx this clearly should be specified on the command line some day
-mosaic-base
-mosaic-ran &
-mosaic-cn &
-wait %1 %2
-# mosaic-ran
-#mosaic-base
-#mosaic-ran
+# mosaic-base
+# mosaic-ran &
+# mosaic-cn &
+# wait %1 %2
 
+centos-8 &
+fedora-31 &
+wait %1 %2

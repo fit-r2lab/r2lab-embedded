@@ -312,7 +312,7 @@ function u16-optin-lts-kernel() {
 
 
 
-doc-imaging ubuntu-dev "add udev rules for canonical interface names"
+doc-imaging network-names-udev "add udev rules for canonical interface names"
 function network-names-udev () {
 ####################
 # udev
@@ -426,8 +426,10 @@ function install-gnuradio() {
 doc-imaging fedora-base "minimal packages"
 function fedora-base() {
     rm /etc/hostname
+    dnf -y update
     packages=" rsync git make gcc emacs-nox wireshark"
     dnf -y install $packages
+    dnf clean all
 }
 
 doc-imaging fedora-setup-ntp "installs ntp"
@@ -438,11 +440,24 @@ function fedora-setup-ntp() {
 }
 
 # most likely there are much smarter ways to do that..
+function fedora-29-ifcfg() {
+    fedora-ifcfg enp3s0:control enp0s25:data
+}
+function fedora-31-ifcfg() {
+    # xxx be confirmed
+    fedora-ifcfg enp3s0:control enp0s25:data
+}
+function centos-8-ifcfg() {
+    # go figure why it is different..
+    fedora-ifcfg enp2s0:control enp0s25:data
+}
+
 doc-imaging fedora-ifcfg "overwrite /etc/sysconfig/networks-scripts"
 function fedora-ifcfg() {
+    local renamings="$@"
     echo WARNING fedora-interfaces might be brittle
     cd /etc/sysconfig/network-scripts
-    for renaming in enp3s0:control enp0s25:data; do
+    for renaming in $renamings; do
 	oldname=$(cut -d: -f1 <<< $renaming)
 	newname=$(cut -d: -f2 <<< $renaming)
 	oldfile=ifcfg-$oldname
