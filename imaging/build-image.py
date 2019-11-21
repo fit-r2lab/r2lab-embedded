@@ -10,7 +10,7 @@ from asynciojobs import Scheduler, Sequence, Job, PrintJob
 
 from apssh.formatters import ColonFormatter
 from apssh.keys import load_agent_keys
-from apssh import SshNode, SshJob, Run, RunScript, RunString, Push, Pull
+from apssh import SshNode, LocalNode, SshJob, Run, RunScript, RunString, Push, Pull
 ### , RunScript, RunString, SshJobPusher, SshJobCollector
 
 #
@@ -171,6 +171,14 @@ class ImageBuilder:
         )
 
         banner = 20*'='
+
+        # now that node_proxy is initialized, we need to 
+        # have a valid gateway_proxy for when we run all this from inside 
+        # the gateway
+        if gateway_proxy is None:
+            print("WARNING: build-image is designed to be run on your laptop")
+            # best-effort, not even tested....
+            gateway_proxy = LocalNode()
 
         #################### the little pieces
         sequence = Sequence(

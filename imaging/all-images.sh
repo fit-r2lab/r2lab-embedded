@@ -6,7 +6,7 @@ case $(hostname) in
         gitroot=/root/r2lab-embedded
     ;;
     *)
-        gateway=inria_mosaic@faraday.inria.fr
+        gateway=inria_admin@faraday.inria.fr
         gitroot=$HOME/git/r2lab-embedded
     ;;
 esac
@@ -295,21 +295,25 @@ function u18-04.2() {
 }
 
 function centos-8() {
-    bim 42 centos-8-ssh centos-8-r2lab \
-     "imaging.sh fedora-base fedora-setup-ntp network-names-udev centos-8-ifcfg new-common-setup"
+    bim 37 centos-8-ssh centos-8-r2lab \
+        "imaging.sh fedora-base" \
+        "imaging.sh fedora-setup-ntp" \
+        "imaging.sh network-names-udev" \
+        "imaging.sh centos-8-ifcfg" \
+        "imaging.sh new-common-setup"
 }
 
 function fedora-31() {
-    bim 41 fedora-31-ssh fedora-31-r2lab \
-     "imaging.sh fedora-base fedora-setup-ntp network-names-udev fedora-31-ifcfg new-common-setup"
+    bim 36 fedora-31-ssh fedora-31-r2lab \
+        "imaging.sh fedora-base" \
+        "imaging.sh fedora-setup-ntp" \
+        "imaging.sh network-names-udev" \
+        "imaging.sh fedora-31-ifcfg" \
+        "imaging.sh new-common-setup"
 }
 
 ####################
 # xxx this clearly should be specified on the command line some day
-# mosaic-base
-# mosaic-ran &
-# mosaic-cn &
-# wait %1 %2
 
 centos-8 &
 fedora-31 &
