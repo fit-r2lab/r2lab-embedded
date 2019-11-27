@@ -631,6 +631,10 @@ function -drac-51() {
     -ip reboot51 -u root -p calvin "$@"
 
 }
+doc-alt status-51 "probe status of dell server fit51"
+function status-51() {
+    -drac-51 -g y
+}
 doc-alt on-51 "switch on dell server fit51"
 function on-51() {
     -drac-51 -r On
@@ -640,7 +644,7 @@ function off-51() {
     -drac-51 -r ForceOff
 }
 doc-alt reset-51 "reset dell server fit51"
-function on-51() {
+function reset-51() {
     -drac-51 -r GracefulRestart
 }
 
