@@ -485,19 +485,18 @@ function -do-first () {
 
 doc-selection ssh1n "(or just s1) Enter first selected node using ssh\n\t\tWARNING: arg if present is taken as a node, not a command"
 alias ssh1n="-do-first ssh"
+doc-selection s1 "alias for ssh1n"
 alias s1="-do-first ssh"
 
 doc-selection ssh1nx "(or just s1x) Same as ssh1n but with ssh -X"
 alias ssh1nx="-do-first 'ssh -X'"
+doc-selection s1x "alias for ssh1nx"
 alias s1x="-do-first 'ssh -X'"
 
 doc-admin tln1n "Enter first selected node using telnet - ditto"
 alias tln1n="-do-first telnet"
-
-doc-selection s "alias for ssh1n"
-alias s="ssh1n"
-doc-selection sx "alias for ssh1nx"
-alias sx="ssh1x"
+doc-selection t1 "alias for tln1n"
+alias t1="-do-first telnet"
 
 ####################
 # look at logs
@@ -627,12 +626,33 @@ function refresh-root() {
 }
 
 ########################################
+function -drac-51() {
+    python3 /root/git/iDRAC-Redfish-Scripting/"Redfish Python"/SetPowerStateREDFISH.py \
+    -ip reboot51 -u root -p calvin "$@"
+
+}
+doc-alt on-51 "switch on dell server fit51"
+function on-51() {
+    -drac-51 -r On
+}
+doc-alt off-51 "switch off dell server fit51"
+function off-51() {
+    -drac-51 -r ForceOff
+}
+doc-alt reset-51 "reset dell server fit51"
+function on-51() {
+    -drac-51 -r GracefulRestart
+}
+
+########################################
 doc-alt all-off "Switch off everything"
 function all-off() {
     rhubarbe usrpoff -a
     sleep 1
     rhubarbe off -a
-    macphone phone-off
+    macphone1 phone-off
+    macphone2 phone-off
+    off-51
 }
 
 # for use with diana systemd bash component
