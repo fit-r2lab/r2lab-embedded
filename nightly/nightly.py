@@ -66,8 +66,8 @@ SIDECAR_URL = "wss://r2lab.inria.fr:999/"
 #  0: image name (for rload)
 #  1: strings to expect in /etc/rhubarbe-image (any of these means it's OK)
 IMAGES_TO_CHECK = [
-    ("ubuntu", ["ubuntu-16.04", "u16.04"]),
-    ("fedora", ["fedora-27"]),
+    ("ubuntu-18", ["ubuntu-18", "u18"]),
+    ("fedora-31", ["fedora-31", "f31"]),
 ]
 
 
