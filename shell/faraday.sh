@@ -627,9 +627,8 @@ function refresh-root() {
 
 ########################################
 function -drac-51() {
-    python3 /root/git/iDRAC-Redfish-Scripting/"Redfish Python"/SetPowerStateREDFISH.py \
+    python3 /home/faraday/git/iDRAC-Redfish-Scripting/"Redfish Python"/SetPowerStateREDFISH.py \
     -ip reboot51 -u root -p calvin "$@"
-
 }
 doc-alt status-51 "probe status of dell server fit51"
 function status-51() {
