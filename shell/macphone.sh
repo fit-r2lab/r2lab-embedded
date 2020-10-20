@@ -36,6 +36,12 @@ function phone-start-app() {
     $adb shell monkey -p $package_name -c android.intent.category.LAUNCHER 1
 }
 
+doc-phone phone-check-cx "check phone connection parameters"
+function phone-check-cx() {
+    echo "Check Phone Connection parameters"
+    $adb shell dumpsys telephony.registry | grep mDataConnectionLinkProperties
+}
+
 doc-phone phone-wifi-on "turn on wifi (tested on nexus 5)"
 function phone-wifi-on() {
     echo "Turning WiFi ON"
