@@ -289,6 +289,12 @@ function increase-data-mtu() {
     ip link list data
 }
 
+doc-nodes increase-control-mtu "increase to 1600 MTU the control interface (useful for OAI eNB and CN when all traffic use the control interface, e.g. through kube5g); "
+function increase-control-mtu() {
+    ip link set dev control mtu 1600 up
+    ip link list control
+}
+
 doc-nodes list-interfaces "list the current status of all interfaces"
 function list-interfaces () {
     set +x
