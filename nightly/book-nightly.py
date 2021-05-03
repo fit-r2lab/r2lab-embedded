@@ -14,7 +14,7 @@ and triggers the actual checks when that slice has the lease at the time
 """
 
 import asyncio
-from argparse import ArgumentParser
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from datetime import date as Date, datetime as DateTime, timedelta as TimeDelta
 import xmlrpc.client
 
@@ -68,8 +68,10 @@ def book_lease_for_nightly(slicename, day, time, dry_run, debug):
         print(f"AddLeases returned {retcod}")
 
 
+USAGE="HEY"
+
 def main():
-    parser = ArgumentParser()
+    parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument("-f", "--from", dest="from_", 
                         default=None, help="from date; format is yy/mm/dd")
     parser.add_argument("-u", "--until", default=None, 
@@ -79,7 +81,7 @@ def main():
     parser.add_argument("-s", "--slice", dest="slice", default="inria_r2lab.nightly",
                         help="Slice name")
     parser.add_argument("-t", "--time", dest="time", nargs=2, type=int, default= [4, 5],
-                        help="Bounds of the nightly timeslot in round hours")
+                        help="Bounds of the nightly timeslot in round hours; example --time 4 5")
     parser.add_argument("-n", "--dry-run", dest="dry_run", action='store_true')
     parser.add_argument("--debug", dest="debug", action='store_true')
 
