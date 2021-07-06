@@ -667,6 +667,40 @@ function e3372-reset() {
     ifup enx0c5b8f279a64
 }
 
+doc-nodes quectel-detach "Detach the Quectel RM500Q-GL on this node"
+function quectel-detach() {
+    # The node should have a USB3 Quectel RM500Q-GL connected and have a quectel image
+    echo "quectel-detach: python3 ci_ctl_qtel.py /dev/ttyUSB2 detach"
+    python3 ci_ctl_qtel.py /dev/ttyUSB2 detach
+}
+
+doc-nodes quectel-attach "Attach the Quectel RM500Q-GL on this node"
+function quectel-attach() {
+    # The node should have a USB3 Quectel RM500Q-GL connected and have a quectel image
+    echo "quectel-attach: python3 ci_ctl_qtel.py /dev/ttyUSB2 wup"
+    python3 ci_ctl_qtel.py /dev/ttyUSB2 wup
+}
+
+doc-nodes check-quectel-on "Check if the Quectel RM500Q-GL module is visible on this node"
+function check-quectel-on() {
+    # The node should have a USB3 Quectel RM500Q-GL connected 
+    echo "check-quectel_on: lsusb -t; ls /dev/ttyUSB*"
+    lsusb -t; ls /dev/ttyUSB*
+}
+
+doc-nodes start-quectelCM "Start the Connection Manager to manage the Quectel RM500Q-GL module on this node"
+function start-quectelCM() {
+    # The node should have a USB3 Quectel RM500Q-GL connected and have a quectel image
+    echo "start-quectelCM: quectel-CM -s oai.ipv4 -4"
+    quectel-CM -s oai.ipv4 -4
+}
+
+doc-nodes check-quectel-cx "Check the 4G/5G connection through the Quectel RM500Q-GL module on this node"
+function check-quectel-cx() {
+    # The node should have a USB3 Quectel RM500Q-GL connected, have a quectel image and the quectelCM started
+    echo "check-quectel-cx: ping -I wwan0 -c 5 google.fr"
+    ping -I wwan0 -c 5 google.fr
+}
 
 
 ##############################
