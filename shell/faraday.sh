@@ -649,7 +649,7 @@ function reset-51() {
 }
 
 ########################################
-doc-alt all-off "Switch off everything"
+doc-selection all-off "Switch off everything"
 function all-off() {
     rhubarbe usrpoff -a
     sleep 1
@@ -658,6 +658,13 @@ function all-off() {
     macphone2 phone-off
     off-51
 }
+
+###
+doc-alt watch-dhcp "run tcpdump on the optical interface with ports 67 or 68"
+function watch-dhcp() {
+    tcpdump -i optical -e -vv port 67 or port 68
+}
+
 
 # for use with diana systemd bash component
 SERVICES="monitornodes monitorphones monitorleases accountsmanager"
