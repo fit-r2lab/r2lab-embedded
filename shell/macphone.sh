@@ -11,7 +11,10 @@
 adb=$(type -p adb)
 
 if [ -z "$adb" ]; then
-    adb="$HOME/nexustools/adb"
+# 2022 - march
+# we upgrade macos to monterey and use adb from brew
+#    adb="$HOME/nexustools/adb"
+    adb="/usr/local/bin/adb"
     [ -x $adb ] || echo "WARNING: from $BASH_SOURCE : $adb not executable"
 fi
 
