@@ -275,7 +275,8 @@ function turn-on-data() {
         ip addr sh dev $ifname >& /dev/null && {
             ip link show $ifname | grep -q UP || {
                 echo "turn-on-data: data network on interface" $ifname >&2-
-                ifup $ifname >&2-
+                # this should work except on fedora-33; go figure
+                ifup $ifname >&2- || nmcli connection up $ifname
             }
             echo $ifname
             break
