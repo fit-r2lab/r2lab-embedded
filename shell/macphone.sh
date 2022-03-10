@@ -1,10 +1,11 @@
 # These helpers target the MAC that is sitting in the R2lab chamber
 # and has a USB connection to a commercial phone (nexus 6 as of now)
 
+# prerequisites:
+#    brew install brew install --cask android-platform-tools
 # because readlink -f is not supported on MacOS, we rely on brew's coreutils
 # that comes with greadlink
-# prerequisite:
-# brew install coreutils
+#    brew install coreutils
 
 [ -z "$_sourced_r2labutils" ] && source $(dirname $(greadlink -f $BASH_SOURCE))/r2labutils.sh
 
