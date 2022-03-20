@@ -297,7 +297,7 @@ class Nightly:                                         # pylint: disable=r0902
         command = "rhubarbe bye"
         for host in self.all_names:
             command += f" {host}"
-        command += "> /var/log/all-off.log"
+        # command += "> /var/log/all-off.log"
         os.system(command)
 
 
