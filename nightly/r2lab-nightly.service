@@ -1,0 +1,6 @@
+[Unit]
+Description=Check the testbed if the nightly lease is on, and turn it off if not busy
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python /root/r2lab-embedded/nightly/nightly.py

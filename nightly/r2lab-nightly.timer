@@ -1,0 +1,8 @@
+[Unit]
+Description=Check the testbed if the nightly lease is on, and turn it off if not busy
+
+[Timer]
+OnCalendar=*:19
+
+[Install]
+WantedBy=multi-user.target
