@@ -1,0 +1,4 @@
+imaging/*.log
+imaging/*.tar
+imaging/*/
+*.tgz
