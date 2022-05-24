@@ -15,5 +15,10 @@ RUN git clone https://github.com/fit-r2lab/r2lab-embedded.git /root/r2lab-embedd
 RUN rm /root/.bashrc
 RUN ln -s /root/r2lab-embedded/shell/nodes.sh /root/.bashrc
 
+RUN ln -s /root/r2lab-embedded/shell/nodes.sh /etc/profile.d/nodes.sh
+
+RUN rm /root/.bash_profile
+RUN ln -s /root/r2lab-embedded/shell/nodes.sh /root/.bash_profile
+
 # Setup Bash prompt to not get lost when in interactive mode
 RUN echo "PS1='[CONTAINER]${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '" | tee -a /root/.bashrc > /dev/null
