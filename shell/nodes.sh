@@ -752,6 +752,16 @@ function watch-downlink() {
     echo $command
     $command
 }
+
+########################################
+doc-nodes ki-utils "load kube-install bash utilities"
+function ki-utils() {
+    if type kube-install.sh >& /dev/null; then
+        local kidir=$(kube-install.sh pwd)
+        source $kidir/bash-utils/loader.sh
+    fi
+}
+
 ########################################
 define-main "$0" "$BASH_SOURCE"
 main "$@"
