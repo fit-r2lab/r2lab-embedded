@@ -371,6 +371,17 @@ function refresh() {
 }
 doc-alt refresh "install latest version of these utilities"
 
+
+########################################
+doc-alt ki-utils "load kube-install bash utilities"
+function ki-utils() {
+    if type kube-install.sh >& /dev/null; then
+        local kidir=$(kube-install.sh pwd)
+        source $kidir/bash-utils/loader.sh
+    fi
+}
+
+
 ####################
 # faraday has p2p1@switches and bemol has eth1 - use control_dev
 # spy on frisbee traffic
