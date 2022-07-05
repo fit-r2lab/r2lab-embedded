@@ -754,13 +754,19 @@ function watch-downlink() {
 }
 
 ########################################
-doc-nodes ki-utils "load kube-install bash utilities"
+#doc-nodes ki-utils "load kube-install bash utilities"
 function ki-utils() {
-    if type kube-install.sh >& /dev/null; then
-        local kidir=$(kube-install.sh pwd)
-        source $kidir/bash-utils/loader.sh
-    fi
+    echo "ki-utils no longer needed with this image"
 }
+
+function load-kube-install-utils() {
+    local cdki=$(kube-install.sh pwd 2> /dev/null)
+    # do not print a warning, because not all nodes have kube-install
+    [[ -z "$cdki" ]] && return 1
+    source $cdki/bash-utils/loader.sh
+}
+
+load-kube-install-utils
 
 ########################################
 define-main "$0" "$BASH_SOURCE"
