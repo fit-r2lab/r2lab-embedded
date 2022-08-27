@@ -526,6 +526,7 @@ doc-nodes define-peer "defines the id of a peer - stores it in $peer_id_file; e.
 # it is required by some setups that need to know where to reach another service
 function define-peer() {
     id="$1"; shift
+    id=$(expr "$id")
     id=$(printf %02d $id)
     [ -n "$id" ] && echo $id > $peer_id_file
     echo "peer now defined as : " $(cat $peer_id_file)
@@ -612,7 +613,7 @@ doc-nodes enable-nat-data "Makes the data interface NAT-enabled to reach the out
 function enable-nat-data() {
     local id=$(r2lab-id -s)
     ip route add default via 192.168.2.100 dev data table 200
-    ip rule add from 192.168.2.2/24 table 200 priority 200
+    ip rule add from 192.168.2.${id}/24 table 200 priority 200
 }
 
 ####################
