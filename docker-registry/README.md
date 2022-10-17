@@ -1,6 +1,6 @@
 # docker registry setup
 
-* runs on https://sopnode-registry.inria.fr:5000/
+* runs on https://sopnode-registry.inria.fr:443/
 * using filesystem /var/lib/docker-registry
 * current certificate and key stored in `./certs/`  
   see `fit-r2lab/misc/ssl-certificate-renewal/README.md`  
