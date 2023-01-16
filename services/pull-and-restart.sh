@@ -25,10 +25,15 @@ case $(hostname) in
 esac
 
 #### updates the contents of selected git repos
+function gtr() { git "$@" rev-parse --abbrev-ref --symbolic-full-name "@{u}"; }
+# follow blindly
+function gfollow() {
+    git "$@" fetch --all
+    git "$@" reset --hard $(gtr "$@")
+}
+
 for git_repo in $GIT_REPOS; do
-    cd $git_repo
-    git reset --hard HEAD
-    git pull
+    gfollow -C $git_repo
 done
 
 cd
