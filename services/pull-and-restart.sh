@@ -52,6 +52,6 @@ case $(hostname) in
 	make -C /root/r2lab.inria.fr publish
 	make -C /root/r2lab.inria.fr-raw publish
 	systemctl restart sidecar
-	systemctl restart httpd
+	systemctl restart nginx
 	;;
 esac
