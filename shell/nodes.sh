@@ -690,6 +690,13 @@ function check-quectel-on() {
     lsusb -t; ls /dev/ttyUSB*
 }
 
+doc-nodes init-quectel "Quectel with MBIM mode: initialize Quectel RM500Q-GL module after a switch-on"
+function start-quectel() {
+    # The node should have a USB3 Quectel RM500Q-GL connected and have a quectel MBIM image
+    echo "init-quectel: /root/init.sh"
+    /root/init.sh
+}
+
 doc-nodes start-quectelCM "Start the Connection Manager to manage the Quectel RM500Q-GL module on this node"
 function start-quectelCM() {
     # The node should have a USB3 Quectel RM500Q-GL connected and have a quectel image
@@ -714,8 +721,8 @@ function stop-quectel() {
 doc-nodes check-quectel-cx "Check the 4G/5G connection through the Quectel RM500Q-GL module on this node"
 function check-quectel-cx() {
     # The node should have a USB3 Quectel RM500Q-GL connected, have a quectel image and the quectelCM started
-    echo "check-quectel-cx: ping -I wwan0 -c 5 google.fr"
-    ping -I wwan0 -c 5 google.fr
+    echo "check-quectel-cx: ping -I wwan0 -c 5 12.1.1.1"
+    ping -I wwan0 -c 5 12.1.1.1
 }
 
 
