@@ -690,10 +690,10 @@ function check-quectel-on() {
     lsusb -t; ls /dev/ttyUSB*
 }
 
-doc-nodes init-quectel "Quectel with MBIM mode: initialize Quectel RM500Q-GL module after a switch-on"
-function init-quectel() {
+doc-nodes quectel-init "Quectel with MBIM mode: initialize Quectel RM500Q-GL module after a switch-on"
+function quectel-init() {
     # The node should have a USB3 Quectel RM500Q-GL connected and have a quectel MBIM image
-    echo "init-quectel: /root/init.sh"
+    echo "quectel-init: /root/init.sh"
     /root/init.sh
 }
 
