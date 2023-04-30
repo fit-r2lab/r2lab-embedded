@@ -691,7 +691,7 @@ function check-quectel-on() {
 }
 
 doc-nodes init-quectel "Quectel with MBIM mode: initialize Quectel RM500Q-GL module after a switch-on"
-function start-quectel() {
+function init-quectel() {
     # The node should have a USB3 Quectel RM500Q-GL connected and have a quectel MBIM image
     echo "init-quectel: /root/init.sh"
     /root/init.sh
