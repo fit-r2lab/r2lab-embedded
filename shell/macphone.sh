@@ -9,6 +9,9 @@
 
 [ -z "$_sourced_r2labutils" ] && source $(dirname $(greadlink -f $BASH_SOURCE))/r2labutils.sh
 
+PIXEL7_ID="34061FDH20068M"
+P40_ID="MDX0220623006208"
+
 adb=$(type -p adb)
 
 if [ -z "$adb" ]; then
@@ -19,6 +22,20 @@ if [ -z "$adb" ]; then
     [ -x $adb ] || echo "WARNING: from $BASH_SOURCE : $adb not executable"
 fi
 
+# retrieve phone ID attached to macphone
+phone_id=$(adb devices|sed '2q;d'| awk  '{print $1}')
+
+case $phone_id in
+    $PIXEL7_ID)
+	phone="pixel7" ;;
+    $P40_ID)
+	phone="p40" ;;
+    *)
+	echo "Unrecognized phone $phone_id"
+	exit 1 ;;
+esac
+
+
 
 create-doc-category phone "tools for managing R2lab phone from macphone"
 augment-help-with phone
@@ -26,7 +43,7 @@ augment-help-with phone
 
 doc-phone refresh "retrieve latest git repo, and source it in this shell"
 function refresh() {
-    cd ~/r2lab
+    cd ~/r2lab-embedded
     git pull
     source ~/.bash_profile
 }
@@ -63,7 +80,13 @@ function phone-wifi-off() {
 doc-phone phone-on "turn off airplane mode"
 function phone-on() {
     echo "Turning ON phone : turning off airplane mode"
-    $adb shell "settings put global airplane_mode_on 0; am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false"
+    case $phone in
+	"p40")
+	    adb shell cmd connectivity airplane-mode disable ;;
+	"pixel7")
+	    adb shell /data/local/tmp/on ;;
+    esac
+#    $adb shell "settings put global airplane_mode_on 0; am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false"
 }
 
 doc-phone phone-off "turn off airplane mode - does not touch wifi settings"
@@ -75,7 +98,13 @@ function phone-off() {
     # so let's have the caller decide to turn off wifi or not
     # phone-wifi-off
     echo "Turning OFF phone : turning on airplane mode"
-    $adb shell "settings put global airplane_mode_on 1; am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true"
+    case $phone in
+	"p40")
+	    adb shell cmd connectivity airplane-mode enable ;;
+	"pixel7")
+	    adb shell /data/local/tmp/off ;;
+    esac
+#    $adb shell "settings put global airplane_mode_on 1; am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true"
 }
 
 doc-phone phone-status "shows wheter airplane mode is on or off"
