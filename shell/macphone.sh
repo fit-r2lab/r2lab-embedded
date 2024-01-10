@@ -27,15 +27,16 @@ phone_id=$(adb devices|sed '2q;d'| awk  '{print $1}')
 
 case $phone_id in
     $PIXEL7_ID)
-	phone="pixel7" ;;
+        phone="pixel7" ;;
     $P40_ID)
-	phone="p40" ;;
+        phone="p40" ;;
     *)
-	echo "Unrecognized phone $phone_id"
-	exit 1 ;;
+        echo "WARNING : Unrecognized phone $phone_id"
+        echo "WARNING : please edit $BASH_SOURCE to fix this"
+        echo "WARNING : until you do, phone commands will likely fail to work properly"
+        # not NOT exit here, this would end the login shell on the macphone
+        # exit 1 ;;
 esac
-
-
 
 create-doc-category phone "tools for managing R2lab phone from macphone"
 augment-help-with phone
