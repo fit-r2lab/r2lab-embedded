@@ -31,9 +31,10 @@ case $phone_id in
     $P40_ID)
         phone="p40" ;;
     *)
-        echo "WARNING : Unrecognized phone $phone_id"
-        echo "WARNING : please edit $BASH_SOURCE to fix this"
-        echo "WARNING : until you do, phone commands will likely fail to work properly"
+	phone="none" ;;
+        #echo "WARNING : Unrecognized phone $phone_id"
+        #echo "WARNING : please edit $BASH_SOURCE to fix this"
+        #echo "WARNING : until you do, phone commands will likely fail to work properly"
         # not NOT exit here, this would end the login shell on the macphone
         # exit 1 ;;
 esac
@@ -86,6 +87,8 @@ function phone-on() {
 	    adb shell cmd connectivity airplane-mode disable ;;
 	"pixel7")
 	    adb shell /data/local/tmp/on ;;
+	*)
+	    echo "Unrecognized phone $phone, check cable connection" ;;
     esac
 #    $adb shell "settings put global airplane_mode_on 0; am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false"
 }
@@ -104,6 +107,8 @@ function phone-off() {
 	    adb shell cmd connectivity airplane-mode enable ;;
 	"pixel7")
 	    adb shell /data/local/tmp/off ;;
+	*)
+	    echo "Unrecognized phone $phone, check cable connection" ;;
     esac
 #    $adb shell "settings put global airplane_mode_on 1; am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true"
 }
