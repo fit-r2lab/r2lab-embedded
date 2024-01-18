@@ -42,16 +42,17 @@ cd
 case $(hostname) in
     faraday*)
         pip3 install -U rhubarbe 2> /dev/null
-	systemctl restart monitornodes
-	systemctl restart monitorphones
-	systemctl restart monitorleases
-	systemctl restart accountsmanager
+		systemctl restart monitornodes
+		systemctl restart monitorphones
+		systemctl restart monitorleases
+		systemctl restart accountsmanager
 	;;
     r2lab*)
         pip3 install -U rhubarbe 2> /dev/null
-	make -C /root/r2lab.inria.fr publish
-	make -C /root/r2lab.inria.fr-raw publish
-	systemctl restart sidecar
-	systemctl restart nginx
+		make -C /root/r2lab.inria.fr publish
+		make -C /root/r2lab.inria.fr-raw publish
+		systemctl restart r2lab-django
+		systemctl restart sidecar
+		systemctl restart nginx
 	;;
 esac
