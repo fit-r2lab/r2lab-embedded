@@ -2,3 +2,9 @@ imaging/*.log
 imaging/*.tar
 imaging/*/
 *.tgz
+*.pcap
+conf-cn-26
+conf-cn-r2lab
+conf-cn-default
+ran-conf-16
+AA-big-move.md
