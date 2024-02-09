@@ -543,7 +543,7 @@ function new-common-setup-root-bash () {
 }
 
 # yet another new layout: .bashrc needs to be extensible
-doc-imaging new-common-setup-user-env2 "add r2lab-embedded/shell/nodes.sh to /etc/profile.d and source from bashrc"
+doc-imaging new-common-setup-root-bash2 "add r2lab-embedded/shell/nodes.sh to /etc/profile.d and source from bashrc"
 function new-common-setup-root-bash2 () {
     cd /etc/profile.d
     rm -f r2labutils.sh
