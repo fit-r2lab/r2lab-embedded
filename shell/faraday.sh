@@ -237,6 +237,11 @@ function rleases() {
 }
 doc-selection rleases "display current leases (rhubarbe leases) - nightly leases are ignored"
 
+function rbook() {
+    rhubarbe book "$@"
+}
+doc-selection rbook "CLI tool to see, create and delete leases"
+
 #
 alias rbye="rhubarbe bye"
 alias all-off="rhubarbe bye"
