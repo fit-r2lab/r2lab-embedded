@@ -1,6 +1,7 @@
 #!/bin/bash
 ###
-# this utility script is cron'ed to run every morning at 6:00 on both faraday and r2lab
+# this utility script is cron'ed to run every morning at 6:00 
+# on both r2lab and faraday (and distrait)
 #
 
 # xxx the django secret key and debug mode needs to be tweaked !
@@ -14,14 +15,14 @@ echo "==================== $COMMAND starting at $(date)"
 
 #### depending on which host:
 case $(hostname) in
-    faraday*)
-	GIT_REPOS="/root/r2lab-embedded"
+    faraday*|distrait*)
+		GIT_REPOS="/root/r2lab-embedded"
 	;;
     r2lab*)
-	GIT_REPOS="/root/r2lab-embedded /root/r2lab-sidecar /root/r2lab.inria.fr /root/r2lab.inria.fr-raw"
+		GIT_REPOS="/root/r2lab-embedded /root/r2lab-sidecar /root/r2lab.inria.fr /root/r2lab.inria.fr-raw"
 	;;
     *)
-	echo Unknown host $(hostname); exit 1;;
+		echo Unknown host $(hostname); exit 1;;
 esac
 
 #### updates the contents of selected git repos
@@ -36,10 +37,21 @@ for git_repo in $GIT_REPOS; do
     gfollow -C $git_repo
 done
 
+# also update the r2lab-embedded repo in /home/faraday for regular users
+case $(hostname) in
+	faraday*|distrait*)
+		runuser -u faraday -- git -C /home/faraday/r2lab-embedded fetch
+		runuser -u faraday -- git -C /home/faraday/r2lab-embedded reset --hard origin/main
+	;;
+esac
+
 cd
 
 #### depending on which host:
 case $(hostname) in
+	distrait*)
+        pip3 install -U rhubarbe 2> /dev/null
+	;;
     faraday*)
         pip3 install -U rhubarbe 2> /dev/null
 		systemctl restart monitornodes
