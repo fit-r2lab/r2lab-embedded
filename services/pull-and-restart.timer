@@ -1,0 +1,6 @@
+[Unit]
+Description="Pull from git and restart services"
+
+[Timer]
+Unit=pull-and-restart.service
+OnCalendar=06:00

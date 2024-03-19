@@ -1,0 +1,5 @@
+[Unit]
+Description="Pull from git and restart services"
+
+[Service]
+ExecStart=/root/r2lab-embedded/services/pull-and-restart.sh
