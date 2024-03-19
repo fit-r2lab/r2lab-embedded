@@ -41,7 +41,7 @@ done
 case $(hostname) in
 	faraday*|distrait*)
 		runuser -u faraday -- git -C /home/faraday/r2lab-embedded fetch
-		runuser -u faraday -- git -C /home/faraday/r2lab-embedded reset --hard origin/main
+		runuser -u faraday -- git -C /home/faraday/r2lab-embedded reset --hard origin/master
 	;;
 esac
 
