@@ -1,0 +1,11 @@
+# specifically designed for distrait
+# where there is no slice system
+# not suitable in production, usr r2lab-nightly.service instead
+
+[Unit]
+Description=turn off the V0 testbed on an hourly basis
+
+[Service]
+Type=oneshot
+ExecStart=/root/miniconda3/bin/rhubarbe bye
+
