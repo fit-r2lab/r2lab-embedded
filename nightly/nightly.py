@@ -319,10 +319,11 @@ class Nightly:                                         # pylint: disable=r0902
         number_nodes = len(self.all_names)
 
         current_owner = self.current_owner()
+        self.verbose_msg(f"current_owner={current_owner}")
 
         # somebody else
         if current_owner is False:
-            # somebody else owns the testbed - silently exit
+            self.verbose_msg("somebody else owns the testbed - silently exit")
             exit(0)
         # nobody at all : make sure the testbed is switched off
         elif current_owner is None:
