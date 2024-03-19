@@ -1,8 +1,8 @@
 [Unit]
-Description=turn off the V0 testbed on an hourly basis
+Description=turn off the V0 testbed on a daily basis
 
 [Timer]
-OnCalendar=*:19
+OnCalendar=20:00
 
 [Install]
 WantedBy=multi-user.target
