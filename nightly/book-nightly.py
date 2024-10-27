@@ -72,9 +72,9 @@ USAGE="HEY"
 
 def main():
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-    parser.add_argument("-f", "--from", dest="from_", 
+    parser.add_argument("-f", "--from", dest="from_",
                         default=None, help="from date; format is yy/mm/dd")
-    parser.add_argument("-u", "--until", default=None, 
+    parser.add_argument("-u", "--until", default=None,
                         help="until date; format is yy/mm/dd; default is from + 1 month")
     parser.add_argument("-d", "--days", dest="days", default=default_weekdays,
                         help="Comma separated list of week days to match between the given period")
@@ -97,7 +97,7 @@ def main():
     from_, until = args.from_, args.until
     try:
         if from_:
-            from_ = DateTime.strptime(from_, date_format).date() 
+            from_ = DateTime.strptime(from_, date_format).date()
         else:
             from_ = Date.today() + TimeDelta(days=1)
         if until:
@@ -112,7 +112,7 @@ def main():
         if f"{day:%a}".lower() in days:
             book_lease_for_nightly(slice, day, time, dry_run, debug)
         day += TimeDelta(days=1)
-    
+
     exit(0)
 
 
