@@ -18,7 +18,7 @@ case $(hostname) in
     faraday*|distrait*)
 		GIT_REPOS="/root/r2lab-embedded"
 	;;
-    r2lab*)
+    prod-r2lab*|r2lab*)
 		GIT_REPOS="/root/r2lab-embedded /root/r2lab-sidecar /root/r2lab.inria.fr /root/r2lab.inria.fr-raw"
 	;;
     *)
@@ -59,7 +59,7 @@ case $(hostname) in
 		systemctl restart monitorleases
 		systemctl restart accountsmanager
 	;;
-    r2lab*)
+    prod-r2lab*|r2lab*)
         pip3 install -U rhubarbe 2> /dev/null
 		make -C /root/r2lab.inria.fr publish
 		make -C /root/r2lab.inria.fr-raw publish
