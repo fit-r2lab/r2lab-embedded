@@ -19,7 +19,7 @@ case $(hostname) in
 		GIT_REPOS="/root/r2lab-embedded"
 	;;
     prod-r2lab*|r2lab*)
-		GIT_REPOS="/root/r2lab-embedded /root/r2lab-sidecar /root/r2lab.inria.fr /root/r2lab.inria.fr-raw"
+		GIT_REPOS="/root/r2lab-embedded /root/r2lab.inria.fr /root/r2lab.inria.fr-raw"
 	;;
     *)
 		echo Unknown host $(hostname); exit 1;;
@@ -61,6 +61,7 @@ case $(hostname) in
 	;;
     prod-r2lab*|r2lab*)
         pip3 install -U rhubarbe 2> /dev/null
+		pip3 install -U r2lab-sidecar 2> /dev/null
 		make -C /root/r2lab.inria.fr publish
 		make -C /root/r2lab.inria.fr-raw publish
 		systemctl restart r2lab-django
