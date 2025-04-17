@@ -36,7 +36,7 @@ import asyncio
 from asyncssh import set_log_level
 
 from asynciojobs import Scheduler, Job
-from apssh import SshNode, SshJob
+from apssh import SshNode, SshJob, load_private_keys
 
 from r2lab.sidecar import SidecarSyncClient
 
@@ -60,14 +60,20 @@ NIGHTLY_SLICE = "inria_r2lab.nightly"
 EMAIL_FROM = "nightly@faraday.inria.fr"
 EMAIL_TO = ["fit-r2lab-dev@inria.fr"]
 
-SIDECAR_URL = "wss://r2lab.inria.fr:999/"
+# ws: looked more appropriate but won't work as it turns out
+# SIDECAR_URL = "ws://r2lab-sidecar.inria.fr:443/"
+SIDECAR_URL = "wss://r2lab-sidecar.inria.fr:443/"
+SSL_ARGS = dict(
+    # we cannot verify the server certificate - as it has none for now
+    # ssl=ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)) as sidecar:
+)
 
 # each image is defined by a tuple
 #  0: image name (for rload)
 #  1: strings to expect in /etc/rhubarbe-image (any of these means it's OK)
 IMAGES_TO_CHECK = [
-    ("ubuntu-22", ["ubuntu-22", "u22"]),
-    ("fedora-37-ng", ["fedora-37", "f37"]),
+    ("ubuntu-24", ["ubuntu-24", "u24"]),
+    ("fedora-41", ["fedora-41", "f41"]),
 ]
 
 
@@ -100,9 +106,15 @@ class NoProgressBarDisplay(Display):
 
 
 # hacky; buggy apssh creates verbose session{start/end} messages
+cached_keys = None
+
 def silent_sshnode(rhubarbe_node, verbose):
+    global cached_keys
+    if cached_keys is None:
+        # load keys only once
+        cached_keys = load_private_keys()
     ssh_node = SshNode(hostname=rhubarbe_node.control_hostname(),
-                       keys=[])
+                       keys=cached_keys)
     ssh_node.formatter.verbose = verbose
     return ssh_node
 
@@ -129,6 +141,18 @@ class Nightly:                                         # pylint: disable=r0902
             'nodes', 'load_nightly_timeout'))
         self.wait_timeout = float(config.value(
             'nodes', 'wait_nightly_timeout'))
+        self.ssh_timeout = float(config.value(
+            'nodes', 'ssh_nightly_timeout'))
+        # explicitly call init_nodes() each time a scheduler is created
+        # any substraction (failing node) is done in mark_and_exclude()
+        # which acts directly on the selector
+        self.init_nodes()
+
+    def init_nodes(self):
+        """
+        we need to redo this several times
+        because self.bus is attached to an asyncio loop
+        """
         #
         # accessories
         self.bus = asyncio.Queue()
@@ -153,14 +177,10 @@ class Nightly:                                         # pylint: disable=r0902
         (*) remember the reason why for producing summary
         """
         self.selector.add_or_delete(node.id, add_if_true=False)
-        # propagate on this attribute
-        self.nodes = {n for n in self.nodes if n.id != node.id}
         self.failures[node.id] = reason
-        # ok, this may be a be a bit fragile, but given that sidecar_client
-        # is not properly installed...
         self.print(f"marking node {node.id} as unavailable for reason {reason}"
                    f" {message or ''}")
-        with SidecarSyncClient(SIDECAR_URL, ssl=ssl.SSLContext()) as sidecar:
+        with SidecarSyncClient(SIDECAR_URL, **SSL_ARGS) as sidecar:
             sidecar.set_node_attribute(node.id, 'available', 'ko')
 
 
@@ -170,9 +190,10 @@ class Nightly:                                         # pylint: disable=r0902
         nodes = self.nodes
         actions = (node.send_action(message=mode, check=True, check_delay=delay)
                    for node in nodes)
-        _result = asyncio.get_event_loop().run_until_complete(
-            asyncio.gather(*actions)
-        )
+        async def gather(*actions):
+            return await asyncio.gather(*actions)
+        with asyncio.Runner() as runner:
+            _result = runner.run(gather(*actions))
         reason = Reason.WONT_TURN_OFF if mode == 'on' \
             else Reason.WONT_TURN_OFF if mode == 'off' \
             else Reason.WONT_RESET
@@ -198,6 +219,7 @@ class Nightly:                                         # pylint: disable=r0902
         self.verbose_msg(f"image={actual_image}")
         self.verbose_msg(f"bandwidth={self.bandwidth}")
         self.verbose_msg(f"timeout={self.load_timeout}")
+        self.init_nodes()
         loader = ImageLoader(self.nodes, image=actual_image,
                              bandwidth=self.bandwidth,
                              message_bus=self.bus,
@@ -212,8 +234,9 @@ class Nightly:                                         # pylint: disable=r0902
         # wait for nodes to be ssh-reachable
         self.print(f"waiting for {len(self.nodes)} nodes"
                    f" (timeout={self.wait_timeout})")
+        self.init_nodes()
         sshs = [SshWaiter(node, verbose=self.verbose) for node in self.nodes]
-        jobs = [Job(ssh.wait_for(self.backoff), critical=False)
+        jobs = [Job(ssh.wait_for(self.backoff, timeout=self.ssh_timeout), critical=False)
                 for ssh in sshs]
 
         scheduler = Scheduler(Job(self.display.run(), forever=True),
@@ -235,6 +258,7 @@ class Nightly:                                         # pylint: disable=r0902
 
     def global_check_image(self, _image, check_strings):
         # on the remaining nodes: check image marker
+        self.init_nodes()
         self.print(f"checking {len(self.nodes)} nodes"
                    f" against {check_strings} in /etc/rhubarbe-image")
 
@@ -280,6 +304,7 @@ class Nightly:                                         # pylint: disable=r0902
         * True if we currently have the lease
         * False if somebody else currently has the lease
         """
+        self.init_nodes()
         leases = Leases(message_bus=self.bus)
         if no_reservation(leases):
             return None
@@ -380,7 +405,7 @@ Run nightly check procedure on R2lab
 """
 
 
-def main(*argv):
+def main():
     parser = ArgumentParser(usage=USAGE)
     parser.add_argument("-v", "--verbose", action='store_true', default=False,
                         help="more verbose output")
@@ -393,7 +418,7 @@ def main(*argv):
                         help="DEBUG ONLY: will only load one image")
     add_selector_arguments(parser)
 
-    args = parser.parse_args(argv)
+    args = parser.parse_args()
 
     selector = selected_selector(args, defaults_to_all=True)
     nightly = Nightly(selector,
@@ -408,7 +433,7 @@ def main(*argv):
 
 if __name__ == '__main__':
     try:
-        exit(main(*sys.argv[1:]))
+        exit(main())
     except MisformedRange as exc:
         print("ERROR: ", exc)
         exit(1)
