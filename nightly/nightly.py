@@ -51,6 +51,7 @@ from rhubarbe.selector import (
     Selector, add_selector_arguments, selected_selector, MisformedRange)
 from rhubarbe.imageloader import ImageLoader
 from rhubarbe.ssh import SshProxy as SshWaiter
+from rhubarbe.logger import monitor_logger
 
 from nightmail import complete_html, send_email
 
@@ -137,16 +138,18 @@ class Nightly:                                         # pylint: disable=r0902
         config = Config()
         self.bandwidth = int(config.value('networking', 'bandwidth'))
         self.backoff = int(config.value('networking', 'ssh_backoff'))
-        self.load_timeout = float(config.value(
-            'nodes', 'load_nightly_timeout'))
-        self.wait_timeout = float(config.value(
-            'nodes', 'wait_nightly_timeout'))
-        self.ssh_timeout = float(config.value(
-            'nodes', 'ssh_nightly_timeout'))
+        self.load_timeout = float(config.value('nodes', 'load_nightly_timeout'))
+        self.wait_timeout = float(config.value('nodes', 'wait_nightly_timeout'))
+        self.ssh_timeout = float(config.value('nodes', 'ssh_nightly_timeout'))
         # explicitly call init_nodes() each time a scheduler is created
         # any substraction (failing node) is done in mark_and_exclude()
         # which acts directly on the selector
         self.init_nodes()
+        if verbose:
+            monitor_logger.setLevel(logging.DEBUG)
+        else:
+            monitor_logger.setLevel(logging.INFO)
+
 
     def init_nodes(self):
         """
@@ -361,7 +364,9 @@ class Nightly:                                         # pylint: disable=r0902
             self.global_send_action('reset')
             self.global_send_action('off')
         else:
-            print("nightly in dry_run mode won't check on and off and reset")
+            print("nightly in dry_run mode just does ON - off and reset are skipped")
+            self.global_send_action('on')
+
 
         images_expected = (
             IMAGES_TO_CHECK
