@@ -237,7 +237,7 @@ function ubuntu-setup-ssh () {
 
 ####################
 # expected result is this
-# root@r2lab:/etc/ssh# grep -v '^#' /etc/ssh/sshd_config | egrep -i 'Root|Password|PAM'
+# root@r2lab:/etc/ssh# grep -v '^#' /etc/ssh/sshd_config | grep -i -E 'Root|Password|PAM'
 # PermitRootLogin yes
 # PermitEmptyPasswords yes
 # PasswordAuthentication yes

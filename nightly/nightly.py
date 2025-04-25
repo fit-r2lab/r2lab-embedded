@@ -264,7 +264,7 @@ class Nightly:                                         # pylint: disable=r0902
 
         grep_pattern = "|".join(check_strings)
         check_command = (
-            f"tail -1 /etc/rhubarbe-image | egrep -q '{grep_pattern}'")
+            f"tail -1 /etc/rhubarbe-image | grep -q -E '{grep_pattern}'")
         jobs = [
             SshJob(node=silent_sshnode(node, verbose=self.verbose),
                    command=check_command,
