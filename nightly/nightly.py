@@ -106,9 +106,9 @@ class NoProgressBarDisplay(Display):
         print('.', end='', flush=True)
 
 
-# hacky; buggy apssh creates verbose session{start/end} messages
 cached_keys = None
 
+# hacky; buggy apssh creates verbose session{start/end} messages
 def silent_sshnode(rhubarbe_node, verbose):
     global cached_keys
     if cached_keys is None:
