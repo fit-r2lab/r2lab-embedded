@@ -5,7 +5,7 @@ Rewritten nightly script.
 
 Features:
 
-(*) designed to be run on an hourly basis, at typically nn:01
+(*) designed to be run on an hourly basis, at typically nn:19
     will check for a lease being currently held by nightly slice; returns if not
 (*) defaults to all nodes but can exclude some hand-picked ones on the command-line
 (*) updates sidecar status (available / unavailable)
@@ -48,7 +48,7 @@ from rhubarbe.main import check_reservation, no_reservation
 from rhubarbe.node import Node
 from rhubarbe.leases import Leases
 from rhubarbe.selector import (
-    Selector, add_selector_arguments, selected_selector, MisformedRange)
+    add_selector_arguments, selected_selector, MisformedRange)
 from rhubarbe.imageloader import ImageLoader
 from rhubarbe.ssh import SshProxy as SshWaiter
 from rhubarbe.logger import monitor_logger
@@ -75,6 +75,7 @@ SSL_ARGS = dict(
 IMAGES_TO_CHECK = [
     ("ubuntu-24", ["ubuntu-24", "u24"]),
     ("fedora-41", ["fedora-41", "f41"]),
+    # ("centos-8-ssh", ["CentOS"]),
 ]
 
 
@@ -304,7 +305,6 @@ class Nightly:                                         # pylint: disable=r0902
                 self.mark_and_exclude(node, Reason.DID_NOT_LOAD, explanation)
                 continue
             self.print(f"node {node} checked out OK" )
-
 
 
     def current_owner(self):
