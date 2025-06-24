@@ -193,13 +193,20 @@ class Nightly:                                         # pylint: disable=r0902
         nodes = self.nodes
         actions = (node.send_action(message=mode, check=True, check_delay=delay)
                    for node in nodes)
-        async def gather(*actions):
-            return await asyncio.gather(*actions)
+        async def gather_with_timeout(*actions, timeout):
+            return await asyncio.wait_for(
+                asyncio.gather(*actions),
+                timeout=timeout
+            )
         with asyncio.Runner() as runner:
-            _result = runner.run(gather(*actions))
-        reason = Reason.WONT_TURN_OFF if mode == 'on' \
-            else Reason.WONT_TURN_OFF if mode == 'off' \
-            else Reason.WONT_RESET
+            # somewhat arbitrary, but use wait_timeout
+            runner.run(
+                gather_with_timeout(
+                    *actions, timeout=self.wait_timeout))
+        reason = (
+            Reason.WONT_TURN_OFF if mode == 'on'
+            else Reason.WONT_TURN_OFF if mode == 'off'
+            else Reason.WONT_RESET)
         for node in nodes:
             if node.action:
                 self.print(f"{node.control_hostname()}: {mode} OK")
