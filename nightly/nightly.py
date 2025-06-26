@@ -35,7 +35,7 @@ import asyncio
 
 from asyncssh import set_log_level
 
-from asynciojobs import Scheduler, Job
+from asynciojobs import Scheduler, Job, set_debug as set_asynciojobs_debug
 from apssh import SshNode, SshJob, load_private_keys
 
 from r2lab.sidecar import SidecarSyncClient
@@ -439,6 +439,8 @@ def main():
     # turn off asyncssh info message unless verbose
     if not args.verbose:
         set_log_level(logging.ERROR)
+    # temporary?
+    set_asynciojobs_debug(True)
 
     return 0 if nightly.run() else 1
 
