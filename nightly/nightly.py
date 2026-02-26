@@ -205,7 +205,7 @@ class Nightly:                                         # pylint: disable=r0902
                 gather_with_timeout(
                     *actions, timeout=self.wait_timeout))
         reason = (
-            Reason.WONT_TURN_OFF if mode == 'on'
+            Reason.WONT_TURN_ON if mode == 'on'
             else Reason.WONT_TURN_OFF if mode == 'off'
             else Reason.WONT_RESET)
         for node in nodes:
