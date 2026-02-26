@@ -25,6 +25,8 @@ Performed checks on all nodes:
 
 import sys
 import os
+import signal
+import subprocess
 import time
 import ssl
 from enum import IntEnum
@@ -184,8 +186,11 @@ class Nightly:                                         # pylint: disable=r0902
         self.failures[node.id] = reason
         self.print(f"marking node {node.id} as unavailable for reason {reason}"
                    f" {message or ''}")
-        with SidecarSyncClient(SIDECAR_URL, **SSL_ARGS) as sidecar:
-            sidecar.set_node_attribute(node.id, 'available', 'ko')
+        try:
+            with SidecarSyncClient(SIDECAR_URL, timeout=10, **SSL_ARGS) as sidecar:
+                sidecar.set_node_attribute(node.id, 'available', 'ko')
+        except Exception as exc:
+            self.print(f"sidecar update failed for node {node.id}: {exc}")
 
 
     def global_send_action(self, mode):
@@ -333,13 +338,21 @@ class Nightly:                                         # pylint: disable=r0902
         for host in self.all_names:
             command += f" {host}"
         # command += "> /var/log/all-off.log"
-        os.system(command)
+        try:
+            subprocess.run(command, shell=True, timeout=300)
+        except subprocess.TimeoutExpired:
+            self.print("all_off: timed out after 300s — moving on")
 
 
     def run(self):
         """
         does everything and returns True if all nodes are fine
         """
+
+        def _alarm_handler(signum, frame):
+            raise SystemExit("nightly: SIGALRM hard timeout — forcing exit")
+        signal.signal(signal.SIGALRM, _alarm_handler)
+        signal.alarm(3600)
 
         # we have the lease, let's get down to business
         # skip this test in dry_run mode
@@ -407,6 +420,7 @@ class Nightly:                                         # pylint: disable=r0902
         self.all_off()
         self.print("turned off - bye")
 
+        signal.alarm(0)
         # True means everything is OK
         return True
 
