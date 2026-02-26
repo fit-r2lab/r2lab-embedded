@@ -30,16 +30,20 @@ plcapi_hostname = "r2labapi.inria.fr"
 
 node_id = None
 
+# no need to book since nn:00 since the hourly timer triggers at nn:19
+# so let's to things modulo nn:10
+OFFSET_MINUTES = 10
 
 def date_hour_to_epoch(date, hour):
     datetime = DateTime.strptime(
-        f"{date:{date_format}}@" + f"{hour:02}", date_format+"@%H")
-    return int(datetime.timestamp())
+        f"{date:{date_format}}@" + f"{hour:02}",
+        date_format+"@%H")
+    return int(datetime.timestamp()) + OFFSET_MINUTES*60
 
 
 def book_lease_for_nightly(slicename, day, time, dry_run, debug):
     beg, end = time
-    message = f"{day:%a} {day} b/w {beg} and {end}"
+    message = f"{day:%a} {day} b/w {beg} and {end} (+{OFFSET_MINUTES}min)"
 
     if dry_run:
         print(f"would deal with {message}")
@@ -78,6 +82,8 @@ def main():
                         help="until date; format is yy/mm/dd; default is from + 1 month")
     parser.add_argument("-d", "--days", dest="days", default=default_weekdays,
                         help="Comma separated list of week days to match between the given period")
+    parser.add_argument("-D", "--all-days", default=False, action='store_true',
+                        help="Comma separated list of week days to match between the given period")
     parser.add_argument("-s", "--slice", dest="slice", default="inria_r2lab.nightly",
                         help="Slice name")
     parser.add_argument("-t", "--time", dest="time", nargs=2, type=int, default= [4, 5],
@@ -91,7 +97,7 @@ def main():
     slice        = args.slice
     debug        = args.debug
     dry_run      = args.dry_run
-    days         = args.days if isinstance(args.days, list) else args.days.split(',')
+    days         = weekdays if args.all_days else (args.days if isinstance(args.days, list) else args.days.split(','))
     time         = args.time
 
     from_, until = args.from_, args.until
