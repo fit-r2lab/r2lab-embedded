@@ -5,6 +5,3 @@ Description=Check the testbed if the nightly lease is on, and turn it off if not
 Type=oneshot
 ExecStart=/usr/bin/python /root/r2lab-embedded/nightly/nightly.py
 TimeoutStartSec=3600
-# the nightly should do this, but as a safety in case it hangs...
-ExecStopPost=/usr/local/bin/rhubarbe bye
-TimeoutStopSec=300
