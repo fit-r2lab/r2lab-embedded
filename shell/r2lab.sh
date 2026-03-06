@@ -7,7 +7,7 @@
 
 create-doc-category admin "admin-oriented commands"
 
-alias logs-django="tail -f /var/lib/r2lab.inria.fr/django.log /var/log/httpd/*log"
+alias logs-django="tail -f /var/lib/r2lab.inria.fr/django/django.log /var/log/httpd/*log"
 doc-admin logs-django alias
 alias logs-r2lab=logs-django
 doc-admin logs-r2lab alias

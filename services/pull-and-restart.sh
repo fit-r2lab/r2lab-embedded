@@ -1,6 +1,6 @@
 #!/bin/bash
 ###
-# this utility script is cron'ed to run every morning at 6:00 
+# this utility script is cron'ed to run every morning at 6:00
 # on both r2lab and faraday (and distrait)
 #
 
