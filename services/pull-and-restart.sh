@@ -8,7 +8,7 @@
 #
 
 COMMAND=$(basename $0 .sh)
-LOG=/var/log/$COMMAND.log
+# writes on stdout as it is invoked by systemd
 
 cd /root
 
