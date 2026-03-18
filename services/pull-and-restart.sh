@@ -10,6 +10,7 @@
 COMMAND=$(basename $0 .sh)
 LOG=/var/log/$COMMAND.log
 
+cd /root
 
 #### updates the contents of a specific git repo
 function gtr() { git "$@" rev-parse --abbrev-ref --symbolic-full-name "@{u}"; }
@@ -68,8 +69,8 @@ case $(hostname) in
     prod-r2lab*|r2lab*)
 		git-upgrade /root/r2lab-embedded
 
-		git-upgrade r2lab.inria.fr; local r1=$?
-		git-upgrade r2lab.inria.fr-raw; local r2=$?
+		git-upgrade r2lab.inria.fr; r1=$?
+		git-upgrade r2lab.inria.fr-raw; r2=$?
 		if (( r1 == 0|| r2 == 0)); then
 			make -C /root/r2lab.inria.fr publish
 			make -C /root/r2lab.inria.fr-raw publish
