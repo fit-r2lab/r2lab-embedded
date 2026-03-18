@@ -82,7 +82,7 @@ case $(hostname) in
 			systemctl restart r2lab-sidecar
 		fi
 
-        pip install -U rhubarbe
+        pip-upgrade rhubarbe
 	;;
 
     *)
