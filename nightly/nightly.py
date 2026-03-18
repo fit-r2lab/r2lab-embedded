@@ -59,7 +59,7 @@ from nightmail import complete_html, send_email
 
 
 # global - need to be configurable ?
-NIGHTLY_SLICE = "inria_r2lab.nightly"
+NIGHTLY_SLICE = "r2lab-nightly"
 EMAIL_FROM = "nightly@faraday.inria.fr"
 EMAIL_TO = ["fit-r2lab-dev@inria.fr"]
 

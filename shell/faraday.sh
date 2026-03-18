@@ -539,7 +539,7 @@ alias images-repo="cd /var/lib/rhubarbe-images/"
 doc-admin images-repo alias
 
 ####################
-ADMIN=inria_r2lab.admin
+ADMIN=r2lab-admin
 
 alias admin-account="su - $ADMIN"
 doc-admin admin-account alias

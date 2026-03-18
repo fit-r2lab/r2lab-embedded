@@ -7,7 +7,7 @@ during a given period, to schedule a 1 hour lease (3am until 4am) in each day fo
 If no period is given, the whole year period is assumed based on the
 current year.
 
-The slice name for the created leases defaults to inria_r2lab.nightly, this
+The slice name for the created leases defaults to r2lab-nightly, this
 probably never needs to be changed as this is the name expected in nightly.py
 which is the active script, that runs every hour from the gateway's crontab
 and triggers the actual checks when that slice has the lease at the time
@@ -112,7 +112,7 @@ def main():
                         help="Comma separated list of week days to match between the given period")
     parser.add_argument("-D", "--all-days", default=False, action='store_true',
                         help="Comma separated list of week days to match between the given period")
-    parser.add_argument("-s", "--slice", dest="slice", default="inria_r2lab.nightly",
+    parser.add_argument("-s", "--slice", dest="slice", default="r2lab-nightly",
                         help="Slice name")
     parser.add_argument("-r", "--resource", dest="resource", default=DEFAULT_RESOURCE,
                         help="Resource name to book leases on")
