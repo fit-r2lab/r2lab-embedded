@@ -53,9 +53,6 @@ case $(hostname) in
 			systemctl restart monitorphones
 			systemctl restart monitorpdus
 			systemctl restart accountsmanager
-			# this service will soon disappear from rhubarbe - and thus from faraday
-			# but we keep it until deploying r2labapi
-			systemctl restart monitorleases || true
 		fi
 	;;
     prod-r2labapi*|r2labapi*)
