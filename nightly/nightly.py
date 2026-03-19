@@ -46,9 +46,8 @@ from rhubarbe.config import Config
 from rhubarbe.imagesrepo import ImagesRepo
 from rhubarbe.display import Display
 
-from rhubarbe.main import check_reservation, no_reservation
 from rhubarbe.node import Node
-from rhubarbe.leases import Leases
+from rhubarbe.r2labapiproxy import R2labApiProxy
 from rhubarbe.selector import (
     add_selector_arguments, selected_selector, MisformedRange)
 from rhubarbe.imageloader import ImageLoader
@@ -319,14 +318,15 @@ class Nightly:                                         # pylint: disable=r0902
         * True if we currently have the lease
         * False if somebody else currently has the lease
         """
-        self.init_nodes()
-        leases = Leases(message_bus=self.bus)
-        if no_reservation(leases):
+        config = Config()
+        api_url = config.value('r2labapi', 'url')
+        proxy = R2labApiProxy(api_url)
+        current = proxy.get_current_leases()
+        if not current:
             return None
-        if check_reservation(leases, root_allowed=False,
-                             verbose=None if not self.verbose else True,
-                             login=NIGHTLY_SLICE):
-            return True
+        for lease in current:
+            if lease.get('slice_name') == NIGHTLY_SLICE:
+                return True
         return False
 
 

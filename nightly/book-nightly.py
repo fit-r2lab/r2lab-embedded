@@ -1,161 +1,189 @@
 #!/usr/bin/env python
 """
-a script used to book leases for the nightly routine that runs in faraday.inria.fr
+Book leases for the nightly routine on faraday.inria.fr.
 
-The code will search for all specified week-days - typically wed & sun)
-during a given period, to schedule a 1 hour lease (3am until 4am) in each day found.
-If no period is given, the whole year period is assumed based on the
-current year.
+Searches for matching weekdays in a date range and creates a lease
+for each on the specified time slot. All times are local (DST-aware).
 
-The slice name for the created leases defaults to r2lab-nightly, this
-probably never needs to be changed as this is the name expected in nightly.py
-which is the active script, that runs every hour from the gateway's crontab
-and triggers the actual checks when that slice has the lease at the time
+The slice name defaults to r2lab-nightly, matching what nightly.py expects.
+
+Examples:
+    # production: book wed+sun for the next 4 weeks, 04:10-05:10
+    book-nightly.py
+
+    # test right now
+    book-nightly.py --today -t 18:00-19:00
+
+    # book every day through end of June
+    book-nightly.py -u 2026-06-30 -D
+
+    # dry-run to see what would be booked
+    book-nightly.py --today -n
 """
 
-import json
-import urllib.request
-import urllib.error
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+import re
+import sys
+from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from datetime import date as Date, datetime as DateTime, timedelta as TimeDelta
 
+import requests
 
-default_weekdays = "wed,sun"
-# xxx inputs are not checked
-weekdays = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
-
-date_format = "%y/%m/%d"
-
-DEFAULT_CREDENTIALS = "/etc/rhubarbe/r2labapi.credentials"
-DEFAULT_API_URL = "https://r2labapi.inria.fr"
-DEFAULT_RESOURCE = "r2lab"
-
-# no need to book since nn:00 since the hourly timer triggers at nn:19
-# so let's do things modulo nn:10
-OFFSET_MINUTES = 10
-
-# cache the bearer token across calls
-_token = None
+from rhubarbe.config import Config
+from rhubarbe.r2labapiproxy import R2labApiProxy
 
 
-def date_hour_to_iso(date, hour):
-    dt = DateTime.strptime(
-        f"{date:{date_format}}@" + f"{hour:02}",
-        date_format + "@%H")
-    dt += TimeDelta(minutes=OFFSET_MINUTES)
-    return dt.isoformat()
+ALL_WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+DEFAULT_WEEKDAYS = "wed,sun"
+DEFAULT_TIME = "04:10-05:10"
 
 
-def get_token(api_url, credentials):
-    global _token
-    if _token:
-        return _token
-    with open(credentials) as feed:
-        email, password = feed.readline().split()
-    payload = json.dumps({"email": email, "password": password}).encode()
-    req = urllib.request.Request(
-        f"{api_url}/auth/login",
-        data=payload,
-        headers={"Content-Type": "application/json"},
-    )
-    with urllib.request.urlopen(req) as resp:
-        data = json.loads(resp.read())
-    _token = data["access_token"]
-    return _token
+def parse_time_slot(time_str):
+    """
+    Parse a time slot string into (hour, minute) pairs.
+    Accepts 'HH:MM-HH:MM' or 'H-H' (round hours).
+    Returns ((h1, m1), (h2, m2)).
+    """
+    match = re.fullmatch(
+        r'(\d{1,2})(?::(\d{2}))?-(\d{1,2})(?::(\d{2}))?', time_str)
+    if not match:
+        print(f"bad time slot '{time_str}', expected HH:MM-HH:MM or H-H")
+        sys.exit(1)
+    h1, m1, h2, m2 = match.groups()
+    return (int(h1), int(m1 or 0)), (int(h2), int(m2 or 0))
 
 
-def book_lease_for_nightly(
-        api_url, credentials, slicename, resource, day, time, dry_run, debug):
-    beg, end = time
-    message = f"{day:%a} {day} b/w {beg} and {end} (+{OFFSET_MINUTES}min)"
+def local_iso(date, hour, minute):
+    """
+    Build a timezone-aware ISO datetime string for the given local date/time.
+    """
+    naive = DateTime(date.year, date.month, date.day, hour, minute)
+    # astimezone() on a naive datetime interprets it as local time
+    return naive.astimezone().isoformat()
+
+
+def parse_date(date_str):
+    """Parse a YYYY-MM-DD date string."""
+    try:
+        return DateTime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        print(f"bad date '{date_str}', expected YYYY-MM-DD")
+        sys.exit(1)
+
+
+def get_proxy():
+    """Create an authenticated R2labApiProxy from rhubarbe config."""
+    config = Config()
+    api_url = config.value('r2labapi', 'url')
+    admin_token = config.value('r2labapi', 'admin_token')
+    return R2labApiProxy(api_url, admin_token=admin_token)
+
+
+def get_resource_name():
+    """Fetch resource name from rhubarbe config."""
+    config = Config()
+    return config.value('r2labapi', 'resource_name')
+
+
+def book_one_lease(proxy, slicename, resource, day, time_slot, dry_run, verbose):
+    (h1, m1), (h2, m2) = time_slot
+    t_from = local_iso(day, h1, m1)
+    t_until = local_iso(day, h2, m2)
+    label = f"{day:%a} {day} {h1:02d}:{m1:02d}-{h2:02d}:{m2:02d}"
 
     if dry_run:
-        print(f"would deal with {message}")
+        print(f"  would book {label}")
         return
-    print(f"dealing with {message}")
+    if verbose:
+        print(f"  booking {label}")
 
-    token = get_token(api_url, credentials)
-    t_from = date_hour_to_iso(day, beg)
-    t_until = date_hour_to_iso(day, end)
-
-    payload = json.dumps({
-        "slice_name": slicename,
-        "resource_name": resource,
-        "t_from": t_from,
-        "t_until": t_until,
-    }).encode()
-    req = urllib.request.Request(
-        f"{api_url}/leases",
-        data=payload,
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {token}",
-        },
-    )
     try:
-        with urllib.request.urlopen(req) as resp:
-            data = json.loads(resp.read())
-            if debug:
-                print(f"  created lease id={data['id']}")
-    except urllib.error.HTTPError as exc:
-        body = exc.read().decode()
-        print(f"  ERROR {exc.code}: {body}")
+        data = proxy.create_lease({
+            "slice_name": slicename,
+            "resource_name": resource,
+            "t_from": t_from,
+            "t_until": t_until,
+        })
+        if verbose:
+            print(f"    -> lease id={data['id']}")
+    except requests.HTTPError as exc:
+        print(f"  ERROR {exc.response.status_code}: {exc.response.text}")
 
 
 def main():
-    parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-    parser.add_argument("-f", "--from", dest="from_",
-                        default=None, help="from date; format is yy/mm/dd")
-    parser.add_argument("-u", "--until", default=None,
-                        help="until date; format is yy/mm/dd; default is from + 1 month")
-    parser.add_argument("-d", "--days", dest="days", default=default_weekdays,
-                        help="Comma separated list of week days to match between the given period")
-    parser.add_argument("-D", "--all-days", default=False, action='store_true',
-                        help="Comma separated list of week days to match between the given period")
-    parser.add_argument("-s", "--slice", dest="slice", default="r2lab-nightly",
-                        help="Slice name")
-    parser.add_argument("-r", "--resource", dest="resource", default=DEFAULT_RESOURCE,
-                        help="Resource name to book leases on")
-    parser.add_argument("-t", "--time", dest="time", nargs=2, type=int, default=[4, 5],
-                        help="Bounds of the nightly timeslot in round hours; example --time 4 5")
-    parser.add_argument("--api-url", dest="api_url", default=DEFAULT_API_URL,
-                        help="Base URL of the R2Lab API")
-    parser.add_argument("--credentials", dest="credentials", default=DEFAULT_CREDENTIALS,
-                        help="Path to credentials file (one line: email password)")
-    parser.add_argument("-n", "--dry-run", dest="dry_run", action='store_true')
-    parser.add_argument("--debug", dest="debug", action='store_true')
+    parser = ArgumentParser(
+        description=__doc__,
+        formatter_class=RawDescriptionHelpFormatter,
+    )
+
+    when = parser.add_argument_group("date range")
+    when.add_argument(
+        "--today", action='store_true',
+        help="book for today only (overrides --from/--until/--days)")
+    when.add_argument(
+        "-f", "--from", dest="from_", default=None,
+        help="start date as YYYY-MM-DD (default: tomorrow)")
+    when.add_argument(
+        "-u", "--until", default=None,
+        help="end date as YYYY-MM-DD (default: from + 4 weeks)")
+    when.add_argument(
+        "-d", "--days", default=DEFAULT_WEEKDAYS,
+        help="comma-separated weekdays (default: %(default)s)")
+    when.add_argument(
+        "-D", "--all-days", action='store_true',
+        help="book every day in the range")
+
+    slot = parser.add_argument_group("time slot")
+    slot.add_argument(
+        "-t", "--time", dest="time", default=DEFAULT_TIME,
+        help="local time slot as HH:MM-HH:MM or H-H (default: %(default)s)")
+
+    misc = parser.add_argument_group("misc")
+    misc.add_argument(
+        "-s", "--slice", dest="slice", default="r2lab-nightly",
+        help="slice name (default: %(default)s)")
+    misc.add_argument("-n", "--dry-run", dest="dry_run", action='store_true')
+    misc.add_argument("-v", "--verbose", dest="verbose", action='store_true')
 
     args = parser.parse_args()
 
-    slicename    = args.slice
-    debug        = args.debug
-    dry_run      = args.dry_run
-    days         = weekdays if args.all_days else (args.days if isinstance(args.days, list) else args.days.split(','))
-    time         = args.time
+    time_slot = parse_time_slot(args.time)
+    slicename = args.slice
+    dry_run = args.dry_run
+    verbose = args.verbose
 
-    from_, until = args.from_, args.until
-    try:
-        if from_:
-            from_ = DateTime.strptime(from_, date_format).date()
-        else:
-            from_ = Date.today() + TimeDelta(days=1)
-        if until:
-            until = DateTime.strptime(until, date_format).date()
-        else:
-            until = from_ + TimeDelta(weeks=4)
-    except Exception:
-        print("Could not compute dates - format issue ?")
+    # date range
+    if args.today:
+        from_ = until = Date.today()
+        days = ALL_WEEKDAYS
+    else:
+        from_ = parse_date(args.from_) if args.from_ else Date.today() + TimeDelta(days=1)
+        until = parse_date(args.until) if args.until else from_ + TimeDelta(weeks=4)
+        days = (ALL_WEEKDAYS if args.all_days
+                else [d.lower() for d in args.days.split(',')])
 
+    # rhubarbe config
+    resource = get_resource_name()
+    proxy = None if dry_run else get_proxy()
+
+    (h1, m1), (h2, m2) = time_slot
+    print(f"slice {slicename} on {resource},"
+          f" {h1:02d}:{m1:02d}-{h2:02d}:{m2:02d},"
+          f" {from_} to {until}, days={','.join(days)}"
+          f"{' (dry-run)' if dry_run else ''}")
+
+    count = 0
     day = from_
     while day <= until:
         if f"{day:%a}".lower() in days:
-            book_lease_for_nightly(
-                args.api_url, args.credentials,
-                slicename, args.resource, day, time, dry_run, debug)
+            book_one_lease(
+                proxy, slicename, resource, day, time_slot, dry_run, verbose)
+            count += 1
+        elif verbose:
+            print(f"  skipping {day:%a} {day}")
         day += TimeDelta(days=1)
 
-    exit(0)
+    print(f"{'would book' if dry_run else 'booked'} {count} lease(s)")
 
 
 if __name__ == '__main__':
-    exit(main())
+    main()
