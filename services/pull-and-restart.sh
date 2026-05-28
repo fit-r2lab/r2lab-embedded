@@ -55,6 +55,7 @@ case $(hostname) in
 			systemctl restart accountsmanager
 		fi
 	;;
+	# relies on uv - does not use system Python
     prod-r2labapi*|r2labapi*)
 		git-upgrade /root/r2lab-embedded
 
@@ -64,14 +65,20 @@ case $(hostname) in
       		systemctl restart r2lab-api
 		fi
 	;;
+	# 2026 May - the r2lab box uses uv to provision and maintain the production venv
+	# for now
+	# OK uv is installed in the host
+	# OK r2lab-django
+	# sidecar: r2lab-sidecar -> /usr/local/bin/r2lab -> /usr/bin/python3 -> /usr/local/lib/.../site-pacakges/...
     prod-r2lab*|r2lab*)
 		git-upgrade /root/r2lab-embedded
 
 		git-upgrade r2lab.inria.fr; r1=$?
 		git-upgrade r2lab.inria.fr-raw; r2=$?
-		if (( r1 == 0|| r2 == 0)); then
+		if (( r1 == 0 || r2 == 0 )); then
 			make -C /root/r2lab.inria.fr publish
 			make -C /root/r2lab.inria.fr-raw publish
+			# this will to the uv sync prior to restarting
 			systemctl restart r2lab-django
 			systemctl restart nginx
 		fi
