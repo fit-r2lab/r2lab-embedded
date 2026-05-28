@@ -73,8 +73,8 @@ case $(hostname) in
     prod-r2lab*|r2lab*)
 		git-upgrade /root/r2lab-embedded
 
-		git-upgrade r2lab.inria.fr; r1=$?
-		git-upgrade r2lab.inria.fr-raw; r2=$?
+		git-upgrade /root/r2lab.inria.fr; r1=$?
+		git-upgrade /root/r2lab.inria.fr-raw; r2=$?
 		if (( r1 == 0 || r2 == 0 )); then
 			make -C /root/r2lab.inria.fr publish
 			make -C /root/r2lab.inria.fr-raw publish
@@ -83,7 +83,7 @@ case $(hostname) in
 			systemctl restart nginx
 		fi
 
-		if pip-upgrade r2lab-sidecar; then
+		if git-upgrade /root/r2lab-sidecar; then
 			# this will to the uv sync prior to restarting
 			systemctl restart r2lab-sidecar
 		fi
