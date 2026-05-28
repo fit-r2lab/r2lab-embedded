@@ -68,8 +68,8 @@ case $(hostname) in
 	# 2026 May - the r2lab box uses uv to provision and maintain the production venv
 	# for now
 	# OK uv is installed in the host
-	# OK r2lab-django
-	# sidecar: r2lab-sidecar -> /usr/local/bin/r2lab -> /usr/bin/python3 -> /usr/local/lib/.../site-pacakges/...
+	# OK r2lab-django  - venv in /var/www/r2lab.inria.fr/django
+	# OK r2lab-sidecar - venv in /root/r2lab-sidecar
     prod-r2lab*|r2lab*)
 		git-upgrade /root/r2lab-embedded
 
@@ -84,6 +84,7 @@ case $(hostname) in
 		fi
 
 		if pip-upgrade r2lab-sidecar; then
+			# this will to the uv sync prior to restarting
 			systemctl restart r2lab-sidecar
 		fi
 
