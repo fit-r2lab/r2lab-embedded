@@ -86,7 +86,8 @@ function phone-on() {
 	"p40")
 	    adb shell cmd connectivity airplane-mode disable ;;
 	"pixel7")
-	    adb shell /data/local/tmp/on ;;
+	    adb shell cmd connectivity airplane-mode disable ;;
+	    # adb shell /data/local/tmp/on ;;
 	*)
 	    echo "Unrecognized phone $phone, check cable connection" ;;
     esac
@@ -106,7 +107,8 @@ function phone-off() {
 	"p40")
 	    adb shell cmd connectivity airplane-mode enable ;;
 	"pixel7")
-	    adb shell /data/local/tmp/off ;;
+	    adb shell cmd connectivity airplane-mode enable ;;
+	    # adb shell /data/local/tmp/off ;;
 	*)
 	    echo "Unrecognized phone $phone, check cable connection" ;;
     esac
