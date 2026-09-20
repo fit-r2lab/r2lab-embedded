@@ -334,7 +334,7 @@ class Nightly:                                         # pylint: disable=r0902
         if self.dry_run:
             self.print("dry_run mode: skip all-off")
             return
-        command = "rhubarbe bye"
+        command = "rhubarbe bye --nodes --phones --pdus"
         for host in self.all_names:
             command += f" {host}"
         # command += "> /var/log/all-off.log"
