@@ -1,0 +1,6 @@
+[Unit]
+Description="Pull from git and run each repo's deploy/update.sh"
+
+[Service]
+Type=oneshot
+ExecStart=/root/r2lab-embedded/services/run-updates.sh

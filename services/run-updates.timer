@@ -1,0 +1,10 @@
+[Unit]
+Description="Pull from git and run each repo's deploy/update.sh"
+
+[Timer]
+Unit=run-updates.service
+OnCalendar=hourly
+Persistent=true
+
+[Install]
+WantedBy=timers.target
