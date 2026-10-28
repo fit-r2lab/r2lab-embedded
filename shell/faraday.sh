@@ -365,17 +365,6 @@ doc-alt cinfo "show node CMC info - using curl"
 ####################
 # reload these tools
 alias reload="source /home/faraday/r2lab-embedded/shell/faraday.sh"
-# git pull and then reload; not allowed to everybody
-function refresh() {
-    [ $(id -u) == 0 ] || { echo refresh must be run by root; return 1; }
-    /root/bin/auto-update-reset.sh /root/diana
-    /root/bin/auto-update-reset.sh /root/r2lab-embedded
-    /root/bin/auto-update-reset.sh /home/faraday/r2lab-embedded
-    chown -R faraday:faraday ~faraday/r2lab-embedded
-    reload
-}
-doc-alt refresh "install latest version of these utilities"
-
 
 ########################################
 doc-alt ki-utils "load kube-install bash utilities"
@@ -599,41 +588,6 @@ function macphone2() { -macphone 2 "$@"; }
 doc-selection-sep "See also help-alt for other commands"
 
 ########################################
-# not available anymore
-# doc-admin snap "create a snapshot of the r2lab chamber state"
-# function snap () {
-#   python3 /root/r2lab/nodes/snap.py "$@"
-# }
-#
-# doc-admin inspect "check the status of a default domain list and some other customized services"
-# function inspect () {
-#   python3 /root/r2lab-embedded/nightly/inspect.py "$@"
-# }
-#
-# doc-admin maintenance "update a json file which contains information about nodes maintenance | maitenance -i|r <node> -m <the message>"
-# function maintenance () {
-#   python3 /root/r2lab/nodes/maintenance.py "$@"
-# }
-#
-# # info is already used for the CMC verb
-# doc-admin information "to be completed"
-# function information () {
-#   python3 /root/r2lab/nodes/information.py "$@"
-# }
-#
-# doc-admin table "to be completed"
-# function table () {
-#   python3 /root/r2lab/nodes/table.py "$@"
-# }
-#
-# doc-admin publish "to be completed"
-# function publish () {
-#   /root/r2lab/infra/scripts/sync-nightly-results-at-r2lab.sh
-#   echo 'INFO: send info to r2lab website and updating...'
-#   ssh root@r2lab.inria.fr /root/r2lab-embedded/services/pull-and-restart.sh
-#   echo 'INFO: updated in r2lab!'
-# }
-
 # refresh is all about /home/faraday/r2lab (that is readable by all)
 # when using the nodes/ utilities we need to git pull in /root/r2lab
 doc-admin refresh-root "git pull in /root/r2lab"
