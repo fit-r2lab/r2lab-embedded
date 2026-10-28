@@ -1,9 +1,0 @@
-[Unit]
-Description="Pull from git and restart services"
-
-[Timer]
-Unit=pull-and-restart.service
-OnCalendar=hourly
-
-[Install]
-WantedBy=timers.target
