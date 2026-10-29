@@ -1,3 +1,4 @@
 # the first one has to be r2lab-embedded, as it contains the updater itself
 /root/r2lab-embedded
 /opt/rhubarbe
+/root/r2lab-nightly
