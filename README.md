@@ -11,6 +11,12 @@ It is designed to be small, and the corresponding public git repo acts
 like a software distribution hub. In this respect, it comes with
 shortcuts (shell functions) that can be used to update itself.
 
+# Related repos
+
+The nightly health check of the testbed, and its distrait counterpart
+turn-off-the-lights, used to live here in `nightly/`; they now have their
+own repo at https://github.com/fit-r2lab/r2lab-nightly
+
 # History
 
 This contents used to be part of a wider repo at
