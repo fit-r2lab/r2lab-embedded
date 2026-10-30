@@ -6,7 +6,7 @@ the various pieces of the R2lab testbed, typically
 * users and root environment on the gateway and infrastructure
 * user environment on nodes
 * user environment on (mac)phones
-* tools for building images
+* node-side helpers for building images (the build tooling itself is in `r2lab-imaging`)
 
 It is designed to be small, and the corresponding public git repo acts
 like a software distribution hub. In this respect, it comes with
@@ -27,6 +27,9 @@ shortcuts (shell functions) that can be used to update itself.
 * https://github.com/fit-r2lab/r2lab-nightly
   the nightly health check of the testbed, and its distrait counterpart
   turn-off-the-lights; these used to live here in `nightly/`
+* https://github.com/fit-r2lab/r2lab-imaging
+  the tooling and notes for building the testbed's images, both frisbee
+  and docker; these used to live here in `imaging/` and `docker-images/`
 * https://github.com/fit-r2lab/r2lab-misc
   miscellaneous material
 

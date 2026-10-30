@@ -1,6 +1,3 @@
-imaging/*.log
-imaging/*.tar
-imaging/*/
 *.tgz
 *.pcap
 conf-cn-26
