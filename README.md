@@ -32,8 +32,12 @@ shortcuts (shell functions) that can be used to update itself.
   and docker; these used to live here in `imaging/` and `docker-images/`
 * https://github.com/fit-r2lab/r2lab-misc  
   miscellaneous material
-* https:///github.com/fit-r2lab/r2lab-demos  
+* https://github.com/fit-r2lab/r2lab-python  
+  the source for a lightweight Python library to interact with the testbed
+* https://github.com/fit-r2lab/r2lab-demos  
   some sample experiments
+
+see also [the complete list of repos in the `fit-r2lab` orga](https://github.com/orgs/fit-r2lab/repositories)
 
 # related hosts
 
