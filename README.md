@@ -14,24 +14,26 @@ shortcuts (shell functions) that can be used to update itself.
 
 # related repos
 
-* https://github.com/fit-r2lab/rhubarbe
+* https://github.com/fit-r2lab/rhubarbe  
   the command-line tools (and library) to drive the testbed nodes
-* https://github.com/fit-r2lab/r2lab-api
+* https://github.com/fit-r2lab/r2lab-api  
   the API server
-* https://github.com/fit-r2lab/r2lab.inria.fr
+* https://github.com/fit-r2lab/r2lab.inria.fr  
   the sources of the r2lab website
-* https://github.com/fit-r2lab/r2lab.inria.fr-raw
+* https://github.com/fit-r2lab/r2lab.inria.fr-raw  
   large static assets for the web site
-* https://github.com/fit-r2lab/r2lab-sidecar
+* https://github.com/fit-r2lab/r2lab-sidecar  
   the sidecar server, that relays live testbed status to the website
-* https://github.com/fit-r2lab/r2lab-nightly
+* https://github.com/fit-r2lab/r2lab-nightly  
   the nightly health check of the testbed, and its distrait counterpart
   turn-off-the-lights; these used to live here in `nightly/`
-* https://github.com/fit-r2lab/r2lab-imaging
+* https://github.com/fit-r2lab/r2lab-imaging  
   the tooling and notes for building the testbed's images, both frisbee
   and docker; these used to live here in `imaging/` and `docker-images/`
-* https://github.com/fit-r2lab/r2lab-misc
+* https://github.com/fit-r2lab/r2lab-misc  
   miscellaneous material
+* https:///github.com/fit-r2lab/r2lab-demos  
+  some sample experiments
 
 # related hosts
 
