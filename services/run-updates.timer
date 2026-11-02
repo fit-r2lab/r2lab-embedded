@@ -3,8 +3,10 @@ Description="Pull from git and run each repo's deploy/update.sh"
 
 [Timer]
 Unit=run-updates.service
-OnCalendar=hourly
 Persistent=true
+# speed it up a bit
+OnCalendar=*:0/10
+# OnCalendar=hourly
 
 [Install]
 WantedBy=timers.target
