@@ -1,4 +1,8 @@
 # the first one has to be r2lab-embedded, as it contains the updater itself
 /root/r2lab-embedded
+# this is where we pull the rhubarbe repo
+# initially because there was a suspicion that regular users
+# would have to have read access
 /opt/rhubarbe
 /root/r2lab-nightly
+/root/r2lab-imaging
