@@ -6,3 +6,5 @@
 /opt/rhubarbe
 /root/r2lab-nightly
 /root/r2lab-imaging
+# the source of truth for rhubarbe's inventory
+/root/r2lab-inventory
